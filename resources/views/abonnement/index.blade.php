@@ -21,7 +21,7 @@
                 </svg>
             </div>
             <div>
-                <p class="font-semibold text-green-800">Plan {{ $tenant->plan_slug ?? 'actif' }} — Actif</p>
+                <p class="font-semibold text-green-800">Plan {{ $tenant->plan ?? 'actif' }} — Actif</p>
                 <p class="text-sm text-green-700">
                     Expire le {{ $abonnementActif->expire_le?->format('d/m/Y') ?? 'N/A' }}
                     @if($abonnementActif->joursRestants() !== null)
@@ -50,7 +50,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         @foreach($plans as $plan)
         @php
-            $isCurrent = $tenant->plan_slug === $plan->slug;
+            $isCurrent = $tenant->plan === $plan->slug;
             $isFree    = $plan->prix_mensuel_xof === 0;
         @endphp
         <div class="bg-white rounded-xl border {{ $isCurrent ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200' }} shadow-sm flex flex-col overflow-hidden relative">
@@ -176,7 +176,7 @@
                 <tbody class="divide-y divide-gray-50">
                     @foreach($historiqueAbonnements as $ab)
                     <tr class="hover:bg-gray-50">
-                        <td class="px-5 py-3 font-medium text-gray-800">{{ $ab->plan_slug ?? '—' }}</td>
+                        <td class="px-5 py-3 font-medium text-gray-800">{{ $ab->plan ?? '—' }}</td>
                         <td class="px-5 py-3 text-gray-500">
                             {{ $ab->debut_le?->format('d/m/Y') ?? '—' }} → {{ $ab->expire_le?->format('d/m/Y') ?? '—' }}
                         </td>

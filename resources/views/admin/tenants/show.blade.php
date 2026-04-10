@@ -88,7 +88,7 @@
                 <dl class="space-y-3 text-sm">
                     <div>
                         <dt class="text-gray-400 text-xs uppercase">Plan actuel</dt>
-                        <dd class="font-semibold text-gray-900 mt-0.5">{{ ucfirst(str_replace('_', ' ', $tenant->plan_slug ?? 'trial')) }}</dd>
+                        <dd class="font-semibold text-gray-900 mt-0.5">{{ ucfirst(str_replace('_', ' ', $tenant->plan ?? 'trial')) }}</dd>
                     </div>
                     <div>
                         <dt class="text-gray-400 text-xs uppercase">Quota mensuel</dt>

@@ -26,7 +26,7 @@
         <dl class="space-y-2 text-sm">
             <div class="flex justify-between">
                 <dt class="text-gray-500">Plan</dt>
-                <dd class="font-semibold text-gray-800">{{ ucfirst($abonnement->plan_slug ?? '—') }}</dd>
+                <dd class="font-semibold text-gray-800">{{ ucfirst($abonnement->plan?->nom ?? '—') }}</dd>
             </div>
             <div class="flex justify-between">
                 <dt class="text-gray-500">Factures / mois</dt>

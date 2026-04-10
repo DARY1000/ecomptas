@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(composer update:*)"
+      "Bash(composer update:*)",
+      "Bash(sed -i 's/\\\\$ab->plan_slug/\\\\$ab->plan?->nom/g' resources/views/abonnement/index.blade.php)",
+      "Bash(sed -i 's/\\\\$abonnement->plan_slug/\\\\$abonnement->plan?->nom/g' resources/views/abonnement/succes.blade.php)"
     ]
   }
 }

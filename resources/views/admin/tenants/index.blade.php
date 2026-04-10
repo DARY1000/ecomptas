@@ -93,8 +93,8 @@
                                     'cabinet_plus' => 'bg-blue-900 text-white',
                                 ];
                             @endphp
-                            <span class="px-2 py-0.5 rounded text-xs font-medium {{ $planColors[$t->plan_slug] ?? 'bg-gray-100 text-gray-600' }}">
-                                {{ ucfirst(str_replace('_', ' ', $t->plan_slug ?? 'trial')) }}
+                            <span class="px-2 py-0.5 rounded text-xs font-medium {{ $planColors[$t->plan] ?? 'bg-gray-100 text-gray-600' }}">
+                                {{ ucfirst(str_replace('_', ' ', $t->plan ?? 'trial')) }}
                             </span>
                         </td>
                         <td class="px-5 py-3 text-center text-gray-600">

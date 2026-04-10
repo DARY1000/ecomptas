@@ -32,12 +32,12 @@ class TenantController extends Controller
 
         // MRR : somme des prix des plans actifs
         $mrr = Tenant::where('statut', 'actif')
-            ->join('plans', 'tenants.plan_slug', '=', 'plans.slug')
+            ->join('plans', 'tenants.plan', '=', 'plans.slug')
             ->sum('plans.prix_mensuel_xof');
 
-        $repartitionPlans = Tenant::selectRaw('plan_slug, count(*) as total')
-            ->groupBy('plan_slug')
-            ->pluck('total', 'plan_slug')
+        $repartitionPlans = Tenant::selectRaw('plan, count(*) as total')
+            ->groupBy('plan')
+            ->pluck('total', 'plan')
             ->toArray();
 
         $derniersTenants = Tenant::orderByDesc('created_at')->limit(8)->get();
@@ -60,7 +60,7 @@ class TenantController extends Controller
                   ->orWhere('email', 'like', '%' . $request->q . '%')
             )
             ->when($request->statut, fn($q) => $q->where('statut', $request->statut))
-            ->when($request->plan,   fn($q) => $q->where('plan_slug', $request->plan))
+            ->when($request->plan,   fn($q) => $q->where('plan', $request->plan))
             ->orderByDesc('created_at')
             ->paginate(20)
             ->withQueryString();
@@ -89,7 +89,7 @@ class TenantController extends Controller
             'ifu'            => 'nullable|string|max:13',
             'rccm'           => 'nullable|string|max:50',
             'regime_fiscal'  => 'required|in:B,D',
-            'plan_slug'      => 'required|exists:plans,slug',
+            'plan_slug'      => 'required|exists:plans,slug',  // alias UI → stocké dans 'plan'
             'statut'         => 'required|in:trial,actif,suspendu',
             'abonnement_expire_le' => 'nullable|date',
             // Admin du cabinet
@@ -101,17 +101,23 @@ class TenantController extends Controller
         /** @var \App\Models\Plan $plan */
         $plan = Plan::where('slug', $validated['plan_slug'])->firstOrFail();
 
+        // Générer un slug unique
+        $slug = \Illuminate\Support\Str::slug($validated['nom']);
+        $base = $slug; $i = 1;
+        while (Tenant::where('slug', $slug)->exists()) { $slug = $base . '-' . $i++; }
+
         // Créer le tenant
         $tenant = Tenant::create([
             'nom'                   => $validated['nom'],
-            'email'                 => $validated['email_cabinet'],
+            'slug'                  => $slug,
+            'email_contact'         => $validated['email_cabinet'],
             'telephone'             => $validated['telephone'],
             'ifu'                   => $validated['ifu'],
-            'rccm'                  => $validated['rccm'],
-            'regime_fiscal'         => $validated['regime_fiscal'],
-            'plan_slug'             => $plan->slug,
-            'quota_factures_mensuel'=> $plan->quota_factures_mensuel,
+            'plan'                  => $plan->slug,
+            'quota_factures_mensuel'=> $plan->quota_factures,
+            'quota_users'           => $plan->quota_users,
             'statut'                => $validated['statut'],
+            'actif'                 => true,
             'abonnement_expire_le'  => $validated['abonnement_expire_le'],
         ]);
 

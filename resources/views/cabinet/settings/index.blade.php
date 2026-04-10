@@ -128,7 +128,7 @@
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                 <div>
                     <p class="text-gray-400 text-xs uppercase">Plan</p>
-                    <p class="font-semibold text-gray-800 mt-0.5">{{ ucfirst(str_replace('_', ' ', $tenant->plan_slug ?? 'trial')) }}</p>
+                    <p class="font-semibold text-gray-800 mt-0.5">{{ ucfirst(str_replace('_', ' ', $tenant->plan ?? 'trial')) }}</p>
                 </div>
                 <div>
                     <p class="text-gray-400 text-xs uppercase">Quota mensuel</p>
