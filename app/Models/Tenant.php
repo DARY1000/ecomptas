@@ -12,8 +12,11 @@ class Tenant extends Model
     use HasUuids, SoftDeletes;
 
     protected $fillable = [
-        'nom', 'slug', 'ifu', 'email_contact', 'telephone',
-        'adresse', 'ville', 'pays', 'devise', 'plan', 'statut',
+        'nom', 'slug', 'ifu', 'email', 'email_contact', 'telephone',
+        'adresse', 'ville', 'pays', 'devise',
+        'plan', 'plan_slug',          // plan_slug = alias accepté, stocké dans 'plan'
+        'regime_fiscal',
+        'statut',
         'quota_factures_mensuel', 'quota_users',
         'abonnement_expire_le', 'config_google_sheets', 'actif',
     ];

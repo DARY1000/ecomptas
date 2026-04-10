@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\LandingController;
 use App\Http\Controllers\FactureController;
 use App\Http\Controllers\EcritureController;
 use App\Http\Controllers\ExportController;
@@ -9,13 +11,21 @@ use App\Http\Controllers\Cabinet\DashboardController;
 use App\Http\Controllers\Cabinet\UserController;
 use App\Http\Controllers\Cabinet\SettingsController;
 use App\Http\Controllers\Admin\TenantController;
+use App\Http\Controllers\Admin\PlanController;
 use Illuminate\Support\Facades\Route;
+
+// ─────────────────────────────────────────────────────────────────────
+// LANDING PAGE PUBLIQUE
+// ─────────────────────────────────────────────────────────────────────
+Route::get('/', [LandingController::class, 'index'])->name('landing');
 
 // ─────────────────────────────────────────────────────────────────────
 // AUTHENTIFICATION
 // ─────────────────────────────────────────────────────────────────────
 Route::middleware('guest')->group(function () {
     Route::get('/connexion', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::get('/inscription', [RegisterController::class, 'showRegistrationForm'])->name('register');
+    Route::post('/inscription', [RegisterController::class, 'register'])->name('register.post');
     Route::post('/connexion', [LoginController::class, 'login'])->name('login.post');
     Route::get('/mot-de-passe-oublie', [LoginController::class, 'showForgotForm'])->name('password.request');
     Route::post('/mot-de-passe-oublie', [LoginController::class, 'sendResetLink'])->name('password.email');
@@ -42,7 +52,7 @@ Route::get('/factures/{facture}/pdf', [FactureController::class, 'servirPdf'])
 Route::middleware(['auth', 'check.subscription'])->group(function () {
 
     // Dashboard
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/tableau-de-bord', [DashboardController::class, 'index'])->name('dashboard');
 
     // ── Factures ──────────────────────────────────────────────────
     Route::prefix('factures')->name('factures.')->group(function () {
@@ -95,4 +105,6 @@ Route::middleware(['auth', 'role:super_admin'])
          Route::resource('tenants', TenantController::class);
          Route::post('/tenants/{tenant}/suspendre', [TenantController::class, 'suspendre'])->name('tenants.suspendre');
          Route::post('/tenants/{tenant}/activer', [TenantController::class, 'activer'])->name('tenants.activer');
+         // Gestion des plans
+         Route::resource('plans', PlanController::class)->except(['show']);
      });

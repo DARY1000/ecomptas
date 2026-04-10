@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Administration') — ComptaSaaS Admin</title>
+    <title>@yield('title', 'Administration') — eCompta360 Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>[x-cloak] { display: none !important; }</style>
@@ -15,13 +15,14 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center gap-4">
-                    <div class="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center font-bold text-sm text-gray-900">A</div>
-                    <span class="font-bold">ComptaSaaS — Super Admin</span>
+                    <div class="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center font-bold text-sm text-gray-900">e</div>
+                    <span class="font-bold">eCompta360 — Admin DRAWIS</span>
                 </div>
                 <div class="flex items-center gap-4 text-sm">
-                    <a href="{{ route('admin.dashboard') }}" class="hover:text-yellow-300">Dashboard</a>
-                    <a href="{{ route('admin.tenants.index') }}" class="hover:text-yellow-300">Cabinets</a>
-                    <a href="{{ route('dashboard') }}" class="hover:text-yellow-300">← App</a>
+                    <a href="{{ route('admin.dashboard') }}" class="hover:text-yellow-300 {{ request()->routeIs('admin.dashboard') ? 'text-yellow-300' : '' }}">Dashboard</a>
+                    <a href="{{ route('admin.tenants.index') }}" class="hover:text-yellow-300 {{ request()->routeIs('admin.tenants.*') ? 'text-yellow-300' : '' }}">Cabinets</a>
+                    <a href="{{ route('admin.plans.index') }}" class="hover:text-yellow-300 {{ request()->routeIs('admin.plans.*') ? 'text-yellow-300' : '' }}">Plans</a>
+                    <a href="{{ route('landing') }}" class="hover:text-yellow-300" target="_blank">Site public ↗</a>
                     <form method="POST" action="{{ route('logout') }}" class="inline">
                         @csrf
                         <button class="text-red-400 hover:text-red-300">Déconnexion</button>
