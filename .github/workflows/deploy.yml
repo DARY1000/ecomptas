@@ -15,33 +15,10 @@ jobs:
   deploy:
     name: Deploy to Hostinger Shared Hosting
     runs-on: ubuntu-latest
-    environment: production
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup PHP 8.3
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.3'
-          extensions: pdo_mysql, mbstring, xml, curl, zip
-
-      - name: Install Composer dependencies (production)
-        run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
-
-      - name: Prepare deployment package
-        run: |
-          # Créer l'archive sans les fichiers inutiles en prod
-          tar --exclude='.git' \
-              --exclude='node_modules' \
-              --exclude='tests' \
-              --exclude='.env' \
-              --exclude='.env.example' \
-              --exclude='storage/app/private' \
-              --exclude='storage/logs' \
-              --exclude='.github' \
-              -czf /tmp/ecomptas_deploy.tar.gz .
 
       - name: Deploy via SSH to Hostinger
         uses: appleboy/ssh-action@v1.0.3
@@ -49,33 +26,29 @@ jobs:
           host: ${{ secrets.HOSTINGER_SSH_HOST }}
           username: ${{ secrets.HOSTINGER_SSH_USER }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          port: ${{ secrets.HOSTINGER_SSH_PORT || 22 }}
-          timeout: 120s
+          port: ${{ secrets.HOSTINGER_SSH_PORT }}
+          timeout: 180s
           script: |
             set -e
-            echo "=== Démarrage déploiement eCOMPTA ==="
 
             APP_DIR="${{ secrets.HOSTINGER_APP_PATH }}"
-            BACKUP_DIR="${APP_DIR}_backup_$(date +%Y%m%d_%H%M%S)"
+            echo "=== Déploiement vers $APP_DIR ==="
 
-            # Sauvegarde de l'ancienne version
-            if [ -d "$APP_DIR" ]; then
-              echo "Sauvegarde vers $BACKUP_DIR..."
-              cp -r "$APP_DIR" "$BACKUP_DIR"
-            fi
-
-            # Passer en mode maintenance
             cd "$APP_DIR"
-            php artisan down --retry=60 --secret="${{ secrets.MAINTENANCE_SECRET }}" 2>/dev/null || true
 
-            # Pull depuis Git (si dépôt cloné sur le serveur)
+            # Pull depuis Git
             git fetch origin main
             git reset --hard origin/main
 
-            # Installer les dépendances Composer
-            composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+            # Installer Composer si nécessaire
+            if [ ! -f "$HOME/composer.phar" ]; then
+              curl -sS https://getcomposer.org/installer | php -- --install-dir="$HOME" --filename=composer.phar
+            fi
 
-            # Migrations (conditionnel)
+            # Installer les dépendances PHP
+            php "$HOME/composer.phar" install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+
+            # Migrations
             if [ "${{ github.event.inputs.run_migrations }}" != "false" ]; then
               echo "Exécution des migrations..."
               php artisan migrate --force
@@ -88,43 +61,8 @@ jobs:
             php artisan route:cache
             php artisan view:clear
             php artisan view:cache
-            php artisan event:cache
 
             # Permissions storage
             chmod -R 775 storage bootstrap/cache
-            find storage -type d -exec chmod 775 {} \;
-            find storage -type f -exec chmod 664 {} \;
 
-            # Créer les répertoires storage si nécessaire
-            php artisan storage:link 2>/dev/null || true
-
-            # Désactiver le mode maintenance
-            php artisan up
-
-            echo "=== Déploiement eCOMPTA terminé avec succès ==="
-
-      - name: Cleanup old backups (keep last 3)
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.HOSTINGER_SSH_HOST }}
-          username: ${{ secrets.HOSTINGER_SSH_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          port: ${{ secrets.HOSTINGER_SSH_PORT || 22 }}
-          script: |
-            # Garder seulement les 3 dernières sauvegardes
-            ls -dt ${{ secrets.HOSTINGER_APP_PATH }}_backup_* 2>/dev/null | tail -n +4 | xargs rm -rf || true
-        continue-on-error: true
-
-      - name: Notify on failure
-        if: failure()
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.HOSTINGER_SSH_HOST }}
-          username: ${{ secrets.HOSTINGER_SSH_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          port: ${{ secrets.HOSTINGER_SSH_PORT || 22 }}
-          script: |
-            cd ${{ secrets.HOSTINGER_APP_PATH }}
-            # Remettre en ligne même en cas d'échec
-            php artisan up || true
-        continue-on-error: true
+            echo "=== Déploiement terminé avec succès ==="
