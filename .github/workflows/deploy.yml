@@ -46,7 +46,8 @@ jobs:
             fi
 
             # Installer les dépendances PHP
-            php "$HOME/composer.phar" install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+            php "$HOME/composer.phar" install --no-interaction --prefer-dist --optimize-autoloader --no-dev 2>&1 || \
+            php "$HOME/composer.phar" update --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
             # Migrations
             if [ "${{ github.event.inputs.run_migrations }}" != "false" ]; then
