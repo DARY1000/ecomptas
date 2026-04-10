@@ -1,0 +1,8 @@
+# .htaccess à la RACINE du projet
+# Utilisé si Laravel est installé dans un sous-dossier (ex: public_html/compta/)
+# et que le domaine pointe sur ce dossier racine.
+# Option recommandée Hostinger : pointer le domaine directement vers public_html/compta/public/
+# Si cette option n'est pas disponible, ce fichier redirige vers public/
+
+RewriteEngine On
+RewriteRule ^(.*)$ public/$1 [L]

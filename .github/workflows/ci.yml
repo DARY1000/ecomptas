@@ -1,0 +1,116 @@
+name: CI — Tests & Quality
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    name: Laravel Tests (PHP 8.3 + MySQL 8.0)
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: ecomptas_test
+          MYSQL_USER: ecomptas
+          MYSQL_PASSWORD: secret
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo, pdo_mysql, mbstring, xml, curl, zip, gd, intl
+          coverage: xdebug
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Copy .env.testing
+        run: |
+          cp .env.example .env.testing
+          echo "APP_ENV=testing" >> .env.testing
+          echo "APP_KEY=" >> .env.testing
+          echo "DB_CONNECTION=mysql" >> .env.testing
+          echo "DB_HOST=127.0.0.1" >> .env.testing
+          echo "DB_PORT=3306" >> .env.testing
+          echo "DB_DATABASE=ecomptas_test" >> .env.testing
+          echo "DB_USERNAME=ecomptas" >> .env.testing
+          echo "DB_PASSWORD=secret" >> .env.testing
+          echo "QUEUE_CONNECTION=sync" >> .env.testing
+          echo "CACHE_DRIVER=array" >> .env.testing
+          echo "SESSION_DRIVER=array" >> .env.testing
+          echo "MAIL_MAILER=array" >> .env.testing
+          echo "FILESYSTEM_DISK=local" >> .env.testing
+          echo "N8N_WEBHOOK_URL=https://mock.n8n.cloud/webhook/test" >> .env.testing
+          echo "N8N_SECRET=test-secret-key-32chars-minimum!!" >> .env.testing
+
+      - name: Generate application key
+        run: php artisan key:generate --env=testing
+
+      - name: Create storage directories
+        run: |
+          mkdir -p storage/app/private
+          mkdir -p storage/logs
+          mkdir -p bootstrap/cache
+          chmod -R 777 storage bootstrap/cache
+
+      - name: Run migrations
+        run: php artisan migrate --env=testing --force
+        env:
+          APP_ENV: testing
+
+      - name: Run seeders
+        run: php artisan db:seed --env=testing --force
+        env:
+          APP_ENV: testing
+
+      - name: Run PHPUnit tests
+        run: php artisan test --env=testing --parallel --coverage-text
+        env:
+          APP_ENV: testing
+
+      - name: Run PHPStan static analysis
+        run: |
+          if [ -f vendor/bin/phpstan ]; then
+            vendor/bin/phpstan analyse app --level=5 --no-progress || true
+          fi
+        continue-on-error: true
+
+  lint:
+    name: Code Style (Pint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - run: composer install --no-interaction --prefer-dist
+      - name: Laravel Pint
+        run: |
+          if [ -f vendor/bin/pint ]; then
+            vendor/bin/pint --test
+          fi
+        continue-on-error: true

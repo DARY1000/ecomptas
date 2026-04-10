@@ -1,0 +1,2571 @@
+# DÉVELOPPEMENT — Application SaaS Comptable SYSCOHADA
+## Stack : Laravel 11 · PHP 8.3 · Docker · GitHub Actions CI/CD
+
+> **Instructions pour Claude** : Ce document est le cahier des charges complet pour coder cette application from scratch. Suis chaque section dans l'ordre. Génère le code complet, fonctionnel, commenté en français. Ne résume pas — produis le code réel.
+
+---
+
+## 0. CONTEXTE MÉTIER
+
+Tu codes une **plateforme SaaS multitenant** pour cabinets comptables au Bénin (zone UEMOA/OHADA). Elle automatise la saisie des factures via IA (OCR + LLM), génère des écritures conformes au **plan comptable SYSCOHADA Révisé**, et gère les abonnements des cabinets partenaires.
+
+### Flux principal
+```
+Cabinet → Upload PDF → OCR Mistral AI → Classification GPT-4o-mini
+→ Extraction champs → Revue comptable humaine → Validation
+→ Génération écritures SYSCOHADA → Export GSheets / XLSX
+```
+
+### Acteurs
+| Rôle | Description |
+|------|-------------|
+| `super_admin` | DRAWIS — gère toute la plateforme, tous les tenants |
+| `admin` | Admin du cabinet — gère son tenant (users, config, abonnement) |
+| `comptable` | Saisit, corrige, valide les factures |
+| `auditeur` | Lecture seule — consulte journaux et historique |
+
+---
+
+## 1. STACK TECHNIQUE OBLIGATOIRE
+
+```
+Backend  : PHP 8.3 + Laravel 11
+Frontend : Blade + Alpine.js + Tailwind CSS 3 (pas de React)
+BDD      : PostgreSQL 16
+Cache    : Redis 7
+Queue    : Laravel Horizon (Redis)
+Stockage : MinIO (S3-compatible, self-hosted)
+Auth     : Laravel Sanctum (JWT-like tokens)
+Docker   : Docker Compose (dev + prod)
+CI/CD    : GitHub Actions
+```
+
+### Pourquoi ce stack
+- Laravel = parfait pour multitenant avec Spatie Multitenancy
+- Blade + Alpine.js = léger, pas besoin de SPA pour cette app
+- PostgreSQL = Row Level Security natif pour isolation tenant
+- MinIO = S3 sans coût externe, stockage PDF isolé par tenant
+- Horizon = monitoring des jobs IA en temps réel
+
+---
+
+## 2. STRUCTURE DOCKER COMPLÈTE
+
+### 2.1 `docker-compose.yml` (développement)
+
+```yaml
+version: '3.9'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: compta_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+      - ./docker/php/php.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - compta_net
+    depends_on:
+      - postgres
+      - redis
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: compta_nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - compta_net
+    depends_on:
+      - app
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: compta_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-compta_saas}
+      POSTGRES_USER: ${DB_USERNAME:-compta_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - compta_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: compta_redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD:-secret}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - compta_net
+
+  horizon:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: compta_horizon
+    restart: unless-stopped
+    working_dir: /var/www
+    command: php artisan horizon
+    volumes:
+      - .:/var/www
+    networks:
+      - compta_net
+    depends_on:
+      - app
+      - redis
+
+  minio:
+    image: minio/minio:latest
+    container_name: compta_minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin123}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - compta_net
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: compta_n8n
+    restart: unless-stopped
+    # AUCUN PORT EXPOSÉ — réseau interne uniquement
+    environment:
+      N8N_BASIC_AUTH_ACTIVE: "true"
+      N8N_BASIC_AUTH_USER: ${N8N_USER:-admin}
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_PASSWORD:-n8n_secret}
+      WEBHOOK_URL: http://n8n:5678
+      N8N_HOST: n8n
+      N8N_PORT: 5678
+      NODE_ENV: production
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - compta_net
+
+networks:
+  compta_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  n8n_data:
+```
+
+### 2.2 `docker/php/Dockerfile`
+
+```dockerfile
+FROM php:8.3-fpm-alpine
+
+# Dépendances système
+RUN apk add --no-cache \
+    git curl libpng-dev libjpeg-turbo-dev libwebp-dev \
+    libzip-dev zip unzip oniguruma-dev postgresql-dev \
+    nodejs npm shadow
+
+# Extensions PHP
+RUN docker-php-ext-install \
+    pdo pdo_pgsql pgsql \
+    mbstring exif pcntl bcmath gd zip \
+    opcache sockets
+
+# Redis extension
+RUN pecl install redis && docker-php-ext-enable redis
+
+# Composer
+COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
+
+# User non-root
+RUN usermod -u 1000 www-data
+
+WORKDIR /var/www
+
+COPY --chown=www-data:www-data . .
+
+RUN composer install --no-dev --optimize-autoloader \
+    && npm ci && npm run build \
+    && chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+
+USER www-data
+
+EXPOSE 9000
+CMD ["php-fpm"]
+```
+
+### 2.3 `docker/nginx/default.conf`
+
+```nginx
+server {
+    listen 80;
+    server_name _;
+    root /var/www/public;
+    index index.php;
+
+    client_max_body_size 55M;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass app:9000;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+        fastcgi_read_timeout 300;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}
+```
+
+---
+
+## 3. STRUCTURE LARAVEL COMPLÈTE
+
+```
+compta-saas/
+├── app/
+│   ├── Console/Commands/
+│   │   ├── ExpireSubscriptions.php
+│   │   └── SendRenewalReminders.php
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── Auth/
+│   │   │   │   ├── LoginController.php
+│   │   │   │   └── PasswordResetController.php
+│   │   │   ├── Admin/
+│   │   │   │   ├── TenantController.php
+│   │   │   │   ├── PlanController.php
+│   │   │   │   └── DashboardController.php
+│   │   │   ├── Cabinet/
+│   │   │   │   ├── DashboardController.php
+│   │   │   │   ├── UserController.php
+│   │   │   │   └── SettingsController.php
+│   │   │   ├── FactureController.php
+│   │   │   ├── EcritureController.php
+│   │   │   ├── ExportController.php
+│   │   │   ├── AbonnementController.php
+│   │   │   └── Webhook/
+│   │   │       ├── N8nCallbackController.php
+│   │   │       └── FeexPayController.php
+│   │   ├── Middleware/
+│   │   │   ├── CheckSubscription.php
+│   │   │   ├── CheckQuota.php
+│   │   │   ├── TenantScope.php
+│   │   │   └── RoleMiddleware.php
+│   │   └── Requests/
+│   │       ├── UploadFactureRequest.php
+│   │       └── ValidateEcritureRequest.php
+│   ├── Jobs/
+│   │   ├── TraiterFacturePDF.php
+│   │   └── SyncGoogleSheets.php
+│   ├── Models/
+│   │   ├── Tenant.php
+│   │   ├── User.php
+│   │   ├── Plan.php
+│   │   ├── Abonnement.php
+│   │   ├── Facture.php
+│   │   ├── EcritureComptable.php
+│   │   ├── CompteComptable.php
+│   │   ├── TraitementLog.php
+│   │   └── Parametre.php
+│   ├── Services/
+│   │   ├── N8nService.php
+│   │   ├── SYSCOHADAService.php
+│   │   ├── MiniOService.php
+│   │   ├── FeexPayService.php
+│   │   ├── CinetPayService.php
+│   │   └── GoogleSheetsService.php
+│   └── Observers/
+│       └── FactureObserver.php
+├── database/
+│   ├── migrations/
+│   └── seeders/
+│       ├── PlanSeeder.php
+│       └── CompteComptableSeeder.php
+├── resources/
+│   └── views/
+│       ├── layouts/
+│       │   ├── app.blade.php
+│       │   └── admin.blade.php
+│       ├── auth/
+│       ├── dashboard/
+│       ├── factures/
+│       │   ├── index.blade.php
+│       │   ├── upload.blade.php
+│       │   ├── revue.blade.php
+│       │   └── show.blade.php
+│       ├── ecritures/
+│       ├── abonnement/
+│       └── admin/
+├── routes/
+│   ├── web.php
+│   ├── api.php
+│   └── webhooks.php
+├── docker/
+├── .github/
+│   └── workflows/
+│       ├── ci.yml
+│       └── deploy.yml
+└── docker-compose.yml
+```
+
+---
+
+## 4. MIGRATIONS BASE DE DONNÉES (ordre exact)
+
+### Migration 1 — `tenants`
+```php
+<?php
+// database/migrations/2024_01_01_000001_create_tenants_table.php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void
+    {
+        Schema::create('tenants', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('nom');
+            $table->string('slug')->unique(); // sous-domaine potentiel
+            $table->string('ifu', 13)->nullable(); // Identifiant Fiscal Unique Bénin
+            $table->string('email_contact');
+            $table->string('telephone', 20)->nullable();
+            $table->string('adresse')->nullable();
+            $table->string('ville')->nullable()->default('Cotonou');
+            $table->string('pays')->default('BJ');
+            $table->string('devise')->default('XOF');
+            $table->string('plan')->default('trial'); // trial|starter|pro|cabinet
+            $table->enum('statut', ['actif', 'trial', 'expire', 'suspendu'])->default('trial');
+            $table->integer('quota_factures_mensuel')->default(10);
+            $table->integer('quota_users')->default(1);
+            $table->timestamp('abonnement_expire_le')->nullable();
+            $table->json('config_google_sheets')->nullable(); // {spreadsheet_id, token_oauth}
+            $table->json('config_n8n')->nullable(); // paramètres spécifiques si besoin
+            $table->boolean('actif')->default(true);
+            $table->timestamps();
+            $table->softDeletes();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('tenants');
+    }
+};
+```
+
+### Migration 2 — `users`
+```php
+<?php
+// database/migrations/2024_01_01_000002_create_users_table.php
+
+return new class extends Migration {
+    public function up(): void
+    {
+        Schema::create('users', function (Blueprint $table) {
+            $table->id();
+            $table->foreignUuid('tenant_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->enum('role', ['super_admin', 'admin', 'comptable', 'auditeur'])->default('comptable');
+            $table->boolean('actif')->default(true);
+            $table->timestamp('last_login_at')->nullable();
+            $table->string('avatar')->nullable();
+            $table->rememberToken();
+            $table->timestamps();
+            $table->softDeletes();
+
+            $table->index(['tenant_id', 'role']);
+            $table->index(['tenant_id', 'email']);
+        });
+    }
+};
+```
+
+### Migration 3 — `plans`
+```php
+<?php
+// database/migrations/2024_01_01_000003_create_plans_table.php
+
+return new class extends Migration {
+    public function up(): void
+    {
+        Schema::create('plans', function (Blueprint $table) {
+            $table->id();
+            $table->string('nom'); // Starter, Pro, Cabinet+
+            $table->string('slug')->unique();
+            $table->integer('prix_mensuel_xof'); // en FCFA
+            $table->integer('quota_factures'); // par mois
+            $table->integer('quota_users');
+            $table->boolean('export_xlsx')->default(true);
+            $table->boolean('google_sheets')->default(false);
+            $table->boolean('api_access')->default(false);
+            $table->boolean('actif')->default(true);
+            $table->integer('ordre')->default(0);
+            $table->json('features')->nullable(); // features additionnelles
+            $table->timestamps();
+        });
+    }
+};
+```
+
+### Migration 4 — `abonnements`
+```php
+<?php
+// database/migrations/2024_01_01_000004_create_abonnements_table.php
+
+return new class extends Migration {
+    public function up(): void
+    {
+        Schema::create('abonnements', function (Blueprint $table) {
+            $table->id();
+            $table->foreignUuid('tenant_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('plan_id')->constrained();
+            $table->enum('statut', ['en_attente', 'actif', 'expire', 'annule'])->default('en_attente');
+            $table->string('processeur_paiement'); // feexpay|cinetpay|stripe
+            $table->string('transaction_id')->nullable();
+            $table->integer('montant_xof');
+            $table->timestamp('debut_le');
+            $table->timestamp('expire_le');
+            $table->json('metadata_paiement')->nullable();
+            $table->timestamps();
+
+            $table->index(['tenant_id', 'statut']);
+        });
+    }
+};
+```
+
+### Migration 5 — `factures`
+```php
+<?php
+// database/migrations/2024_01_01_000005_create_factures_table.php
+
+return new class extends Migration {
+    public function up(): void
+    {
+        Schema::create('factures', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('tenant_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('uploaded_by')->constrained('users');
+            $table->foreignId('valide_par')->nullable()->constrained('users');
+
+            // Classification
+            $table->enum('type_document', ['VENTE', 'ACHAT', 'CHARGE'])->nullable();
+            $table->string('sous_type')->nullable(); // Marchandise, Service, Immobilisation, Charge, Fourniture
+            $table->decimal('score_confiance_classification', 5, 2)->nullable();
+
+            // Statut pipeline
+            $table->enum('statut', [
+                'uploade',
+                'ocr_en_cours',
+                'ocr_termine',
+                'classification_en_cours',
+                'classification_terminee',
+                'extraction_en_cours',
+                'extraction_terminee',
+                'a_valider',
+                'valide',
+                'rejete',
+                'erreur'
+            ])->default('uploade');
+
+            // Fichier
+            $table->string('pdf_path'); // chemin MinIO : tenants/{tenant_id}/pdfs/{filename}
+            $table->string('pdf_nom_original');
+            $table->bigInteger('pdf_taille_bytes')->nullable();
+            $table->integer('nombre_pages')->nullable();
+
+            // Données extraites brutes (JSON complet retourné par n8n)
+            $table->json('ocr_texte')->nullable();
+            $table->json('donnees_extraites')->nullable(); // tous les champs extraits
+            $table->json('donnees_corrigees')->nullable(); // modifications humaines
+
+            // Champs principaux (dénormalisés pour recherche rapide)
+            $table->string('numero_facture')->nullable();
+            $table->string('fournisseur_client')->nullable();
+            $table->string('ifu_tiers')->nullable();
+            $table->string('code_mecef')->nullable(); // spécifique Bénin
+            $table->date('date_facture')->nullable();
+            $table->decimal('montant_ht', 15, 2)->nullable();
+            $table->decimal('montant_tva', 15, 2)->nullable();
+            $table->decimal('montant_ttc', 15, 2)->nullable();
+            $table->decimal('montant_aib', 15, 2)->nullable(); // AIB 1% Bénin
+            $table->decimal('montant_rirf', 15, 2)->nullable(); // RIRF Bénin
+            $table->string('regime_fiscal')->nullable(); // B ou D (Bénin)
+            $table->string('mode_paiement')->nullable(); // especes|virement|mobile_money|cheque
+            $table->string('justification_ia')->nullable();
+
+            // n8n tracking
+            $table->string('n8n_execution_id')->nullable();
+            $table->timestamp('n8n_started_at')->nullable();
+            $table->timestamp('n8n_finished_at')->nullable();
+
+            $table->timestamp('valide_le')->nullable();
+            $table->text('motif_rejet')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+
+            // Index pour recherche et filtres
+            $table->index(['tenant_id', 'statut']);
+            $table->index(['tenant_id', 'type_document']);
+            $table->index(['tenant_id', 'date_facture']);
+            $table->index(['tenant_id', 'fournisseur_client']);
+        });
+    }
+};
+```
+
+### Migration 6 — `comptes_comptables`
+```php
+<?php
+// database/migrations/2024_01_01_000006_create_comptes_comptables_table.php
+
+return new class extends Migration {
+    public function up(): void
+    {
+        Schema::create('comptes_comptables', function (Blueprint $table) {
+            $table->id();
+            $table->foreignUuid('tenant_id')->nullable()->constrained()->cascadeOnDelete();
+            // null = compte global SYSCOHADA, non-null = personnalisation cabinet
+            $table->string('numero', 10)->index();
+            $table->string('libelle');
+            $table->string('classe', 2); // 1-9
+            $table->enum('nature', ['actif', 'passif', 'charge', 'produit', 'bilan'])->nullable();
+            $table->boolean('actif')->default(true);
+            $table->timestamps();
+
+            $table->unique(['tenant_id', 'numero']);
+        });
+    }
+};
+```
+
+### Migration 7 — `ecritures_comptables`
+```php
+<?php
+// database/migrations/2024_01_01_000007_create_ecritures_comptables_table.php
+
+return new class extends Migration {
+    public function up(): void
+    {
+        Schema::create('ecritures_comptables', function (Blueprint $table) {
+            $table->id();
+            $table->foreignUuid('tenant_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('facture_id')->constrained('factures')->cascadeOnDelete();
+            $table->string('journal')->default('ACH'); // ACH=Achat, VTE=Vente, OD=Opérations diverses
+            $table->date('date_ecriture');
+            $table->string('numero_piece')->nullable(); // N° facture
+            $table->string('numero_compte', 10);
+            $table->string('libelle_compte')->nullable();
+            $table->string('libelle_ecriture');
+            $table->decimal('debit', 15, 2)->default(0);
+            $table->decimal('credit', 15, 2)->default(0);
+            $table->string('devise')->default('XOF');
+            $table->boolean('est_ecriture_reglement')->default(false);
+            $table->integer('ordre_ligne')->default(0); // pour trier l'affichage
+            $table->timestamps();
+
+            $table->index(['tenant_id', 'date_ecriture']);
+            $table->index(['tenant_id', 'numero_compte']);
+            $table->index(['facture_id']);
+        });
+    }
+};
+```
+
+### Migration 8 — `traitements_logs`
+```php
+<?php
+// database/migrations/2024_01_01_000008_create_traitements_logs_table.php
+
+return new class extends Migration {
+    public function up(): void
+    {
+        Schema::create('traitements_logs', function (Blueprint $table) {
+            $table->id();
+            $table->foreignUuid('facture_id')->constrained('factures')->cascadeOnDelete();
+            $table->enum('etape', [
+                'upload', 'ocr', 'classification', 'extraction', 'generation_ecritures', 'validation', 'export'
+            ]);
+            $table->enum('statut', ['en_cours', 'succes', 'erreur']);
+            $table->text('message')->nullable();
+            $table->json('payload')->nullable(); // données utiles pour debug
+            $table->integer('duree_ms')->nullable();
+            $table->timestamp('created_at');
+        });
+    }
+};
+```
+
+### Migration 9 — `parametres`
+```php
+<?php
+// database/migrations/2024_01_01_000009_create_parametres_table.php
+
+return new class extends Migration {
+    public function up(): void
+    {
+        Schema::create('parametres', function (Blueprint $table) {
+            $table->id();
+            $table->foreignUuid('tenant_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->string('cle');
+            $table->text('valeur')->nullable();
+            $table->string('type')->default('string'); // string|json|boolean|integer
+            $table->timestamps();
+
+            $table->unique(['tenant_id', 'cle']);
+        });
+    }
+};
+```
+
+---
+
+## 5. MODÈLES ELOQUENT
+
+### `app/Models/Tenant.php`
+```php
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class Tenant extends Model
+{
+    use HasUuids, SoftDeletes;
+
+    protected $fillable = [
+        'nom', 'slug', 'ifu', 'email_contact', 'telephone',
+        'adresse', 'ville', 'pays', 'devise', 'plan', 'statut',
+        'quota_factures_mensuel', 'quota_users',
+        'abonnement_expire_le', 'config_google_sheets', 'config_n8n', 'actif',
+    ];
+
+    protected $casts = [
+        'config_google_sheets' => 'array',
+        'config_n8n' => 'array',
+        'actif' => 'boolean',
+        'abonnement_expire_le' => 'datetime',
+    ];
+
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
+
+    public function factures(): HasMany
+    {
+        return $this->hasMany(Facture::class);
+    }
+
+    public function abonnements(): HasMany
+    {
+        return $this->hasMany(Abonnement::class);
+    }
+
+    public function abonnementActif(): ?Abonnement
+    {
+        return $this->abonnements()
+            ->where('statut', 'actif')
+            ->where('expire_le', '>', now())
+            ->latest()
+            ->first();
+    }
+
+    public function estActif(): bool
+    {
+        return $this->statut === 'actif' || $this->statut === 'trial';
+    }
+
+    public function facturesCeMois(): int
+    {
+        return $this->factures()
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->whereNotIn('statut', ['rejete', 'erreur'])
+            ->count();
+    }
+
+    public function quotaDisponible(): bool
+    {
+        return $this->facturesCeMois() < $this->quota_factures_mensuel;
+    }
+}
+```
+
+### `app/Models/Facture.php`
+```php
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Facture extends Model
+{
+    use HasUuids, SoftDeletes;
+
+    protected $fillable = [
+        'tenant_id', 'uploaded_by', 'valide_par',
+        'type_document', 'sous_type', 'score_confiance_classification',
+        'statut', 'pdf_path', 'pdf_nom_original', 'pdf_taille_bytes', 'nombre_pages',
+        'ocr_texte', 'donnees_extraites', 'donnees_corrigees',
+        'numero_facture', 'fournisseur_client', 'ifu_tiers', 'code_mecef',
+        'date_facture', 'montant_ht', 'montant_tva', 'montant_ttc',
+        'montant_aib', 'montant_rirf', 'regime_fiscal', 'mode_paiement',
+        'justification_ia', 'n8n_execution_id', 'n8n_started_at', 'n8n_finished_at',
+        'valide_le', 'motif_rejet',
+    ];
+
+    protected $casts = [
+        'ocr_texte' => 'array',
+        'donnees_extraites' => 'array',
+        'donnees_corrigees' => 'array',
+        'date_facture' => 'date',
+        'montant_ht' => 'decimal:2',
+        'montant_tva' => 'decimal:2',
+        'montant_ttc' => 'decimal:2',
+        'montant_aib' => 'decimal:2',
+        'montant_rirf' => 'decimal:2',
+        'n8n_started_at' => 'datetime',
+        'n8n_finished_at' => 'datetime',
+        'valide_le' => 'datetime',
+    ];
+
+    // Scopes tenant isolation — TOUJOURS utiliser ces scopes
+    public function scopePourTenant($query, string $tenantId)
+    {
+        return $query->where('tenant_id', $tenantId);
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    public function uploadePar(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'uploaded_by');
+    }
+
+    public function validePar(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'valide_par');
+    }
+
+    public function ecritures(): HasMany
+    {
+        return $this->hasMany(EcritureComptable::class)->orderBy('ordre_ligne');
+    }
+
+    public function logs(): HasMany
+    {
+        return $this->hasMany(TraitementLog::class)->orderBy('created_at');
+    }
+
+    public function estEquilibree(): bool
+    {
+        $totalDebit  = $this->ecritures()->sum('debit');
+        $totalCredit = $this->ecritures()->sum('credit');
+        return abs($totalDebit - $totalCredit) < 0.01; // tolérance arrondi
+    }
+
+    public function getStatutLabelAttribute(): string
+    {
+        return match($this->statut) {
+            'uploade'                 => 'Uploadé',
+            'ocr_en_cours'            => 'OCR en cours...',
+            'ocr_termine'             => 'OCR terminé',
+            'classification_en_cours' => 'Classification...',
+            'classification_terminee' => 'Classification terminée',
+            'extraction_en_cours'     => 'Extraction...',
+            'extraction_terminee'     => 'Extraction terminée',
+            'a_valider'               => 'À valider',
+            'valide'                  => 'Validé',
+            'rejete'                  => 'Rejeté',
+            'erreur'                  => 'Erreur',
+            default                   => $this->statut,
+        };
+    }
+}
+```
+
+---
+
+## 6. SERVICES MÉTIER
+
+### `app/Services/N8nService.php`
+```php
+<?php
+
+namespace App\Services;
+
+use App\Models\Facture;
+use App\Models\TraitementLog;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+
+class N8nService
+{
+    private string $webhookUrl;
+    private string $secret;
+    private string $callbackUrl;
+
+    public function __construct()
+    {
+        $this->webhookUrl  = config('services.n8n.webhook_url');
+        $this->secret      = config('services.n8n.secret');
+        $this->callbackUrl = config('services.n8n.callback_url');
+    }
+
+    /**
+     * Déclenche le pipeline n8n pour traiter une facture PDF.
+     * n8n est appelé via réseau interne Docker uniquement.
+     */
+    public function declencherTraitement(Facture $facture): bool
+    {
+        $payload = [
+            'facture_id'   => $facture->id,
+            'tenant_id'    => $facture->tenant_id,
+            'pdf_url'      => $this->genererUrlSigneePdf($facture->pdf_path),
+            'callback_url' => $this->callbackUrl . '/webhooks/n8n/callback',
+            'timestamp'    => now()->toISOString(),
+        ];
+
+        // Signature HMAC pour authentifier l'appel
+        $signature = hash_hmac('sha256', json_encode($payload), $this->secret);
+
+        try {
+            $response = Http::timeout(30)
+                ->withHeaders([
+                    'X-N8N-Secret'    => $signature,
+                    'X-Tenant-Id'     => $facture->tenant_id,
+                    'Content-Type'    => 'application/json',
+                ])
+                ->post($this->webhookUrl, $payload);
+
+            if ($response->successful()) {
+                $facture->update([
+                    'statut'          => 'ocr_en_cours',
+                    'n8n_started_at'  => now(),
+                    'n8n_execution_id' => $response->json('executionId'),
+                ]);
+
+                TraitementLog::create([
+                    'facture_id' => $facture->id,
+                    'etape'      => 'ocr',
+                    'statut'     => 'en_cours',
+                    'message'    => 'Pipeline n8n déclenché avec succès',
+                ]);
+
+                return true;
+            }
+
+            Log::error('N8n webhook error', [
+                'facture_id' => $facture->id,
+                'status'     => $response->status(),
+                'body'       => $response->body(),
+            ]);
+
+            return false;
+
+        } catch (\Exception $e) {
+            Log::error('N8n connection failed', [
+                'facture_id' => $facture->id,
+                'error'      => $e->getMessage(),
+            ]);
+
+            $facture->update(['statut' => 'erreur']);
+            return false;
+        }
+    }
+
+    /**
+     * Vérifie la signature HMAC du callback n8n entrant.
+     */
+    public function verifierSignature(string $payload, string $signature): bool
+    {
+        $expected = hash_hmac('sha256', $payload, $this->secret);
+        return hash_equals($expected, $signature);
+    }
+
+    private function genererUrlSigneePdf(string $path): string
+    {
+        return app(MiniOService::class)->urlSignee($path, 900); // 15 min
+    }
+}
+```
+
+### `app/Services/SYSCOHADAService.php`
+```php
+<?php
+
+namespace App\Services;
+
+use App\Models\Facture;
+use App\Models\EcritureComptable;
+
+class SYSCOHADAService
+{
+    /**
+     * Génère les écritures comptables SYSCOHADA à partir des données n8n.
+     * Règles fiscales Bénin : AIB 1%, RIRF, Régimes B et D.
+     */
+    public function genererEcritures(Facture $facture, array $ecrituresN8n): void
+    {
+        // Supprimer les anciennes écritures si re-génération
+        $facture->ecritures()->delete();
+
+        $ordre = 0;
+
+        foreach ($ecrituresN8n as $ligne) {
+            EcritureComptable::create([
+                'tenant_id'              => $facture->tenant_id,
+                'facture_id'             => $facture->id,
+                'journal'                => $this->determinerJournal($facture->type_document),
+                'date_ecriture'          => $facture->date_facture ?? now()->toDateString(),
+                'numero_piece'           => $facture->numero_facture,
+                'numero_compte'          => $ligne['compte'],
+                'libelle_compte'         => $ligne['libelle_compte'] ?? null,
+                'libelle_ecriture'       => $ligne['libelle'],
+                'debit'                  => $ligne['debit'] ?? 0,
+                'credit'                 => $ligne['credit'] ?? 0,
+                'devise'                 => 'XOF',
+                'est_ecriture_reglement' => $ligne['est_reglement'] ?? false,
+                'ordre_ligne'            => $ordre++,
+            ]);
+        }
+    }
+
+    /**
+     * Génère les écritures manuellement (fallback si n8n ne fournit pas les écritures).
+     * Couvre les cas VENTE, ACHAT, CHARGE avec fiscalité Bénin.
+     */
+    public function genererEcrituresManuel(Facture $facture): array
+    {
+        $donnees = array_merge(
+            $facture->donnees_extraites ?? [],
+            $facture->donnees_corrigees ?? []
+        );
+
+        $ecritures = match($facture->type_document) {
+            'VENTE'  => $this->ecrituresVente($facture, $donnees),
+            'ACHAT'  => $this->ecrituresAchat($facture, $donnees),
+            'CHARGE' => $this->ecrituresCharge($facture, $donnees),
+            default  => [],
+        };
+
+        return $ecritures;
+    }
+
+    private function ecrituresVente(Facture $facture, array $d): array
+    {
+        $ecritures = [];
+        $ht  = (float) ($facture->montant_ht ?? 0);
+        $ttc = (float) ($facture->montant_ttc ?? 0);
+        $aib = (float) ($facture->montant_aib ?? 0);
+        $rirf = (float) ($facture->montant_rirf ?? 0);
+        $regimeD = ($facture->regime_fiscal === 'D');
+
+        // Débit : 411 Clients (montant TTC - retenues)
+        $montantClient = $ttc - $aib - $rirf;
+        $ecritures[] = $this->ligne('4111', 'Clients', $montantClient, 0);
+
+        if ($aib > 0) {
+            $ecritures[] = $this->ligne('4473', 'RIRF à récupérer', $aib, 0);
+        }
+
+        if ($rirf > 0) {
+            $ecritures[] = $this->ligne('4473', 'RIRF à récupérer', $rirf, 0);
+        }
+
+        // Crédit : 701 Ventes de marchandises
+        $ecritures[] = $this->ligne('7011', 'Ventes de marchandises', 0, $ht);
+
+        // Crédit : 4431 TVA facturée (seulement si régime B)
+        if (!$regimeD && $facture->montant_tva > 0) {
+            $ecritures[] = $this->ligne('4431', 'T.V.A. facturée sur ventes', 0, $facture->montant_tva);
+        }
+
+        // Écriture de règlement
+        $ecritures[] = $this->ecritureReglement($ttc, $facture->mode_paiement, true);
+
+        return $ecritures;
+    }
+
+    private function ecrituresAchat(Facture $facture, array $d): array
+    {
+        $ecritures = [];
+        $ht  = (float) ($facture->montant_ht ?? 0);
+        $ttc = (float) ($facture->montant_ttc ?? 0);
+        $aib = (float) ($facture->montant_aib ?? 0);
+
+        // Débit : 601 Achats de marchandises
+        $ecritures[] = $this->ligne('6011', 'Achats de marchandises', $ht, 0);
+
+        // Débit : 4452 TVA récupérable sur achats
+        if ($facture->montant_tva > 0) {
+            $ecritures[] = $this->ligne('4452', 'T.V.A. récupérable sur achats', $facture->montant_tva, 0);
+        }
+
+        // Débit : AIB à récupérer
+        if ($aib > 0) {
+            $ecritures[] = $this->ligne('44593', 'AIB à récupérer 1%', $aib, 0);
+        }
+
+        // Crédit : 401 Fournisseurs
+        $ecritures[] = $this->ligne('4011', 'Fournisseurs', 0, $ttc);
+
+        // Écriture de règlement
+        $ecritures[] = $this->ecritureReglement($ttc, $facture->mode_paiement, false);
+
+        return $ecritures;
+    }
+
+    private function ecrituresCharge(Facture $facture, array $d): array
+    {
+        $ecritures = [];
+        $ht  = (float) ($facture->montant_ht ?? 0);
+        $ttc = (float) ($facture->montant_ttc ?? 0);
+
+        // Déterminer le compte de charge selon la nature (envoyé par n8n)
+        $compteCharge = $d['compte_syscohada'] ?? '6228'; // Locations par défaut
+
+        $ecritures[] = $this->ligne($compteCharge, $d['libelle_compte'] ?? 'Charges d\'exploitation', $ht, 0);
+
+        if ($facture->montant_tva > 0) {
+            $ecritures[] = $this->ligne('4454', 'T.V.A. récupérable sur services', $facture->montant_tva, 0);
+        }
+
+        $ecritures[] = $this->ligne('4011', 'Fournisseurs', 0, $ttc);
+        $ecritures[] = $this->ecritureReglement($ttc, $facture->mode_paiement, false);
+
+        return $ecritures;
+    }
+
+    /**
+     * Écriture de règlement selon mode de paiement et montant.
+     * Règle Bénin : < 100 000 FCFA → caisse, ≥ 100 000 → banque, mobile money → 531
+     */
+    private function ecritureReglement(float $montant, ?string $mode, bool $estVente): array
+    {
+        $compte = match(true) {
+            $mode === 'mobile_money'    => ['5731', 'Monnaie électronique'],
+            $montant >= 100000          => ['5211', 'Banques en monnaie nationale'],
+            default                     => ['5711', 'Caisse en monnaie nationale'],
+        };
+
+        return $this->ligne(
+            $compte[0],
+            $compte[1],
+            $estVente ? $montant : 0,
+            $estVente ? 0 : $montant,
+            true
+        );
+    }
+
+    private function ligne(
+        string $compte,
+        string $libelle,
+        float $debit,
+        float $credit,
+        bool $estReglement = false
+    ): array {
+        return [
+            'compte'          => $compte,
+            'libelle_compte'  => $libelle,
+            'libelle'         => $libelle,
+            'debit'           => $debit,
+            'credit'          => $credit,
+            'est_reglement'   => $estReglement,
+        ];
+    }
+
+    private function determinerJournal(string $typeDocument): string
+    {
+        return match($typeDocument) {
+            'VENTE'  => 'VTE',
+            'ACHAT'  => 'ACH',
+            'CHARGE' => 'OD',
+            default  => 'OD',
+        };
+    }
+}
+```
+
+### `app/Services/FeexPayService.php`
+```php
+<?php
+
+namespace App\Services;
+
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+
+class FeexPayService
+{
+    private string $token;
+    private string $baseUrl = 'https://api.feexpay.me/api';
+
+    public function __construct()
+    {
+        $this->token = config('services.feexpay.token');
+    }
+
+    /**
+     * Crée une transaction de paiement FeexPay.
+     * Retourne l'URL de paiement à rediriger l'utilisateur.
+     */
+    public function creerTransaction(
+        int    $montantXof,
+        string $description,
+        string $tenantId,
+        string $planSlug,
+        string $redirectUrl,
+        string $cancelUrl
+    ): array {
+        $response = Http::post("{$this->baseUrl}/orders/online/create", [
+            'token'         => $this->token,
+            'amount'        => $montantXof,
+            'currency'      => 'XOF',
+            'description'   => $description,
+            'callback_info' => json_encode([
+                'tenant_id' => $tenantId,
+                'plan'      => $planSlug,
+            ]),
+            'redirect_url'  => $redirectUrl,
+            'cancel_url'    => $cancelUrl,
+        ]);
+
+        if ($response->successful()) {
+            return [
+                'succes'      => true,
+                'payment_url' => $response->json('payment_url'),
+                'order_id'    => $response->json('id'),
+            ];
+        }
+
+        Log::error('FeexPay création transaction échouée', [
+            'tenant_id' => $tenantId,
+            'response'  => $response->json(),
+        ]);
+
+        return ['succes' => false, 'erreur' => $response->json('message')];
+    }
+
+    /**
+     * Vérifie le statut d'une transaction via l'ID de commande.
+     */
+    public function verifierTransaction(string $orderId): array
+    {
+        $response = Http::get("{$this->baseUrl}/orders/{$orderId}", [
+            'token' => $this->token,
+        ]);
+
+        return $response->json();
+    }
+}
+```
+
+---
+
+## 7. CONTROLLERS PRINCIPAUX
+
+### `app/Http/Controllers/FactureController.php`
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\UploadFactureRequest;
+use App\Jobs\TraiterFacturePDF;
+use App\Models\Facture;
+use App\Services\MiniOService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+
+class FactureController extends Controller
+{
+    public function __construct(private MiniOService $minio) {}
+
+    public function index(Request $request)
+    {
+        $tenantId = auth()->user()->tenant_id;
+
+        $factures = Facture::where('tenant_id', $tenantId)
+            ->when($request->type, fn($q) => $q->where('type_document', $request->type))
+            ->when($request->statut, fn($q) => $q->where('statut', $request->statut))
+            ->when($request->q, fn($q, $search) =>
+                $q->where(fn($sq) => $sq
+                    ->where('numero_facture', 'ilike', "%{$search}%")
+                    ->orWhere('fournisseur_client', 'ilike', "%{$search}%")
+                )
+            )
+            ->when($request->date_debut, fn($q) => $q->whereDate('date_facture', '>=', $request->date_debut))
+            ->when($request->date_fin, fn($q) => $q->whereDate('date_facture', '<=', $request->date_fin))
+            ->with(['uploadePar:id,name', 'validePar:id,name'])
+            ->orderByDesc('created_at')
+            ->paginate(25);
+
+        return view('factures.index', compact('factures'));
+    }
+
+    public function upload()
+    {
+        return view('factures.upload');
+    }
+
+    /**
+     * Reçoit le PDF, le stocke dans MinIO, lance le job de traitement.
+     */
+    public function store(UploadFactureRequest $request)
+    {
+        $user   = auth()->user();
+        $tenant = $user->tenant;
+
+        // Vérifier quota
+        if (!$tenant->quotaDisponible()) {
+            return back()->withErrors(['quota' => "Quota mensuel atteint ({$tenant->quota_factures_mensuel} factures). Passez à un plan supérieur."]);
+        }
+
+        $fichiers = $request->file('pdfs');
+        $factures = [];
+
+        foreach ($fichiers as $fichier) {
+            $nomFichier = Str::uuid() . '.pdf';
+            $chemin     = "tenants/{$tenant->id}/pdfs/{$nomFichier}";
+
+            // Upload vers MinIO
+            $this->minio->upload($fichier->getPathname(), $chemin);
+
+            $facture = Facture::create([
+                'tenant_id'       => $tenant->id,
+                'uploaded_by'     => $user->id,
+                'statut'          => 'uploade',
+                'pdf_path'        => $chemin,
+                'pdf_nom_original' => $fichier->getClientOriginalName(),
+                'pdf_taille_bytes' => $fichier->getSize(),
+            ]);
+
+            // Dispatch du job de traitement IA (via n8n)
+            TraiterFacturePDF::dispatch($facture)->onQueue('factures');
+
+            $factures[] = $facture;
+        }
+
+        if (count($factures) === 1) {
+            return redirect()
+                ->route('factures.show', $factures[0])
+                ->with('succes', 'Facture uploadée, traitement IA en cours...');
+        }
+
+        return redirect()
+            ->route('factures.index')
+            ->with('succes', count($factures) . ' factures uploadées, traitement en cours...');
+    }
+
+    public function show(Facture $facture)
+    {
+        $this->autoriserTenant($facture);
+
+        $facture->load(['ecritures' => fn($q) => $q->orderBy('ordre_ligne'), 'logs']);
+
+        $urlPdf = $this->minio->urlSignee($facture->pdf_path, 3600);
+
+        return view('factures.show', compact('facture', 'urlPdf'));
+    }
+
+    public function revue(Facture $facture)
+    {
+        $this->autoriserTenant($facture);
+        abort_unless(in_array($facture->statut, ['a_valider', 'extraction_terminee']), 403);
+
+        $urlPdf = $this->minio->urlSignee($facture->pdf_path, 3600);
+
+        return view('factures.revue', compact('facture', 'urlPdf'));
+    }
+
+    public function valider(Request $request, Facture $facture)
+    {
+        $this->autoriserTenant($facture);
+        abort_unless(auth()->user()->can('valider-facture'), 403);
+
+        // Sauvegarder les corrections manuelles
+        if ($request->has('donnees_corrigees')) {
+            $facture->donnees_corrigees = $request->donnees_corrigees;
+        }
+
+        $facture->update([
+            'statut'      => 'valide',
+            'valide_par'  => auth()->id(),
+            'valide_le'   => now(),
+            'donnees_corrigees' => $facture->donnees_corrigees,
+            // Mise à jour des champs dénormalisés si corrigés
+            'numero_facture'     => $request->get('numero_facture', $facture->numero_facture),
+            'fournisseur_client' => $request->get('fournisseur_client', $facture->fournisseur_client),
+            'date_facture'       => $request->get('date_facture', $facture->date_facture),
+            'montant_ttc'        => $request->get('montant_ttc', $facture->montant_ttc),
+        ]);
+
+        // Synchroniser vers Google Sheets si configuré
+        if ($facture->tenant->config_google_sheets) {
+            \App\Jobs\SyncGoogleSheets::dispatch($facture)->onQueue('exports');
+        }
+
+        return redirect()
+            ->route('factures.show', $facture)
+            ->with('succes', 'Facture validée et écritures enregistrées.');
+    }
+
+    public function rejeter(Request $request, Facture $facture)
+    {
+        $this->autoriserTenant($facture);
+        $request->validate(['motif_rejet' => 'required|string|min:10']);
+
+        $facture->update([
+            'statut'      => 'rejete',
+            'motif_rejet' => $request->motif_rejet,
+            'valide_par'  => auth()->id(),
+        ]);
+
+        return redirect()->route('factures.index')->with('info', 'Facture rejetée.');
+    }
+
+    private function autoriserTenant(Facture $facture): void
+    {
+        abort_unless($facture->tenant_id === auth()->user()->tenant_id, 403);
+    }
+}
+```
+
+### `app/Http/Controllers/Webhook/N8nCallbackController.php`
+```php
+<?php
+
+namespace App\Http\Controllers\Webhook;
+
+use App\Http\Controllers\Controller;
+use App\Models\Facture;
+use App\Models\TraitementLog;
+use App\Services\N8nService;
+use App\Services\SYSCOHADAService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
+class N8nCallbackController extends Controller
+{
+    public function __construct(
+        private N8nService       $n8n,
+        private SYSCOHADAService $syscohada
+    ) {}
+
+    /**
+     * Point d'entrée des résultats du pipeline n8n.
+     * Cette route est appelée par n8n uniquement (réseau interne).
+     * Vérification HMAC obligatoire.
+     */
+    public function recevoir(Request $request)
+    {
+        // Vérification signature HMAC
+        $signature = $request->header('X-N8N-Secret');
+        $payload   = $request->getContent();
+
+        if (!$this->n8n->verifierSignature($payload, $signature)) {
+            Log::warning('N8n callback: signature invalide', [
+                'ip' => $request->ip(),
+            ]);
+            return response()->json(['error' => 'Non autorisé'], 403);
+        }
+
+        $data      = $request->json()->all();
+        $factureId = $data['facture_id'] ?? null;
+        $etape     = $data['etape'] ?? null;
+
+        if (!$factureId || !$etape) {
+            return response()->json(['error' => 'Données manquantes'], 400);
+        }
+
+        $facture = Facture::find($factureId);
+        if (!$facture) {
+            return response()->json(['error' => 'Facture introuvable'], 404);
+        }
+
+        try {
+            $this->traiterEtape($facture, $etape, $data);
+            return response()->json(['ok' => true]);
+        } catch (\Exception $e) {
+            Log::error('N8n callback traitement erreur', [
+                'facture_id' => $factureId,
+                'etape'      => $etape,
+                'error'      => $e->getMessage(),
+            ]);
+
+            $facture->update(['statut' => 'erreur']);
+
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    private function traiterEtape(Facture $facture, string $etape, array $data): void
+    {
+        $dureeMs = $data['duree_ms'] ?? null;
+
+        match($etape) {
+            'ocr_termine' => $this->traiterOCR($facture, $data, $dureeMs),
+            'classification_terminee' => $this->traiterClassification($facture, $data, $dureeMs),
+            'extraction_terminee' => $this->traiterExtraction($facture, $data, $dureeMs),
+            'ecritures_generees' => $this->traiterEcritures($facture, $data, $dureeMs),
+            'erreur' => $this->traiterErreur($facture, $data),
+            default => Log::warning("N8n callback: étape inconnue {$etape}"),
+        };
+    }
+
+    private function traiterOCR(Facture $facture, array $data, ?int $dureeMs): void
+    {
+        $facture->update([
+            'statut'        => 'ocr_termine',
+            'ocr_texte'     => $data['ocr_texte'],
+            'nombre_pages'  => $data['nombre_pages'] ?? null,
+        ]);
+
+        TraitementLog::create([
+            'facture_id' => $facture->id,
+            'etape'      => 'ocr',
+            'statut'     => 'succes',
+            'duree_ms'   => $dureeMs,
+            'message'    => "OCR terminé — {$data['nombre_pages']} page(s) extraite(s)",
+        ]);
+    }
+
+    private function traiterClassification(Facture $facture, array $data, ?int $dureeMs): void
+    {
+        $facture->update([
+            'statut'                       => 'classification_terminee',
+            'type_document'                => $data['type_document'],
+            'sous_type'                    => $data['sous_type'] ?? null,
+            'score_confiance_classification' => $data['score_confiance'] ?? null,
+            'justification_ia'             => $data['justification'] ?? null,
+        ]);
+
+        TraitementLog::create([
+            'facture_id' => $facture->id,
+            'etape'      => 'classification',
+            'statut'     => 'succes',
+            'duree_ms'   => $dureeMs,
+            'message'    => "Type: {$data['type_document']} (confiance: {$data['score_confiance']}%)",
+        ]);
+    }
+
+    private function traiterExtraction(Facture $facture, array $data, ?int $dureeMs): void
+    {
+        $extraits = $data['donnees_extraites'] ?? [];
+
+        $facture->update([
+            'statut'            => 'a_valider',
+            'donnees_extraites' => $extraits,
+            'numero_facture'    => $extraits['numero_facture'] ?? null,
+            'fournisseur_client' => $extraits['fournisseur'] ?? $extraits['client'] ?? null,
+            'ifu_tiers'         => $extraits['ifu'] ?? null,
+            'code_mecef'        => $extraits['code_mecef'] ?? null,
+            'date_facture'      => $extraits['date_facture'] ?? null,
+            'montant_ht'        => $extraits['montant_ht'] ?? null,
+            'montant_tva'       => $extraits['montant_tva'] ?? null,
+            'montant_ttc'       => $extraits['montant_ttc'] ?? null,
+            'montant_aib'       => $extraits['montant_aib'] ?? null,
+            'montant_rirf'      => $extraits['montant_rirf'] ?? null,
+            'regime_fiscal'     => $extraits['regime'] ?? null,
+            'mode_paiement'     => $extraits['mode_paiement'] ?? null,
+        ]);
+
+        TraitementLog::create([
+            'facture_id' => $facture->id,
+            'etape'      => 'extraction',
+            'statut'     => 'succes',
+            'duree_ms'   => $dureeMs,
+            'message'    => 'Données extraites — en attente de validation comptable',
+        ]);
+    }
+
+    private function traiterEcritures(Facture $facture, array $data, ?int $dureeMs): void
+    {
+        if (!empty($data['ecritures'])) {
+            $this->syscohada->genererEcritures($facture, $data['ecritures']);
+        }
+
+        TraitementLog::create([
+            'facture_id' => $facture->id,
+            'etape'      => 'generation_ecritures',
+            'statut'     => 'succes',
+            'duree_ms'   => $dureeMs,
+            'message'    => count($data['ecritures'] ?? []) . ' écritures générées',
+        ]);
+    }
+
+    private function traiterErreur(Facture $facture, array $data): void
+    {
+        $facture->update(['statut' => 'erreur']);
+
+        TraitementLog::create([
+            'facture_id' => $facture->id,
+            'etape'      => $data['etape_echouee'] ?? 'unknown',
+            'statut'     => 'erreur',
+            'message'    => $data['message_erreur'] ?? 'Erreur inconnue',
+        ]);
+    }
+}
+```
+
+### `app/Http/Controllers/Webhook/FeexPayController.php`
+```php
+<?php
+
+namespace App\Http\Controllers\Webhook;
+
+use App\Http\Controllers\Controller;
+use App\Models\Abonnement;
+use App\Models\Plan;
+use App\Models\Tenant;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
+class FeexPayController extends Controller
+{
+    /**
+     * Reçoit la confirmation de paiement FeexPay.
+     * Activation ou renouvellement de l'abonnement du cabinet.
+     */
+    public function callback(Request $request)
+    {
+        $statut     = $request->input('status');
+        $callbackInfo = json_decode($request->input('callback_info'), true);
+        $montant    = (int) $request->input('amount');
+        $transactionId = $request->input('id') ?? $request->input('transaction_id');
+
+        if ($statut !== 'SUCCESSFUL') {
+            Log::info('FeexPay paiement non réussi', ['statut' => $statut, 'data' => $request->all()]);
+            return response()->json(['ok' => true]); // On ignore les échecs
+        }
+
+        $tenantId = $callbackInfo['tenant_id'] ?? null;
+        $planSlug = $callbackInfo['plan'] ?? null;
+
+        if (!$tenantId || !$planSlug) {
+            Log::error('FeexPay callback: données manquantes', $request->all());
+            return response()->json(['error' => 'Données manquantes'], 400);
+        }
+
+        $tenant = Tenant::find($tenantId);
+        $plan   = Plan::where('slug', $planSlug)->first();
+
+        if (!$tenant || !$plan) {
+            Log::error('FeexPay callback: tenant ou plan introuvable', compact('tenantId', 'planSlug'));
+            return response()->json(['error' => 'Tenant ou plan introuvable'], 404);
+        }
+
+        // Créer l'enregistrement d'abonnement
+        Abonnement::create([
+            'tenant_id'            => $tenant->id,
+            'plan_id'              => $plan->id,
+            'statut'               => 'actif',
+            'processeur_paiement'  => 'feexpay',
+            'transaction_id'       => $transactionId,
+            'montant_xof'          => $montant,
+            'debut_le'             => now(),
+            'expire_le'            => now()->addDays(30),
+            'metadata_paiement'    => $request->all(),
+        ]);
+
+        // Mettre à jour le tenant
+        $tenant->update([
+            'plan'                    => $plan->slug,
+            'statut'                  => 'actif',
+            'quota_factures_mensuel'  => $plan->quota_factures,
+            'quota_users'             => $plan->quota_users,
+            'abonnement_expire_le'    => now()->addDays(30),
+        ]);
+
+        Log::info("Abonnement activé — Tenant: {$tenant->nom} — Plan: {$plan->nom}");
+
+        return response()->json(['ok' => true]);
+    }
+}
+```
+
+---
+
+## 8. MIDDLEWARE DE SÉCURITÉ
+
+### `app/Http/Middleware/CheckSubscription.php`
+```php
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+
+class CheckSubscription
+{
+    public function handle(Request $request, Closure $next)
+    {
+        $user = $request->user();
+
+        // Super admin = pas de vérification
+        if ($user->role === 'super_admin') {
+            return $next($request);
+        }
+
+        $tenant = $user->tenant;
+
+        if (!$tenant || !$tenant->estActif()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'error'    => 'Abonnement expiré ou inactif',
+                    'redirect' => route('abonnement.index'),
+                ], 402);
+            }
+
+            return redirect()
+                ->route('abonnement.index')
+                ->withErrors(['abonnement' => 'Votre abonnement est expiré. Veuillez renouveler pour continuer.']);
+        }
+
+        return $next($request);
+    }
+}
+```
+
+### `app/Http/Middleware/CheckQuota.php`
+```php
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+
+class CheckQuota
+{
+    public function handle(Request $request, Closure $next)
+    {
+        $tenant = $request->user()->tenant;
+
+        if ($tenant && !$tenant->quotaDisponible()) {
+            $utilisees = $tenant->facturesCeMois();
+            $quota     = $tenant->quota_factures_mensuel;
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'error' => "Quota mensuel atteint ({$utilisees}/{$quota} factures)",
+                ], 402);
+            }
+
+            return back()->withErrors([
+                'quota' => "Quota mensuel atteint ({$utilisees}/{$quota}). Passez à un plan supérieur."
+            ]);
+        }
+
+        return $next($request);
+    }
+}
+```
+
+---
+
+## 9. ROUTES
+
+### `routes/web.php`
+```php
+<?php
+
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\FactureController;
+use App\Http\Controllers\EcritureController;
+use App\Http\Controllers\ExportController;
+use App\Http\Controllers\AbonnementController;
+use App\Http\Controllers\Cabinet\DashboardController;
+use App\Http\Controllers\Cabinet\UserController;
+use App\Http\Controllers\Cabinet\SettingsController;
+use App\Http\Controllers\Admin\TenantController;
+use Illuminate\Support\Facades\Route;
+
+// Auth
+Route::middleware('guest')->group(function () {
+    Route::get('/connexion', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/connexion', [LoginController::class, 'login']);
+    Route::get('/mot-de-passe-oublie', [LoginController::class, 'showForgotForm'])->name('password.request');
+    Route::post('/mot-de-passe-oublie', [LoginController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/reinitialiser/{token}', [LoginController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/reinitialiser', [LoginController::class, 'reset'])->name('password.update');
+});
+
+Route::post('/deconnexion', [LoginController::class, 'logout'])->name('logout');
+
+// Zone authentifiée
+Route::middleware(['auth', 'check.subscription'])->group(function () {
+
+    // Dashboard cabinet
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Factures
+    Route::prefix('factures')->name('factures.')->group(function () {
+        Route::get('/', [FactureController::class, 'index'])->name('index');
+        Route::get('/upload', [FactureController::class, 'upload'])->name('upload');
+        Route::post('/', [FactureController::class, 'store'])
+             ->middleware('check.quota')
+             ->name('store');
+        Route::get('/{facture}', [FactureController::class, 'show'])->name('show');
+        Route::get('/{facture}/revue', [FactureController::class, 'revue'])->name('revue');
+        Route::post('/{facture}/valider', [FactureController::class, 'valider'])
+             ->middleware('role:comptable,admin,super_admin')
+             ->name('valider');
+        Route::post('/{facture}/rejeter', [FactureController::class, 'rejeter'])
+             ->middleware('role:comptable,admin,super_admin')
+             ->name('rejeter');
+    });
+
+    // Écritures
+    Route::get('/ecritures', [EcritureController::class, 'index'])->name('ecritures.index');
+    Route::get('/ecritures/{facture}', [EcritureController::class, 'show'])->name('ecritures.show');
+
+    // Exports
+    Route::get('/export/xlsx', [ExportController::class, 'xlsx'])->name('export.xlsx');
+    Route::get('/export/csv', [ExportController::class, 'csv'])->name('export.csv');
+
+    // Abonnement
+    Route::prefix('abonnement')->name('abonnement.')->group(function () {
+        Route::get('/', [AbonnementController::class, 'index'])->name('index');
+        Route::post('/payer', [AbonnementController::class, 'initierPaiement'])->name('payer');
+        Route::get('/succes', [AbonnementController::class, 'succes'])->name('succes');
+        Route::get('/annule', [AbonnementController::class, 'annule'])->name('annule');
+    });
+
+    // Paramètres cabinet (admin uniquement)
+    Route::middleware('role:admin,super_admin')->group(function () {
+        Route::get('/parametres', [SettingsController::class, 'index'])->name('settings.index');
+        Route::put('/parametres', [SettingsController::class, 'update'])->name('settings.update');
+        Route::get('/utilisateurs', [UserController::class, 'index'])->name('users.index');
+        Route::post('/utilisateurs', [UserController::class, 'store'])->name('users.store');
+        Route::put('/utilisateurs/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::delete('/utilisateurs/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+    });
+});
+
+// Zone Super Admin
+Route::middleware(['auth', 'role:super_admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [TenantController::class, 'dashboard'])->name('dashboard');
+    Route::resource('tenants', TenantController::class);
+    Route::post('/tenants/{tenant}/suspendre', [TenantController::class, 'suspendre'])->name('tenants.suspendre');
+    Route::post('/tenants/{tenant}/activer', [TenantController::class, 'activer'])->name('tenants.activer');
+});
+```
+
+### `routes/webhooks.php`
+```php
+<?php
+// Routes webhooks — pas de middleware CSRF ni auth standard
+// Sécurité par signature HMAC uniquement
+
+use App\Http\Controllers\Webhook\N8nCallbackController;
+use App\Http\Controllers\Webhook\FeexPayController;
+use Illuminate\Support\Facades\Route;
+
+// Callback n8n (réseau interne Docker uniquement)
+Route::post('/webhooks/n8n/callback', [N8nCallbackController::class, 'recevoir'])
+     ->name('webhooks.n8n');
+
+// Webhook FeexPay (internet — vérification signature côté FeexPay)
+Route::post('/webhooks/feexpay', [FeexPayController::class, 'callback'])
+     ->name('webhooks.feexpay');
+
+// Webhook CinetPay (optionnel)
+// Route::post('/webhooks/cinetpay', [CinetPayController::class, 'callback']);
+```
+
+---
+
+## 10. JOB DE TRAITEMENT
+
+### `app/Jobs/TraiterFacturePDF.php`
+```php
+<?php
+
+namespace App\Jobs;
+
+use App\Models\Facture;
+use App\Models\TraitementLog;
+use App\Services\N8nService;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+
+class TraiterFacturePDF implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public int $tries   = 3;
+    public int $timeout = 300; // 5 minutes max
+
+    public function __construct(private Facture $facture) {}
+
+    public function handle(N8nService $n8n): void
+    {
+        Log::info("TraiterFacturePDF: début", ['facture_id' => $this->facture->id]);
+
+        $succes = $n8n->declencherTraitement($this->facture);
+
+        if (!$succes) {
+            TraitementLog::create([
+                'facture_id' => $this->facture->id,
+                'etape'      => 'upload',
+                'statut'     => 'erreur',
+                'message'    => 'Impossible de contacter n8n — nouvelle tentative dans 1 minute',
+            ]);
+
+            $this->release(60); // Retry après 60 secondes
+        }
+    }
+
+    public function failed(\Throwable $e): void
+    {
+        $this->facture->update(['statut' => 'erreur']);
+
+        TraitementLog::create([
+            'facture_id' => $this->facture->id,
+            'etape'      => 'upload',
+            'statut'     => 'erreur',
+            'message'    => "Échec définitif: {$e->getMessage()}",
+        ]);
+
+        Log::error("TraiterFacturePDF: échec définitif", [
+            'facture_id' => $this->facture->id,
+            'error'      => $e->getMessage(),
+        ]);
+    }
+}
+```
+
+---
+
+## 11. SEEDER — PLAN COMPTABLE SYSCOHADA
+
+```php
+<?php
+// database/seeders/CompteComptableSeeder.php
+
+namespace Database\Seeders;
+
+use App\Models\CompteComptable;
+use Illuminate\Database\Seeder;
+
+class CompteComptableSeeder extends Seeder
+{
+    /**
+     * Plan comptable SYSCOHADA Révisé — comptes utilisés par l'application.
+     * Source : PLAN_COMPTABLE_SYSCOHADA_REVISE.xlsx
+     */
+    public function run(): void
+    {
+        $comptes = [
+            // CLASSE 1 — RESSOURCES DURABLES
+            ['numero' => '101',  'libelle' => 'Capital social',                              'classe' => '1', 'nature' => 'passif'],
+            // CLASSE 4 — COMPTES DE TIERS (fiscaux Bénin)
+            ['numero' => '4011', 'libelle' => 'Fournisseurs',                                'classe' => '4', 'nature' => 'passif'],
+            ['numero' => '4012', 'libelle' => 'Fournisseurs Groupe',                         'classe' => '4', 'nature' => 'passif'],
+            ['numero' => '4013', 'libelle' => 'Fournisseurs sous-traitants',                 'classe' => '4', 'nature' => 'passif'],
+            ['numero' => '4111', 'libelle' => 'Clients',                                     'classe' => '4', 'nature' => 'actif'],
+            ['numero' => '4112', 'libelle' => 'Clients - Groupe',                            'classe' => '4', 'nature' => 'actif'],
+            ['numero' => '4114', 'libelle' => 'Clients, État et Collectivités publiques',    'classe' => '4', 'nature' => 'actif'],
+            ['numero' => '4431', 'libelle' => 'T.V.A. facturée sur ventes',                 'classe' => '4', 'nature' => 'passif'],
+            ['numero' => '4432', 'libelle' => 'T.V.A. facturée sur prestations de services','classe' => '4', 'nature' => 'passif'],
+            ['numero' => '4433', 'libelle' => 'T.V.A. facturée sur travaux',                'classe' => '4', 'nature' => 'passif'],
+            ['numero' => '4441', 'libelle' => 'État, T.V.A. due',                           'classe' => '4', 'nature' => 'passif'],
+            ['numero' => '4449', 'libelle' => 'État, crédit de T.V.A. à reporter',          'classe' => '4', 'nature' => 'actif'],
+            ['numero' => '4451', 'libelle' => 'T.V.A. récupérable sur immobilisations',     'classe' => '4', 'nature' => 'actif'],
+            ['numero' => '4452', 'libelle' => 'T.V.A. récupérable sur achats',              'classe' => '4', 'nature' => 'actif'],
+            ['numero' => '4453', 'libelle' => 'T.V.A. récupérable sur transport',           'classe' => '4', 'nature' => 'actif'],
+            ['numero' => '4454', 'libelle' => 'T.V.A. récupérable sur services extérieurs', 'classe' => '4', 'nature' => 'actif'],
+            ['numero' => '4455', 'libelle' => 'T.V.A. récupérable sur factures non parvenues','classe' => '4','nature' => 'actif'],
+            // Fiscalité spécifique Bénin
+            ['numero' => '44593','libelle' => 'AIB à récupérer 1%',                         'classe' => '4', 'nature' => 'actif'],
+            ['numero' => '4472', 'libelle' => 'AIB collecté 1%',                            'classe' => '4', 'nature' => 'passif'],
+            ['numero' => '4473', 'libelle' => 'RIRF à récupérer',                           'classe' => '4', 'nature' => 'actif'],
+            ['numero' => '4811', 'libelle' => 'Fournisseurs d\'investissement, immob. incorporelles','classe' => '4','nature' => 'passif'],
+            ['numero' => '4812', 'libelle' => 'Fournisseurs d\'investissement, immob. corporelles','classe' => '4','nature' => 'passif'],
+            // CLASSE 5 — TRÉSORERIE
+            ['numero' => '5211', 'libelle' => 'Banques en monnaie nationale',               'classe' => '5', 'nature' => 'actif'],
+            ['numero' => '5215', 'libelle' => 'Banques en devises',                         'classe' => '5', 'nature' => 'actif'],
+            ['numero' => '5311', 'libelle' => 'Établissements financiers (Mobile Money)',   'classe' => '5', 'nature' => 'actif'],
+            ['numero' => '5731', 'libelle' => 'Monnaie électronique',                       'classe' => '5', 'nature' => 'actif'],
+            ['numero' => '5711', 'libelle' => 'Caisse en monnaie nationale',                'classe' => '5', 'nature' => 'actif'],
+            ['numero' => '5712', 'libelle' => 'Caisse en devises',                         'classe' => '5', 'nature' => 'actif'],
+            // CLASSE 6 — CHARGES
+            ['numero' => '6011', 'libelle' => 'Achats de marchandises dans la Région',      'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6012', 'libelle' => 'Achats de marchandises hors Région',         'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6021', 'libelle' => 'Achats de matières premières dans la Région','classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6031', 'libelle' => 'Variations des stocks de marchandises',      'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6041', 'libelle' => 'Matières consommables',                      'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6051', 'libelle' => 'Fournitures non stockables — Eau',           'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6052', 'libelle' => 'Fournitures non stockables — Électricité',   'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6053', 'libelle' => 'Fournitures non stockables — Autres énergies','classe' => '6','nature' => 'charge'],
+            ['numero' => '6057', 'libelle' => 'Achats d\'études et prestations de services','classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6181', 'libelle' => 'Transports — Voyages et déplacements',       'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6221', 'libelle' => 'Locations de terrains',                      'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6222', 'libelle' => 'Locations de bâtiments',                     'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6228', 'libelle' => 'Locations et charges locatives diverses',    'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6241', 'libelle' => 'Entretien et réparations — biens immobiliers','classe' => '6','nature' => 'charge'],
+            ['numero' => '6242', 'libelle' => 'Entretien et réparations — biens mobiliers', 'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6251', 'libelle' => 'Assurances multirisques',                    'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6271', 'libelle' => 'Publicité — Annonces et insertions',         'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6281', 'libelle' => 'Frais de téléphone',                         'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6288', 'libelle' => 'Autres frais de télécommunications',         'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6311', 'libelle' => 'Frais bancaires sur titres',                 'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6317', 'libelle' => 'Frais sur instruments monnaie électronique', 'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6318', 'libelle' => 'Autres frais bancaires',                     'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6324', 'libelle' => 'Honoraires des professions règlementées',    'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6351', 'libelle' => 'Cotisations',                                'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6383', 'libelle' => 'Réceptions',                                 'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6384', 'libelle' => 'Missions',                                   'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6411', 'libelle' => 'Impôts fonciers et taxes annexes',           'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6413', 'libelle' => 'Taxes sur appointements et salaires',        'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6418', 'libelle' => 'Autres impôts et taxes directs',             'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6611', 'libelle' => 'Appointements, salaires et commissions',     'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6641', 'libelle' => 'Charges sociales — personnel national',      'classe' => '6', 'nature' => 'charge'],
+            ['numero' => '6812', 'libelle' => 'Dotations aux amortissements — immob. incorporelles','classe' => '6','nature' => 'charge'],
+            ['numero' => '6813', 'libelle' => 'Dotations aux amortissements — immob. corporelles','classe' => '6','nature' => 'charge'],
+            // CLASSE 7 — PRODUITS
+            ['numero' => '7011', 'libelle' => 'Ventes de marchandises dans la Région',      'classe' => '7', 'nature' => 'produit'],
+            ['numero' => '7012', 'libelle' => 'Ventes de marchandises hors Région',         'classe' => '7', 'nature' => 'produit'],
+            ['numero' => '7021', 'libelle' => 'Ventes de produits finis dans la Région',    'classe' => '7', 'nature' => 'produit'],
+            ['numero' => '7061', 'libelle' => 'Prestations de services',                    'classe' => '7', 'nature' => 'produit'],
+            ['numero' => '7071', 'libelle' => 'Produits des activités annexes',             'classe' => '7', 'nature' => 'produit'],
+        ];
+
+        foreach ($comptes as $compte) {
+            CompteComptable::updateOrCreate(
+                ['tenant_id' => null, 'numero' => $compte['numero']],
+                $compte
+            );
+        }
+
+        $this->command->info(count($comptes) . ' comptes SYSCOHADA initialisés.');
+    }
+}
+```
+
+---
+
+## 12. PIPELINE CI/CD GITHUB ACTIONS
+
+### `.github/workflows/ci.yml` — Tests et qualité
+```yaml
+name: CI — Tests & Qualité
+
+on:
+  push:
+    branches: [main, develop, 'feature/**']
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  tests:
+    name: Tests PHP + Laravel
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: compta_test
+          POSTGRES_USER: compta_user
+          POSTGRES_PASSWORD: secret
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo, pdo_pgsql, redis, mbstring, bcmath, zip, gd
+          coverage: xdebug
+
+      - name: Cache Composer
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install & build assets
+        run: npm ci && npm run build
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env.testing
+          php artisan key:generate --env=testing
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: compta_test
+          DB_USERNAME: compta_user
+          DB_PASSWORD: secret
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6379
+
+      - name: Run migrations
+        run: php artisan migrate --env=testing --force
+
+      - name: Seed plan comptable
+        run: php artisan db:seed --class=CompteComptableSeeder --env=testing
+
+      - name: Run tests
+        run: php artisan test --coverage --min=70
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: compta_test
+          DB_USERNAME: compta_user
+          DB_PASSWORD: secret
+
+      - name: Code style (Pint)
+        run: vendor/bin/pint --test
+
+      - name: Static analysis (PHPStan)
+        run: vendor/bin/phpstan analyse --level=5
+
+  docker-build:
+    name: Build Docker image
+    runs-on: ubuntu-latest
+    needs: tests
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t compta-saas:${{ github.sha }} .
+
+      - name: Test Docker image
+        run: |
+          docker run --rm compta-saas:${{ github.sha }} php -v
+          docker run --rm compta-saas:${{ github.sha }} php artisan --version
+```
+
+### `.github/workflows/deploy.yml` — Déploiement production
+```yaml
+name: Deploy — Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Forcer le déploiement'
+        type: boolean
+        default: false
+
+jobs:
+  deploy:
+    name: Déployer sur VPS
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host:     ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key:      ${{ secrets.VPS_SSH_KEY }}
+          port:     ${{ secrets.VPS_PORT || 22 }}
+          script: |
+            set -e
+
+            echo "=== Mise à jour du code ==="
+            cd /opt/compta-saas
+            git pull origin main
+
+            echo "=== Build & Push image ==="
+            docker build -t compta-saas:latest .
+
+            echo "=== Maintenance ON ==="
+            docker compose exec app php artisan down --retry=5
+
+            echo "=== Mise à jour dépendances ==="
+            docker compose run --rm app composer install \
+              --no-dev --optimize-autoloader --no-interaction
+
+            echo "=== Build assets ==="
+            docker compose run --rm app npm ci
+            docker compose run --rm app npm run build
+
+            echo "=== Migrations ==="
+            docker compose run --rm app php artisan migrate --force
+
+            echo "=== Cache ==="
+            docker compose run --rm app php artisan config:cache
+            docker compose run --rm app php artisan route:cache
+            docker compose run --rm app php artisan view:cache
+            docker compose run --rm app php artisan event:cache
+
+            echo "=== Redémarrage services ==="
+            docker compose up -d --build app nginx horizon
+
+            echo "=== Maintenance OFF ==="
+            docker compose exec app php artisan up
+
+            echo "=== Health check ==="
+            sleep 5
+            curl -f http://localhost/health || exit 1
+
+            echo "=== Déploiement terminé ==="
+
+      - name: Notify success
+        if: success()
+        run: echo "✅ Déploiement production réussi — $(date)"
+
+      - name: Notify failure
+        if: failure()
+        run: echo "❌ Déploiement ÉCHOUÉ — voir logs GitHub Actions"
+```
+
+---
+
+## 13. VARIABLES D'ENVIRONNEMENT
+
+### `.env.example`
+```env
+APP_NAME="ComptaSaaS"
+APP_ENV=production
+APP_KEY=
+APP_DEBUG=false
+APP_URL=https://tonapp.com
+
+# Base de données PostgreSQL
+DB_CONNECTION=pgsql
+DB_HOST=postgres
+DB_PORT=5432
+DB_DATABASE=compta_saas
+DB_USERNAME=compta_user
+DB_PASSWORD=mot_de_passe_fort
+
+# Redis
+REDIS_HOST=redis
+REDIS_PASSWORD=redis_secret
+REDIS_PORT=6379
+
+# Queue
+QUEUE_CONNECTION=redis
+HORIZON_PREFIX=compta_
+
+# MinIO (stockage PDF)
+AWS_ACCESS_KEY_ID=minioadmin
+AWS_SECRET_ACCESS_KEY=minioadmin123
+AWS_DEFAULT_REGION=us-east-1
+AWS_BUCKET=compta-factures
+AWS_ENDPOINT=http://minio:9000
+AWS_USE_PATH_STYLE_ENDPOINT=true
+
+# n8n (réseau interne Docker uniquement)
+N8N_WEBHOOK_URL=http://n8n:5678/webhook/traiter-facture
+N8N_SECRET=une_cle_hmac_tres_longue_et_aleatoire
+N8N_CALLBACK_URL=http://app:9000
+
+# APIs IA
+MISTRAL_API_KEY=
+OPENAI_API_KEY=
+
+# FeexPay
+FEEXPAY_TOKEN=
+FEEXPAY_CALLBACK_URL=https://tonapp.com/webhooks/feexpay
+
+# CinetPay (optionnel)
+CINETPAY_API_KEY=
+CINETPAY_SITE_ID=
+
+# Mail
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=587
+MAIL_USERNAME=
+MAIL_PASSWORD=
+MAIL_FROM_ADDRESS=noreply@tonapp.com
+MAIL_FROM_NAME="ComptaSaaS"
+
+# Google Sheets (OAuth2 global — chaque tenant a son propre token en BDD)
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+```
+
+---
+
+## 14. SEEDER PLANS
+
+```php
+<?php
+// database/seeders/PlanSeeder.php
+
+namespace Database\Seeders;
+
+use App\Models\Plan;
+use Illuminate\Database\Seeder;
+
+class PlanSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $plans = [
+            [
+                'nom'                => 'Trial',
+                'slug'               => 'trial',
+                'prix_mensuel_xof'   => 0,
+                'quota_factures'     => 10,
+                'quota_users'        => 1,
+                'export_xlsx'        => false,
+                'google_sheets'      => false,
+                'api_access'         => false,
+                'actif'              => true,
+                'ordre'              => 0,
+            ],
+            [
+                'nom'                => 'Starter',
+                'slug'               => 'starter',
+                'prix_mensuel_xof'   => 15000,
+                'quota_factures'     => 50,
+                'quota_users'        => 2,
+                'export_xlsx'        => true,
+                'google_sheets'      => false,
+                'api_access'         => false,
+                'actif'              => true,
+                'ordre'              => 1,
+            ],
+            [
+                'nom'                => 'Pro',
+                'slug'               => 'pro',
+                'prix_mensuel_xof'   => 35000,
+                'quota_factures'     => 300,
+                'quota_users'        => 5,
+                'export_xlsx'        => true,
+                'google_sheets'      => true,
+                'api_access'         => false,
+                'actif'              => true,
+                'ordre'              => 2,
+            ],
+            [
+                'nom'                => 'Cabinet+',
+                'slug'               => 'cabinet',
+                'prix_mensuel_xof'   => 75000,
+                'quota_factures'     => 9999,
+                'quota_users'        => 99,
+                'export_xlsx'        => true,
+                'google_sheets'      => true,
+                'api_access'         => true,
+                'actif'              => true,
+                'ordre'              => 3,
+            ],
+        ];
+
+        foreach ($plans as $plan) {
+            Plan::updateOrCreate(['slug' => $plan['slug']], $plan);
+        }
+    }
+}
+```
+
+---
+
+## 15. COMMANDE CRON — EXPIRATION ABONNEMENTS
+
+```php
+<?php
+// app/Console/Commands/ExpireSubscriptions.php
+
+namespace App\Console\Commands;
+
+use App\Models\Tenant;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Mail;
+
+class ExpireSubscriptions extends Command
+{
+    protected $signature   = 'abonnements:expirer';
+    protected $description = 'Expire les abonnements arrivés à échéance et envoie les rappels';
+
+    public function handle(): void
+    {
+        // 1. Expirer les abonnements dépassés
+        $expires = Tenant::where('statut', 'actif')
+            ->where('abonnement_expire_le', '<', now())
+            ->get();
+
+        foreach ($expires as $tenant) {
+            $tenant->update(['statut' => 'expire']);
+            $this->info("Expiré: {$tenant->nom}");
+        }
+
+        $this->info("{$expires->count()} abonnement(s) expiré(s).");
+
+        // 2. Rappels J-3
+        $bientotExpires = Tenant::where('statut', 'actif')
+            ->whereBetween('abonnement_expire_le', [now(), now()->addDays(3)])
+            ->get();
+
+        foreach ($bientotExpires as $tenant) {
+            // Mail::to($tenant->email_contact)->send(new RappelAbonnementMail($tenant));
+            $this->info("Rappel envoyé: {$tenant->nom}");
+        }
+    }
+}
+```
+
+### Enregistrer dans `routes/console.php` ou `app/Console/Kernel.php` :
+```php
+// Dans bootstrap/app.php (Laravel 11)
+->withSchedule(function (Schedule $schedule) {
+    $schedule->command('abonnements:expirer')->dailyAt('00:00');
+    $schedule->command('horizon:snapshot')->everyFiveMinutes();
+})
+```
+
+---
+
+## 16. CONFIGURATION — `config/services.php` (compléter)
+
+```php
+<?php
+
+return [
+    // ... services existants ...
+
+    'n8n' => [
+        'webhook_url'  => env('N8N_WEBHOOK_URL', 'http://n8n:5678/webhook/traiter-facture'),
+        'secret'       => env('N8N_SECRET'),
+        'callback_url' => env('N8N_CALLBACK_URL', 'http://app:9000'),
+    ],
+
+    'feexpay' => [
+        'token'        => env('FEEXPAY_TOKEN'),
+        'callback_url' => env('FEEXPAY_CALLBACK_URL'),
+    ],
+
+    'cinetpay' => [
+        'api_key' => env('CINETPAY_API_KEY'),
+        'site_id' => env('CINETPAY_SITE_ID'),
+    ],
+
+    'mistral' => [
+        'api_key' => env('MISTRAL_API_KEY'),
+        'model'   => 'mistral-ocr-latest',
+    ],
+
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+        'model'   => 'gpt-4o-mini',
+    ],
+];
+```
+
+---
+
+## 17. ORDRE D'IMPLÉMENTATION RECOMMANDÉ
+
+Implémente dans cet ordre exact pour avoir quelque chose de fonctionnel à chaque étape :
+
+```
+Phase 1 — Infrastructure (Semaine 1)
+  ✅ docker-compose.yml complet
+  ✅ Dockerfile PHP 8.3
+  ✅ Nginx config
+  ✅ Laravel 11 fresh install
+  ✅ Toutes les migrations
+  ✅ Seeders (Plans + Comptes SYSCOHADA)
+
+Phase 2 — Auth & Multitenant (Semaine 1-2)
+  ✅ Modèles (Tenant, User, Plan, Abonnement)
+  ✅ LoginController + middleware Auth
+  ✅ Middleware CheckSubscription + CheckQuota + RoleMiddleware
+  ✅ Routes web.php + webhooks.php
+  ✅ Vues auth (login, forgot password)
+
+Phase 3 — Upload & Pipeline (Semaine 2-3)
+  ✅ MiniOService (upload, URL signée)
+  ✅ FactureController (upload, store)
+  ✅ Job TraiterFacturePDF
+  ✅ N8nService (déclencher + vérifier signature)
+  ✅ N8nCallbackController (recevoir résultats)
+  ✅ Vue upload avec progression SSE
+
+Phase 4 — SYSCOHADA & Validation (Semaine 3)
+  ✅ SYSCOHADAService (genererEcritures)
+  ✅ Vue revue facture (formulaire correction)
+  ✅ FactureController::valider() / rejeter()
+  ✅ Vue journal d'écritures
+
+Phase 5 — Abonnements (Semaine 4)
+  ✅ FeexPayService
+  ✅ AbonnementController
+  ✅ FeexPayController (webhook)
+  ✅ Command ExpireSubscriptions
+  ✅ Vue page abonnement
+
+Phase 6 — Dashboard & Exports (Semaine 4-5)
+  ✅ DashboardController (KPIs)
+  ✅ ExportController (XLSX, CSV)
+  ✅ GoogleSheetsService (optionnel)
+  ✅ Vues dashboard + historique
+
+Phase 7 — Super Admin (Semaine 5)
+  ✅ TenantController (admin global)
+  ✅ Vues admin tenants
+
+Phase 8 — CI/CD & Déploiement (Semaine 6)
+  ✅ GitHub Actions CI (tests)
+  ✅ GitHub Actions Deploy (VPS SSH)
+  ✅ Tests Feature PHPUnit
+  ✅ Monitoring Horizon
+```
+
+---
+
+## 18. TESTS À ÉCRIRE
+
+```php
+// tests/Feature/FactureUploadTest.php
+// → Teste upload PDF → vérification quota → dispatch job → callback n8n → validation
+
+// tests/Feature/MultitenantIsolationTest.php
+// → Vérifie qu'un user du Tenant A ne peut PAS accéder aux factures du Tenant B
+// → Test cross-tenant = 403 obligatoire
+
+// tests/Feature/SYSCOHADAEcrituresTest.php
+// → VENTE régime B → écritures 4111 + 7011 + 4431 équilibrées
+// → VENTE régime D → pas de TVA, compte 7011 uniquement
+// → ACHAT avec AIB → débit 44593 présent
+// → Paiement espèces < 100k → compte 5711
+// → Paiement virement ≥ 100k → compte 5211
+// → Paiement mobile money → compte 5731
+
+// tests/Feature/AbonnementTest.php
+// → Webhook FeexPay SUCCESSFUL → tenant activé, quota mis à jour
+// → Webhook FeexPay FAILED → tenant inchangé
+// → Commande expirer → tenant statut = expire
+```
+
+---
+
+## 19. RÈGLES MÉTIER CRITIQUES À RESPECTER
+
+```
+RÈGLE 1 — Isolation tenant
+  → CHAQUE requête SQL sur factures/ecritures/users DOIT filtrer par tenant_id
+  → Ne JAMAIS faire Facture::all() sans ->where('tenant_id', ...)
+  → Tester avec deux tenants en parallèle
+
+RÈGLE 2 — Signature HMAC n8n
+  → Tous les appels backend→n8n : Header X-N8N-Secret = hmac_sha256(payload, SECRET)
+  → Tous les callbacks n8n→backend : vérifier la signature avant tout traitement
+  → Refus 403 si signature invalide ou absente
+
+RÈGLE 3 — URLs PDF signées uniquement
+  → Jamais de URL publique permanente pour un PDF
+  → Toujours générer une URL signée MinIO (15 min pour n8n, 1h pour UI)
+  → Stocker uniquement le chemin relatif en BDD
+
+RÈGLE 4 — Équilibre SYSCOHADA
+  → TOUTE écriture doit être équilibrée : Σ débit = Σ crédit
+  → Tester estEquilibree() avant validation
+  → Bloquer la validation si déséquilibre
+
+RÈGLE 5 — Fiscalité Bénin
+  → Régime B (18% TVA) → compte 4431 obligatoire en vente, 4452 en achat
+  → Régime D (exonéré)  → AUCUNE ligne TVA
+  → AIB 1% → 4472 crédit vente / 44593 débit achat
+  → RIRF → 4473 débit vente
+  → Règlement : < 100k FCFA = caisse 5711, ≥ 100k = banque 5211, mobile = 5731
+
+RÈGLE 6 — n8n invisible
+  → Port n8n JAMAIS exposé dans docker-compose.yml
+  → L'URL n8n JAMAIS retournée au frontend
+  → Seul le backend connaît N8N_WEBHOOK_URL
+```
+
+---
+
+
