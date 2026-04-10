@@ -72,7 +72,13 @@
             </form>
         </div>
 
-        <p class="text-center text-blue-200 text-xs mt-6">
+        <p class="text-center text-blue-200 text-sm mt-6">
+            Pas encore de compte ?
+            <a href="{{ route('register') }}" class="text-white font-semibold hover:underline">
+                S'inscrire gratuitement →
+            </a>
+        </p>
+        <p class="text-center text-blue-300 text-xs mt-3">
             eCompta360 © {{ date('Y') }} — SYSCOHADA Révisé — Zone UEMOA/OHADA
         </p>
     </div>

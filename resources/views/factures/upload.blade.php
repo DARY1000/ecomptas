@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Uploader des factures')
+@section('page-title', 'Uploader des factures')
 
 @section('content')
 <div class="max-w-2xl mx-auto space-y-5">

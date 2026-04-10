@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Paramètres du cabinet')
+@section('page-title', 'Paramètres du cabinet')
 
 @section('content')
 <div class="max-w-2xl mx-auto space-y-5">

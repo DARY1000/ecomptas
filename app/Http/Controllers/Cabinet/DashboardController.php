@@ -11,7 +11,13 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $user     = auth()->user();
+        $user = auth()->user();
+
+        // Le super_admin n'a pas de cabinet — rediriger vers son espace dédié
+        if ($user->isSuperAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+
         $tenant   = $user->tenant;
         $tenantId = $user->tenant_id;
 
