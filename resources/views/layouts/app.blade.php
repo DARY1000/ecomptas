@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Tableau de bord') — ComptaSaaS</title>
+    <title>@yield('title', 'Tableau de bord') — eCompta360</title>
 
     {{-- Tailwind CSS via CDN Play — pas de npm/vite sur Hostinger mutualisé --}}
     <script src="https://cdn.tailwindcss.com"></script>
@@ -41,8 +41,8 @@
                 {{-- Logo + Nom cabinet --}}
                 <div class="flex items-center gap-4">
                     <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
-                        <div class="w-8 h-8 bg-blue-400 rounded-lg flex items-center justify-center font-bold text-sm">C</div>
-                        <span class="font-bold text-lg hidden sm:block">ComptaSaaS</span>
+                        <div class="w-8 h-8 bg-blue-400 rounded-lg flex items-center justify-center font-bold text-sm">e</div>
+                        <span class="font-bold text-lg hidden sm:block">eCompta360</span>
                     </a>
                     @if(auth()->user()?->tenant)
                         <span class="text-blue-300 text-sm hidden md:block">
@@ -169,7 +169,7 @@
 
     {{-- ══ FOOTER ══════════════════════════════════════════════════════ --}}
     <footer class="bg-white border-t border-gray-100 py-3 text-center text-xs text-gray-400">
-        ComptaSaaS — SYSCOHADA Révisé — Bénin &copy; {{ date('Y') }}
+        eCompta360 — Comptabilité Intelligente &copy; {{ date('Y') }}
     </footer>
 
     {{-- ══ POLLING JS — mise à jour statut factures ════════════════════ --}}

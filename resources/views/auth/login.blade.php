@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion — ComptaSaaS</title>
+    <title>Connexion — eCompta360</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gradient-to-br from-blue-900 to-blue-700 min-h-screen flex items-center justify-center p-4">
@@ -12,10 +12,10 @@
         {{-- Logo --}}
         <div class="text-center mb-8">
             <div class="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl shadow-lg mb-4">
-                <span class="text-blue-900 font-black text-2xl">C</span>
+                <span class="text-blue-900 font-black text-2xl">e</span>
             </div>
-            <h1 class="text-white text-2xl font-bold">ComptaSaaS</h1>
-            <p class="text-blue-200 text-sm mt-1">Comptabilité SYSCOHADA — Bénin</p>
+            <h1 class="text-white text-2xl font-bold">eCompta360</h1>
+            <p class="text-blue-200 text-sm mt-1">Comptabilité Intelligente</p>
         </div>
 
         {{-- Formulaire --}}
@@ -73,7 +73,7 @@
         </div>
 
         <p class="text-center text-blue-200 text-xs mt-6">
-            ComptaSaaS © {{ date('Y') }} — SYSCOHADA Révisé — Zone UEMOA/OHADA
+            eCompta360 © {{ date('Y') }} — SYSCOHADA Révisé — Zone UEMOA/OHADA
         </p>
     </div>
 </body>

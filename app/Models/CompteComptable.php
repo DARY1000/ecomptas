@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class CompteComptable extends Model
 {
+    protected $table = 'comptes_comptables';
+
     protected $fillable = [
         'tenant_id', 'numero', 'libelle', 'classe', 'nature', 'actif',
     ];

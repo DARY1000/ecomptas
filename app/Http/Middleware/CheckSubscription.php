@@ -34,7 +34,7 @@ class CheckSubscription
 
             return redirect()
                 ->route('abonnement.index')
-                ->withErrors(['abonnement' => 'Votre abonnement est expiré. Renouvelez pour continuer à utiliser ComptaSaaS.']);
+                ->withErrors(['abonnement' => 'Votre abonnement est expiré. Renouvelez pour continuer à utiliser eCompta360.']);
         }
 
         return $next($request);

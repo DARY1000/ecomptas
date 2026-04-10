@@ -9,7 +9,7 @@
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Tableau de bord</h1>
             <p class="text-gray-500 text-sm mt-1">
-                {{ $tenant->nom }} — {{ now()->translatedFormat('F Y') }}
+                {{ $tenant->nom ?? 'eCompta360' }} — {{ now()->translatedFormat('F Y') }}
             </p>
         </div>
         @if(!auth()->user()->estAuditeur())
@@ -37,9 +37,9 @@
                 </div>
             </div>
             <div class="text-3xl font-bold text-gray-900">{{ $facturesCeMois }}</div>
-            <div class="text-xs text-gray-400 mt-1">/ {{ $tenant->quota_factures_mensuel }} autorisées</div>
+            <div class="text-xs text-gray-400 mt-1">/ {{ $tenant->quota_factures_mensuel ?? '∞' }} autorisées</div>
             {{-- Barre de progression quota --}}
-            @php $pct = $tenant->quota_factures_mensuel > 0 ? min(100, round($facturesCeMois / $tenant->quota_factures_mensuel * 100)) : 0; @endphp
+            @php $pct = ($tenant?->quota_factures_mensuel > 0) ? min(100, round($facturesCeMois / $tenant->quota_factures_mensuel * 100)) : 0; @endphp
             <div class="mt-3 w-full bg-gray-100 rounded-full h-1.5">
                 <div class="h-1.5 rounded-full {{ $pct >= 80 ? 'bg-yellow-500' : 'bg-blue-500' }}"
                      style="width: {{ $pct }}%"></div>
