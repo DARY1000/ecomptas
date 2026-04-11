@@ -22,16 +22,17 @@ class PlanController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nom'              => 'required|string|max:100',
-            'slug'             => 'required|string|max:50|unique:plans,slug',
-            'prix_mensuel_xof' => 'required|integer|min:0',
-            'quota_factures'   => 'required|integer|min:1',
-            'quota_users'      => 'required|integer|min:1',
-            'export_xlsx'      => 'boolean',
-            'google_sheets'    => 'boolean',
-            'api_access'       => 'boolean',
-            'actif'            => 'boolean',
-            'ordre'            => 'required|integer|min:0',
+            'nom'               => 'required|string|max:100',
+            'slug'              => 'required|string|max:50|unique:plans,slug',
+            'prix_mensuel_xof'  => 'required|integer|min:0',
+            'quota_factures'    => 'required|integer|min:1',
+            'quota_users'       => 'required|integer|min:1',
+            'duree_essai_jours' => 'nullable|integer|min:0',
+            'export_xlsx'       => 'boolean',
+            'google_sheets'     => 'boolean',
+            'api_access'        => 'boolean',
+            'actif'             => 'boolean',
+            'ordre'             => 'required|integer|min:0',
         ]);
 
         $validated['export_xlsx']   = $request->boolean('export_xlsx');
@@ -53,15 +54,16 @@ class PlanController extends Controller
     public function update(Request $request, Plan $plan)
     {
         $validated = $request->validate([
-            'nom'              => 'required|string|max:100',
-            'prix_mensuel_xof' => 'required|integer|min:0',
-            'quota_factures'   => 'required|integer|min:1',
-            'quota_users'      => 'required|integer|min:1',
-            'export_xlsx'      => 'boolean',
-            'google_sheets'    => 'boolean',
-            'api_access'       => 'boolean',
-            'actif'            => 'boolean',
-            'ordre'            => 'required|integer|min:0',
+            'nom'               => 'required|string|max:100',
+            'prix_mensuel_xof'  => 'required|integer|min:0',
+            'quota_factures'    => 'required|integer|min:1',
+            'quota_users'       => 'required|integer|min:1',
+            'duree_essai_jours' => 'nullable|integer|min:0',
+            'export_xlsx'       => 'boolean',
+            'google_sheets'     => 'boolean',
+            'api_access'        => 'boolean',
+            'actif'             => 'boolean',
+            'ordre'             => 'required|integer|min:0',
         ]);
 
         $validated['export_xlsx']   = $request->boolean('export_xlsx');

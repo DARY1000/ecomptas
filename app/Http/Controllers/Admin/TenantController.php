@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Abonnement;
 use App\Models\Facture;
 use App\Models\Plan;
 use App\Models\Tenant;
@@ -24,6 +25,7 @@ class TenantController extends Controller
     {
         $totalTenants    = Tenant::count();
         $tenantsActifs   = Tenant::where('statut', 'actif')->count();
+        $tenantsTrial    = Tenant::where('statut', 'trial')->count();
         $totalUsers      = User::count();
         $facturesTotales = Facture::count();
         $facturesCeMois  = Facture::whereMonth('created_at', now()->month)
@@ -35,6 +37,9 @@ class TenantController extends Controller
             ->join('plans', 'tenants.plan', '=', 'plans.slug')
             ->sum('plans.prix_mensuel_xof');
 
+        // Revenu total cumulé (abonnements actifs)
+        $revenuTotal = Abonnement::where('statut', 'actif')->sum('montant_xof');
+
         $repartitionPlans = Tenant::selectRaw('plan, count(*) as total')
             ->groupBy('plan')
             ->pluck('total', 'plan')
@@ -42,10 +47,36 @@ class TenantController extends Controller
 
         $derniersTenants = Tenant::orderByDesc('created_at')->limit(8)->get();
 
+        // Derniers paiements
+        $derniersAbonnements = Abonnement::with(['tenant:id,nom', 'plan:id,nom'])
+            ->where('statut', 'actif')
+            ->orderByDesc('created_at')
+            ->limit(5)
+            ->get();
+
+        // Monitoring IA — ce mois
+        $facturesValidees  = Facture::where('statut', 'valide')
+            ->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count();
+        $facturesEnCours   = Facture::where('statut', 'traitement_en_cours')
+            ->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count();
+        $facturesAValider  = Facture::where('statut', 'a_valider')
+            ->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count();
+        $facturesErreur    = Facture::where('statut', 'erreur')
+            ->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count();
+
+        // Essais expirant dans 7 jours
+        $trialsExpirant = Tenant::where('statut', 'trial')
+            ->whereNotNull('abonnement_expire_le')
+            ->whereBetween('abonnement_expire_le', [now(), now()->addDays(7)])
+            ->orderBy('abonnement_expire_le')
+            ->get();
+
         return view('admin.dashboard', compact(
-            'totalTenants', 'tenantsActifs', 'totalUsers',
-            'facturesTotales', 'facturesCeMois', 'mrr',
-            'repartitionPlans', 'derniersTenants'
+            'totalTenants', 'tenantsActifs', 'tenantsTrial', 'totalUsers',
+            'facturesTotales', 'facturesCeMois', 'mrr', 'revenuTotal',
+            'repartitionPlans', 'derniersTenants', 'derniersAbonnements',
+            'facturesValidees', 'facturesEnCours', 'facturesAValider', 'facturesErreur',
+            'trialsExpirant'
         ));
     }
 

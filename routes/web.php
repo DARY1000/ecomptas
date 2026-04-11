@@ -12,6 +12,8 @@ use App\Http\Controllers\Cabinet\UserController;
 use App\Http\Controllers\Cabinet\SettingsController;
 use App\Http\Controllers\Admin\TenantController;
 use App\Http\Controllers\Admin\PlanController;
+use App\Http\Controllers\Admin\AbonnementAdminController;
+use App\Http\Controllers\Admin\MonitoringController;
 use Illuminate\Support\Facades\Route;
 
 // ─────────────────────────────────────────────────────────────────────
@@ -107,4 +109,11 @@ Route::middleware(['auth', 'role:super_admin'])
          Route::post('/tenants/{tenant}/activer', [TenantController::class, 'activer'])->name('tenants.activer');
          // Gestion des plans
          Route::resource('plans', PlanController::class)->except(['show']);
+         // Abonnements & paiements
+         Route::get('/abonnements', [AbonnementAdminController::class, 'index'])->name('abonnements.index');
+         // Monitoring IA & quotas
+         Route::get('/monitoring', [MonitoringController::class, 'monitoring'])->name('monitoring');
+         Route::get('/quotas', [MonitoringController::class, 'quotas'])->name('quotas');
+         // Utilisateurs globaux
+         Route::get('/utilisateurs', [MonitoringController::class, 'users'])->name('users.index');
      });

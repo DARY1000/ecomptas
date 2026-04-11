@@ -51,6 +51,13 @@
         <p class="text-xs text-gray-400 mt-1">Mettre 99 pour illimité.</p>
     </div>
 
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Durée essai (jours)</label>
+        <input type="number" name="duree_essai_jours" value="{{ old('duree_essai_jours', $plan->duree_essai_jours ?? 14) }}" min="0"
+               class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+        <p class="text-xs text-gray-400 mt-1">Nombre de jours d'essai gratuit (ex: 14). Mettre 0 pour aucun essai.</p>
+    </div>
+
 </div>
 
 {{-- Options booléennes --}}
