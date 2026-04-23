@@ -186,6 +186,65 @@ class TenantController extends Controller
     }
 
     /**
+     * Formulaire d'édition d'un cabinet.
+     */
+    public function edit(Tenant $tenant)
+    {
+        $plans = Plan::actifs();
+        return view('admin.tenants.edit', compact('tenant', 'plans'));
+    }
+
+    /**
+     * Met à jour les informations d'un cabinet (+ optionnellement le mot de passe admin).
+     */
+    public function update(Request $request, Tenant $tenant)
+    {
+        $validated = $request->validate([
+            'nom'                   => 'required|string|max:150',
+            'email_contact'         => 'nullable|email',
+            'telephone'             => 'nullable|string|max:20',
+            'ifu'                   => 'nullable|string|max:13',
+            'rccm'                  => 'nullable|string|max:50',
+            'regime_fiscal'         => 'required|in:B,D',
+            'plan'                  => 'required|exists:plans,slug',
+            'statut'                => 'required|in:trial,actif,suspendu,expire',
+            'abonnement_expire_le'  => 'nullable|date',
+            'quota_factures_mensuel'=> 'nullable|integer|min:-1',
+            'quota_users'           => 'nullable|integer|min:1',
+            // Admin du cabinet (optionnel)
+            'admin_password'        => 'nullable|min:8',
+        ]);
+
+        // Mettre à jour les quotas selon le plan choisi si non surchargé
+        $plan = Plan::where('slug', $validated['plan'])->firstOrFail();
+        $tenant->update([
+            'nom'                   => $validated['nom'],
+            'email_contact'         => $validated['email_contact'],
+            'telephone'             => $validated['telephone'],
+            'ifu'                   => $validated['ifu'],
+            'rccm'                  => $validated['rccm'] ?? $tenant->rccm,
+            'regime_fiscal'         => $validated['regime_fiscal'],
+            'plan'                  => $validated['plan'],
+            'statut'                => $validated['statut'],
+            'actif'                 => $validated['statut'] === 'actif',
+            'abonnement_expire_le'  => $validated['abonnement_expire_le'],
+            'quota_factures_mensuel'=> $validated['quota_factures_mensuel'] ?? $plan->quota_factures,
+            'quota_users'           => $validated['quota_users'] ?? $plan->quota_users,
+        ]);
+
+        // Changer le mot de passe de l'admin du cabinet si fourni
+        if (!empty($validated['admin_password'])) {
+            $admin = $tenant->users()->where('role', 'admin')->first();
+            if ($admin) {
+                $admin->update(['password' => Hash::make($validated['admin_password'])]);
+            }
+        }
+
+        return redirect()->route('admin.tenants.show', $tenant)
+            ->with('succes', "Cabinet « {$tenant->nom} » mis à jour.");
+    }
+
+    /**
      * Suspend un cabinet (bloque l'accès immédiatement).
      */
     public function suspendre(Tenant $tenant)

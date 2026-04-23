@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\CabinetRegisteredMail;
 use App\Models\Plan;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class RegisterController extends Controller
@@ -54,7 +56,7 @@ class RegisterController extends Controller
             'quota_users'            => $plan->quota_users,
             'statut'                 => 'trial',
             'actif'                  => true,
-            'abonnement_expire_le'   => now()->addDays(30),
+            'abonnement_expire_le'   => now()->addDays($plan->duree_essai_jours ?? 15),
         ]);
 
         // Créer l'utilisateur admin du cabinet
@@ -69,7 +71,15 @@ class RegisterController extends Controller
 
         Auth::login($user);
 
+        // Email de bienvenue
+        try {
+            Mail::to($user->email)->send(new CabinetRegisteredMail($user, $tenant));
+        } catch (\Throwable $e) {
+            // Ne pas bloquer l'inscription si l'email échoue
+            \Illuminate\Support\Facades\Log::warning('Email bienvenue non envoyé : ' . $e->getMessage());
+        }
+
         return redirect()->route('dashboard')
-            ->with('succes', "Bienvenue sur eCompta360 ! Votre période d'essai de 30 jours a démarré.");
+            ->with('succes', "Bienvenue sur eCompta360 ! Votre période d'essai de {$plan->duree_essai_jours} jours a démarré.");
     }
 }

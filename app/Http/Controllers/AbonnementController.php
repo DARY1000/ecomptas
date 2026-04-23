@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\PaiementConfirmeMail;
 use App\Models\Abonnement;
 use App\Models\Plan;
 use App\Services\FeexPayService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class AbonnementController extends Controller
 {
@@ -67,11 +69,22 @@ class AbonnementController extends Controller
      */
     public function succes(Request $request)
     {
-        $tenant = auth()->user()->tenant;
-        $abonnement = Abonnement::where('tenant_id', $tenant->id)
+        $user   = auth()->user();
+        $tenant = $user->tenant;
+        $abonnement = Abonnement::with(['plan', 'tenant'])
+            ->where('tenant_id', $tenant->id)
             ->where('statut', 'actif')
             ->latest()
             ->first();
+
+        // Email de confirmation de paiement
+        if ($abonnement) {
+            try {
+                Mail::to($user->email)->send(new PaiementConfirmeMail($user, $abonnement));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Email paiement non envoyé : ' . $e->getMessage());
+            }
+        }
 
         return view('abonnement.succes', compact('tenant', 'abonnement'));
     }

@@ -8,7 +8,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('plans', function (Blueprint $table) {
-            $table->integer('duree_essai_jours')->default(14)->after('quota_users');
+            $table->integer('duree_essai_jours')->default(15)->after('quota_users');
         });
     }
 

@@ -14,12 +14,18 @@ use App\Http\Controllers\Admin\TenantController;
 use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\AbonnementAdminController;
 use App\Http\Controllers\Admin\MonitoringController;
+use App\Http\Controllers\Admin\AdminSettingsController;
 use Illuminate\Support\Facades\Route;
 
 // ─────────────────────────────────────────────────────────────────────
 // LANDING PAGE PUBLIQUE
 // ─────────────────────────────────────────────────────────────────────
 Route::get('/', [LandingController::class, 'index'])->name('landing');
+
+// Pages légales
+Route::get('/politique-de-confidentialite', fn() => view('legal.privacy'))->name('legal.privacy');
+Route::get('/cookies', fn() => view('legal.cookies'))->name('legal.cookies');
+Route::get('/mentions-legales', fn() => view('legal.mentions'))->name('legal.mentions');
 
 // ─────────────────────────────────────────────────────────────────────
 // AUTHENTIFICATION
@@ -116,4 +122,8 @@ Route::middleware(['auth', 'role:super_admin'])
          Route::get('/quotas', [MonitoringController::class, 'quotas'])->name('quotas');
          // Utilisateurs globaux
          Route::get('/utilisateurs', [MonitoringController::class, 'users'])->name('users.index');
+         // Paramètres admin
+         Route::get('/parametres', [AdminSettingsController::class, 'index'])->name('settings');
+         Route::post('/parametres/logo', [AdminSettingsController::class, 'uploadLogo'])->name('settings.logo');
+         Route::post('/parametres/env', [AdminSettingsController::class, 'updateEnv'])->name('settings.env');
      });
