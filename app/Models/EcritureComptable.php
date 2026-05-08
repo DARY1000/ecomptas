@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EcritureComptable extends Model
 {
+    // Laravel génère 'ecriture_comptables' mais la table s'appelle 'ecritures_comptables'
+    protected $table = 'ecritures_comptables';
+
     protected $fillable = [
         'tenant_id', 'facture_id', 'journal',
         'date_ecriture', 'numero_piece',
