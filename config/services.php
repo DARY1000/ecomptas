@@ -8,8 +8,9 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    // n8n.cloud — Pipeline IA externe (OCR Mistral + Classification GPT-4o-mini)
-    // Pas de n8n local sur Hostinger mutualisé — utiliser n8n.cloud (~20$/mois)
+    // n8n.cloud — LEGACY, non utilisé par le pipeline actuel.
+    // Remplacé par TraiterFacturePDF/TraitementIAService (Mistral + OpenAI en direct, voir ci-dessous).
+    // Conservé au cas où (webhook + callback encore présents dans routes/webhooks.php).
     'n8n' => [
         'webhook_url'  => env('N8N_WEBHOOK_URL', 'https://ton-instance.app.n8n.cloud/webhook/traiter-facture'),
         'api_token'    => env('N8N_API_TOKEN'),
@@ -23,16 +24,17 @@ return [
         'callback_url' => env('FEEXPAY_CALLBACK_URL'),
     ],
 
-    // Mistral AI — OCR des factures PDF (utilisé directement dans n8n.cloud)
+    // Mistral AI — OCR PDF + Vision images (TraitementIAService)
     'mistral' => [
-        'api_key' => env('MISTRAL_API_KEY'),
-        'model'   => 'mistral-ocr-latest',
+        'api_key'       => env('MISTRAL_API_KEY'),
+        'model'         => env('MISTRAL_OCR_MODEL',    'mistral-ocr-latest'),    // OCR PDF
+        'vision_model'  => env('MISTRAL_VISION_MODEL', 'pixtral-large-latest'), // Vision JPG/PNG
     ],
 
-    // OpenAI — Classification et extraction (utilisé directement dans n8n.cloud)
+    // OpenAI — Classification + Extraction + Écritures (GPT-4o function calling)
     'openai' => [
         'api_key' => env('OPENAI_API_KEY'),
-        'model'   => 'gpt-4o-mini',
+        'model'   => env('OPENAI_MODEL', 'gpt-4o'),   // gpt-4o = meilleure précision comptable
     ],
 
     // Google Sheets — Synchronisation des écritures (plan Pro+)

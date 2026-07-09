@@ -10,7 +10,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             PlanSeeder::class,
-            CompteComptableSeeder::class,
+            JournalSeeder::class,          // 7 journaux SYSCOHADA (HA, VE, BQ, CA, OD, AN, SA)
+            CompteComptableSeeder::class,  // ~1416 comptes SYSCOHADA Révisé + Bénin
         ]);
     }
 }

@@ -21,6 +21,11 @@ class UserController extends Controller
         return view('cabinet.users.index', compact('users', 'tenant'));
     }
 
+    public function create()
+    {
+        return view('cabinet.users.create');
+    }
+
     public function store(Request $request)
     {
         $tenant = auth()->user()->tenant;
@@ -50,6 +55,13 @@ class UserController extends Controller
         ]);
 
         return back()->with('succes', "Utilisateur {$validated['name']} créé avec succès.");
+    }
+
+    public function edit(User $user)
+    {
+        abort_unless($user->tenant_id === auth()->user()->tenant_id, 403);
+
+        return view('cabinet.users.edit', compact('user'));
     }
 
     public function update(Request $request, User $user)

@@ -99,7 +99,9 @@ class FactureController extends Controller
         $this->autoriserTenant($facture);
         $facture->load(['ecritures', 'logs', 'uploadePar:id,name', 'validePar:id,name']);
 
-        return view('factures.show', compact('facture'));
+        $pdfToken = $this->genererTokenPdf($facture);
+
+        return view('factures.show', compact('facture', 'pdfToken'));
     }
 
     /**
@@ -212,5 +214,17 @@ class FactureController extends Controller
     private function autoriserTenant(Facture $facture): void
     {
         abort_unless($facture->tenant_id === auth()->user()->tenant_id, 403);
+    }
+
+    /**
+     * Token chiffré pour servir le PDF (valable 30 min) — même format que servirPdf().
+     * RÈGLE 3 : pas d'URL publique directe pour les PDFs.
+     */
+    private function genererTokenPdf(Facture $facture): string
+    {
+        return encrypt([
+            'facture_id' => $facture->id,
+            'expires_at' => now()->addMinutes(30)->timestamp,
+        ]);
     }
 }

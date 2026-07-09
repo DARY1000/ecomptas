@@ -96,7 +96,9 @@ Route::middleware(['auth', 'check.subscription'])->group(function () {
         Route::put('/parametres', [SettingsController::class, 'update'])->name('settings.update');
 
         Route::get('/utilisateurs', [UserController::class, 'index'])->name('users.index');
+        Route::get('/utilisateurs/creer', [UserController::class, 'create'])->name('users.create');
         Route::post('/utilisateurs', [UserController::class, 'store'])->name('users.store');
+        Route::get('/utilisateurs/{user}/modifier', [UserController::class, 'edit'])->name('users.edit');
         Route::put('/utilisateurs/{user}', [UserController::class, 'update'])->name('users.update');
         Route::delete('/utilisateurs/{user}', [UserController::class, 'destroy'])->name('users.destroy');
     });

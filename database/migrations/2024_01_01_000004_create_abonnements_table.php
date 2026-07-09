@@ -15,8 +15,8 @@ return new class extends Migration {
             $table->string('processeur_paiement', 20);      // feexpay|cinetpay
             $table->string('transaction_id')->nullable();
             $table->integer('montant_xof');
-            $table->timestamp('debut_le');
-            $table->timestamp('expire_le');
+            $table->timestamp('debut_le')->nullable();
+            $table->timestamp('expire_le')->nullable();
             // MySQL 8 JSON natif — métadonnées brutes FeexPay
             $table->json('metadata_paiement')->nullable();
             $table->timestamps();

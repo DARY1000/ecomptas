@@ -19,9 +19,9 @@ class EcritureController extends Controller
             ->where('tenant_id', $tenantId)
             ->when($request->q, fn($q, $s) => $q->where(function ($sub) use ($s) {
                 $sub->where('numero_compte', 'like', "%{$s}%")
-                    ->orWhere('libelle', 'like', "%{$s}%");
+                    ->orWhere('libelle_ecriture', 'like', "%{$s}%");
             }))
-            ->when($request->type, fn($q, $t) => $q->where('type_document', $t))
+            ->when($request->type, fn($q, $t) => $q->whereHas('facture', fn($sq) => $sq->where('type_document', $t)))
             ->when($request->date_debut, fn($q) => $q->whereDate('date_ecriture', '>=', $request->date_debut))
             ->when($request->date_fin,   fn($q) => $q->whereDate('date_ecriture', '<=', $request->date_fin))
             ->orderBy('date_ecriture', 'desc')
@@ -32,12 +32,12 @@ class EcritureController extends Controller
 
         // Totaux globaux pour la période filtrée (toutes pages)
         $totauxQuery = EcritureComptable::where('tenant_id', $tenantId)
-            ->when($request->type, fn($q, $t) => $q->where('type_document', $t))
+            ->when($request->type, fn($q, $t) => $q->whereHas('facture', fn($sq) => $sq->where('type_document', $t)))
             ->when($request->date_debut, fn($q) => $q->whereDate('date_ecriture', '>=', $request->date_debut))
             ->when($request->date_fin,   fn($q) => $q->whereDate('date_ecriture', '<=', $request->date_fin));
 
-        $totalDebit  = $totauxQuery->sum('montant_debit');
-        $totalCredit = (clone $totauxQuery)->sum('montant_credit');
+        $totalDebit  = $totauxQuery->sum('debit');
+        $totalCredit = (clone $totauxQuery)->sum('credit');
 
         return view('ecritures.index', compact('ecritures', 'totalDebit', 'totalCredit'));
     }

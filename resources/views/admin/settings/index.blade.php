@@ -43,30 +43,44 @@
         </form>
     </div>
 
-    {{-- ── Paramètres IA / n8n ───────────────────────────────────────── --}}
+    {{-- ── Paramètres IA — Mistral & OpenAI ────────────────────────────── --}}
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
         <h2 class="font-semibold text-gray-800 mb-1 flex items-center gap-2">
             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
             </svg>
-            Pipeline IA — n8n
+            Pipeline IA — Mistral & OpenAI
         </h2>
         <p class="text-sm text-gray-400 mb-5">
-            eCompta360 envoie les factures uploadées vers un workflow n8n qui extrait les données (OCR + IA)
-            et retourne les écritures comptables. Configurez ici les credentials de connexion.
+            eCompta360 traite les factures directement (sans service externe) : OCR/Vision Mistral puis
+            classification et extraction GPT-4o. Configurez ici les clés API utilisées par le pipeline.
         </p>
 
         <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-5 text-sm text-blue-800">
             <p class="font-semibold mb-1">Comment ça fonctionne :</p>
             <ol class="list-decimal list-inside space-y-1 text-blue-700">
-                <li>Le cabinet uploade une facture PDF</li>
-                <li>Laravel envoie le fichier au webhook n8n via HTTPS + signature HMAC</li>
-                <li>n8n extrait : fournisseur, date, montants, TVA via OCR + modèle IA (GPT-4o / Claude)</li>
-                <li>n8n retourne les données à Laravel via un webhook de callback</li>
-                <li>Laravel crée les écritures SYSCOHADA et notifie le cabinet</li>
+                <li>Le cabinet uploade une facture (PDF ou image)</li>
+                <li>Un job en file d'attente appelle l'OCR Mistral (PDF) ou Vision Pixtral (image)</li>
+                <li>Le texte extrait est envoyé à GPT-4o (function calling) pour classification et extraction des montants/TVA/AIB/RIRF</li>
+                <li>Laravel génère les écritures SYSCOHADA et notifie le cabinet</li>
             </ol>
-            <p class="mt-2 text-xs text-blue-600">Pour configurer n8n : créez un compte sur n8n.cloud, importez le workflow fourni, activez-le et copiez l'URL du webhook ici.</p>
+            <p class="mt-2 text-xs text-blue-600">
+                Clés à récupérer sur
+                <a href="https://console.mistral.ai" target="_blank" class="underline">console.mistral.ai</a>
+                et <a href="https://platform.openai.com/api-keys" target="_blank" class="underline">platform.openai.com</a>.
+            </p>
+        </div>
+
+        <div class="mb-4 flex flex-wrap gap-3 text-xs">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full {{ $settings['mistral_api_key'] ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                <span class="w-1.5 h-1.5 rounded-full {{ $settings['mistral_api_key'] ? 'bg-green-500' : 'bg-red-500' }}"></span>
+                Mistral : {{ $settings['mistral_api_key'] ? 'clé configurée' : 'clé manquante' }}
+            </span>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full {{ $settings['openai_api_key'] ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                <span class="w-1.5 h-1.5 rounded-full {{ $settings['openai_api_key'] ? 'bg-green-500' : 'bg-red-500' }}"></span>
+                OpenAI : {{ $settings['openai_api_key'] ? 'clé configurée' : 'clé manquante' }}
+            </span>
         </div>
 
         <form method="POST" action="{{ route('admin.settings.env') }}" class="space-y-4">
@@ -74,19 +88,30 @@
 
             <div class="grid md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">URL Webhook n8n</label>
-                    <input type="url" name="n8n_webhook_url"
-                           value="{{ old('n8n_webhook_url', $settings['n8n_webhook_url']) }}"
-                           placeholder="https://your-instance.n8n.cloud/webhook/..."
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Clé API Mistral</label>
+                    <input type="password" name="mistral_api_key" autocomplete="new-password"
+                           placeholder="{{ $settings['mistral_api_key'] ? '•••••••••••••••••••• (configurée)' : 'Coller la clé Mistral' }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 font-mono">
+                    <p class="text-xs text-gray-400 mt-0.5">Laissez vide pour conserver la valeur actuelle.</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Clé API OpenAI</label>
+                    <input type="password" name="openai_api_key" autocomplete="new-password"
+                           placeholder="{{ $settings['openai_api_key'] ? '•••••••••••••••••••• (configurée)' : 'Coller la clé OpenAI (sk-...)' }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 font-mono">
+                    <p class="text-xs text-gray-400 mt-0.5">Laissez vide pour conserver la valeur actuelle.</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Modèle OCR Mistral</label>
+                    <input type="text" name="mistral_ocr_model"
+                           value="{{ old('mistral_ocr_model', $settings['mistral_ocr_model']) }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 font-mono">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Secret HMAC</label>
-                    <input type="text" name="n8n_secret"
-                           value="{{ old('n8n_secret', $settings['n8n_secret'] ? str_repeat('•', min(strlen($settings['n8n_secret']), 20)) : '') }}"
-                           placeholder="Clé secrète partagée (min. 32 caractères)"
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Modèle OpenAI</label>
+                    <input type="text" name="openai_model"
+                           value="{{ old('openai_model', $settings['openai_model']) }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 font-mono">
-                    <p class="text-xs text-gray-400 mt-0.5">Laissez vide pour conserver la valeur actuelle.</p>
                 </div>
             </div>
 

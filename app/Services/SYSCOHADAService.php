@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Facture;
 use App\Models\EcritureComptable;
+use App\Models\Journal;
 
 /**
  * Service de génération des écritures comptables SYSCOHADA Révisé
@@ -215,11 +216,12 @@ class SYSCOHADAService
 
     private function determinerJournal(?string $type): string
     {
+        // Codes SYSCOHADA Révisé standards (7 journaux)
         return match($type) {
-            'VENTE'  => 'VTE',
-            'ACHAT'  => 'ACH',
-            'CHARGE' => 'OD',
-            default  => 'OD',
+            'VENTE'  => Journal::VE,   // VE — Journal des Ventes
+            'ACHAT'  => Journal::HA,   // HA — Journal des Achats
+            'CHARGE' => Journal::HA,   // HA — Charges = Achats dans SYSCOHADA
+            default  => Journal::OD,   // OD — Opérations Diverses
         };
     }
 }

@@ -4,7 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Facture;
 use App\Models\TraitementLog;
-use App\Services\N8nService;
+use App\Services\TraitementIAService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -13,7 +13,8 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Job de déclenchement du pipeline n8n.cloud.
+ * Job de traitement IA d'une facture.
+ * Remplace l'intégration n8n.cloud par un appel direct Mistral OCR + GPT-4o.
  *
  * Queue : database (MySQL) — PAS de Redis sur Hostinger mutualisé.
  * Exécution : cron Hostinger toutes les minutes via
@@ -21,7 +22,7 @@ use Illuminate\Support\Facades\Log;
  *
  * Logique de retry :
  *  - 3 tentatives max
- *  - Attente de 60 secondes entre chaque tentative
+ *  - Attente de 60 secondes entre chaque tentative (rate-limit API)
  *  - En cas d'échec définitif → statut "erreur" + log
  */
 class TraiterFacturePDF implements ShouldQueue
@@ -29,14 +30,14 @@ class TraiterFacturePDF implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries   = 3;
-    public int $timeout = 120;   // 2 min max par job (contrainte mutualisé)
-    public int $backoff = 60;    // 1 min entre les tentatives
+    public int $timeout = 180;  // 3 min max — OCR + GPT-4o peuvent prendre jusqu'à 2 min
+    public int $backoff = 60;   // 1 min entre les tentatives (rate-limit Mistral/OpenAI)
 
     public function __construct(public Facture $facture) {}
 
-    public function handle(N8nService $n8n): void
+    public function handle(TraitementIAService $ia): void
     {
-        // Vérifier que la facture est toujours en attente
+        // Vérifier que la facture est toujours en attente de traitement
         $facture = $this->facture->fresh();
 
         if (!$facture || !in_array($facture->statut, ['uploade', 'erreur'])) {
@@ -44,16 +45,22 @@ class TraiterFacturePDF implements ShouldQueue
             return;
         }
 
-        $succes = $n8n->declencherTraitement($facture);
-
-        if (!$succes) {
-            // Pas d'exception → le job va se retry automatiquement après $backoff secondes
-            Log::warning("TraiterFacturePDF: échec envoi n8n — retry dans {$this->backoff}s", [
+        try {
+            $ia->traiter($facture);
+        } catch (\Throwable $e) {
+            Log::warning("TraiterFacturePDF: tentative {$this->attempts()} échouée", [
                 'facture_id' => $facture->id,
-                'attempt'    => $this->attempts(),
+                'error'      => $e->getMessage(),
             ]);
 
-            $this->release($this->backoff);
+            // Remettre en queue si des tentatives restent
+            if ($this->attempts() < $this->tries) {
+                $this->release($this->backoff);
+                return;
+            }
+
+            // Dernier essai échoué → laisser remonter pour déclencher failed()
+            throw $e;
         }
     }
 
@@ -63,7 +70,7 @@ class TraiterFacturePDF implements ShouldQueue
 
         TraitementLog::create([
             'facture_id' => $this->facture->id,
-            'etape'      => 'n8n_envoi',
+            'etape'      => 'traitement_ia',
             'statut'     => 'erreur',
             'message'    => "Échec définitif après {$this->tries} tentatives : {$e->getMessage()}",
         ]);
@@ -71,6 +78,7 @@ class TraiterFacturePDF implements ShouldQueue
         Log::error("TraiterFacturePDF: échec définitif", [
             'facture_id' => $this->facture->id,
             'error'      => $e->getMessage(),
+            'trace'      => $e->getTraceAsString(),
         ]);
     }
 }

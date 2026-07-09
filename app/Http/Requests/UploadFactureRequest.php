@@ -5,9 +5,9 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
- * Validation de l'upload de factures PDF.
+ * Validation de l'upload de factures.
  * Limite : 50 Mo par fichier, max 10 fichiers simultanés.
- * Types acceptés : PDF uniquement (contrôle MIME + extension).
+ * Types acceptés : PDF (OCR Mistral), JPG/PNG/WEBP (Pixtral Vision).
  */
 class UploadFactureRequest extends FormRequest
 {
@@ -29,8 +29,8 @@ class UploadFactureRequest extends FormRequest
             'pdfs.*' => [
                 'required',
                 'file',
-                'mimes:pdf',        // Extension PDF
-                'mimetypes:application/pdf', // MIME type réel
+                'mimes:pdf,jpg,jpeg,png,webp',                              // Extensions acceptées
+                'mimetypes:application/pdf,image/jpeg,image/png,image/webp', // MIME types réels
                 'max:51200',        // 50 Mo en kilo-octets
             ],
         ];
@@ -44,8 +44,8 @@ class UploadFactureRequest extends FormRequest
             'pdfs.max'            => 'Vous ne pouvez pas uploader plus de 10 fichiers à la fois.',
             'pdfs.*.required'     => 'Un fichier est requis.',
             'pdfs.*.file'         => 'Le fichier uploadé est invalide.',
-            'pdfs.*.mimes'        => 'Seuls les fichiers PDF sont acceptés.',
-            'pdfs.*.mimetypes'    => 'Le type MIME doit être application/pdf.',
+            'pdfs.*.mimes'        => 'Types acceptés : PDF, JPG, PNG, WEBP.',
+            'pdfs.*.mimetypes'    => 'Le type MIME doit être PDF ou image (JPG/PNG/WEBP).',
             'pdfs.*.max'          => 'Chaque fichier ne doit pas dépasser 50 Mo.',
         ];
     }

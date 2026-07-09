@@ -172,30 +172,30 @@
                         <dt class="text-gray-400 text-xs uppercase tracking-wide">Uploadé le</dt>
                         <dd class="text-gray-700 mt-0.5">{{ $facture->created_at->format('d/m/Y à H:i') }}</dd>
                     </div>
-                    @if($facture->validee_at)
+                    @if($facture->valide_le)
                     <div>
                         <dt class="text-gray-400 text-xs uppercase tracking-wide">Validé le</dt>
-                        <dd class="text-gray-700 mt-0.5">{{ $facture->validee_at->format('d/m/Y à H:i') }}</dd>
+                        <dd class="text-gray-700 mt-0.5">{{ $facture->valide_le->format('d/m/Y à H:i') }}</dd>
                     </div>
                     @endif
-                    @if($facture->validee_par)
+                    @if($facture->validePar)
                     <div>
                         <dt class="text-gray-400 text-xs uppercase tracking-wide">Validé par</dt>
                         <dd class="font-medium text-gray-800 mt-0.5">
-                            {{ optional($facture->validateur)->name ?? '—' }}
+                            {{ $facture->validePar->name }}
                         </dd>
                     </div>
                     @endif
-                    @if($facture->commentaire_rejet)
+                    @if($facture->motif_rejet)
                     <div class="bg-red-50 border border-red-200 rounded-lg p-3 mt-2">
                         <dt class="text-red-600 text-xs font-semibold uppercase tracking-wide mb-1">Motif de rejet</dt>
-                        <dd class="text-red-700 text-sm">{{ $facture->commentaire_rejet }}</dd>
+                        <dd class="text-red-700 text-sm">{{ $facture->motif_rejet }}</dd>
                     </div>
                     @endif
-                    @if($facture->erreur_message)
+                    @if($facture->statut === 'erreur' && $facture->logs->where('statut', 'erreur')->last())
                     <div class="bg-red-50 border border-red-200 rounded-lg p-3 mt-2">
                         <dt class="text-red-600 text-xs font-semibold uppercase tracking-wide mb-1">Erreur</dt>
-                        <dd class="text-red-700 text-sm">{{ $facture->erreur_message }}</dd>
+                        <dd class="text-red-700 text-sm">{{ $facture->logs->where('statut', 'erreur')->last()->message }}</dd>
                     </div>
                     @endif
                 </dl>
@@ -286,12 +286,12 @@
                                             {{ $e->numero_compte }}
                                         </span>
                                     </td>
-                                    <td class="px-4 py-2.5 text-gray-700">{{ $e->libelle }}</td>
+                                    <td class="px-4 py-2.5 text-gray-700">{{ $e->libelle_ecriture }}</td>
                                     <td class="px-4 py-2.5 text-right font-medium text-gray-800">
-                                        {{ $e->montant_debit > 0 ? number_format((float)$e->montant_debit, 0, ',', ' ') : '' }}
+                                        {{ $e->debit > 0 ? number_format((float)$e->debit, 0, ',', ' ') : '' }}
                                     </td>
                                     <td class="px-4 py-2.5 text-right font-medium text-gray-800">
-                                        {{ $e->montant_credit > 0 ? number_format((float)$e->montant_credit, 0, ',', ' ') : '' }}
+                                        {{ $e->credit > 0 ? number_format((float)$e->credit, 0, ',', ' ') : '' }}
                                     </td>
                                 </tr>
                                 @endforeach
@@ -300,10 +300,10 @@
                                 <tr>
                                     <td colspan="2" class="px-4 py-2.5 text-right uppercase tracking-wide">Total</td>
                                     <td class="px-4 py-2.5 text-right">
-                                        {{ number_format((float)$facture->ecritures->sum('montant_debit'), 0, ',', ' ') }}
+                                        {{ number_format((float)$facture->ecritures->sum('debit'), 0, ',', ' ') }}
                                     </td>
                                     <td class="px-4 py-2.5 text-right">
-                                        {{ number_format((float)$facture->ecritures->sum('montant_credit'), 0, ',', ' ') }}
+                                        {{ number_format((float)$facture->ecritures->sum('credit'), 0, ',', ' ') }}
                                     </td>
                                 </tr>
                             </tfoot>
@@ -311,7 +311,7 @@
                     </div>
 
                     {{-- Équilibre --}}
-                    @php $equilibre = abs($facture->ecritures->sum('montant_debit') - $facture->ecritures->sum('montant_credit')) < 1; @endphp
+                    @php $equilibre = abs($facture->ecritures->sum('debit') - $facture->ecritures->sum('credit')) < 1; @endphp
                     <div class="px-4 py-3 border-t border-gray-100">
                         @if($equilibre)
                         <span class="inline-flex items-center gap-1.5 text-green-700 text-xs font-medium">

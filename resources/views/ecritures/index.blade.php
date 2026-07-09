@@ -128,7 +128,7 @@
                             </span>
                         </td>
                         <td class="px-5 py-3 text-gray-700 max-w-xs">
-                            <span class="block truncate" title="{{ $e->libelle }}">{{ $e->libelle }}</span>
+                            <span class="block truncate" title="{{ $e->libelle_ecriture }}">{{ $e->libelle_ecriture }}</span>
                         </td>
                         <td class="px-5 py-3">
                             @if($e->facture)
@@ -141,20 +141,20 @@
                             @endif
                         </td>
                         <td class="px-5 py-3">
-                            @if($e->type_document)
+                            @if($e->facture?->type_document)
                             <span class="px-2 py-0.5 rounded text-xs font-medium
-                                {{ $e->type_document === 'VENTE' ? 'bg-green-100 text-green-700' : ($e->type_document === 'ACHAT' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700') }}">
-                                {{ $e->type_document }}
+                                {{ $e->facture->type_document === 'VENTE' ? 'bg-green-100 text-green-700' : ($e->facture->type_document === 'ACHAT' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700') }}">
+                                {{ $e->facture->type_document }}
                             </span>
                             @else
                             <span class="text-gray-300 text-xs">—</span>
                             @endif
                         </td>
                         <td class="px-5 py-3 text-right font-medium text-gray-800 whitespace-nowrap">
-                            {{ $e->montant_debit > 0 ? number_format((float)$e->montant_debit, 0, ',', ' ') : '' }}
+                            {{ $e->debit > 0 ? number_format((float)$e->debit, 0, ',', ' ') : '' }}
                         </td>
                         <td class="px-5 py-3 text-right font-medium text-gray-800 whitespace-nowrap">
-                            {{ $e->montant_credit > 0 ? number_format((float)$e->montant_credit, 0, ',', ' ') : '' }}
+                            {{ $e->credit > 0 ? number_format((float)$e->credit, 0, ',', ' ') : '' }}
                         </td>
                     </tr>
                     @endforeach
@@ -165,10 +165,10 @@
                             Totaux (page)
                         </td>
                         <td class="px-5 py-3 text-right text-gray-800">
-                            {{ number_format((float)$ecritures->sum('montant_debit'), 0, ',', ' ') }}
+                            {{ number_format((float)$ecritures->sum('debit'), 0, ',', ' ') }}
                         </td>
                         <td class="px-5 py-3 text-right text-gray-800">
-                            {{ number_format((float)$ecritures->sum('montant_credit'), 0, ',', ' ') }}
+                            {{ number_format((float)$ecritures->sum('credit'), 0, ',', ' ') }}
                         </td>
                     </tr>
                 </tfoot>
