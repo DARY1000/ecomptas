@@ -129,7 +129,7 @@
                 @elseif($isFree)
                 <span class="block w-full py-2.5 text-center text-gray-400 text-sm">Plan d'essai</span>
                 @else
-                <form method="POST" action="{{ route('abonnement.initier') }}">
+                <form method="POST" action="{{ route('abonnement.payer') }}">
                     @csrf
                     <input type="hidden" name="plan_slug" value="{{ $plan->slug }}">
                     <button type="submit"
@@ -157,6 +157,17 @@
         </div>
     </div>
 
+    {{-- Widget de paiement FeexPay --}}
+    @if($planAPayer)
+    <div id="feexpay-paiement" class="bg-white rounded-xl border-2 border-blue-500 shadow-sm p-5 text-center space-y-3">
+        <p class="font-semibold text-gray-800">
+            Finaliser le paiement — Plan {{ $planAPayer->nom }}
+            ({{ number_format($planAPayer->prix_mensuel_xof, 0, ',', ' ') }} FCFA/mois)
+        </p>
+        <div id="feexpay-render" class="flex justify-center"></div>
+    </div>
+    @endif
+
     {{-- Historique abonnements --}}
     @if($historiqueAbonnements->isNotEmpty())
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -176,12 +187,12 @@
                 <tbody class="divide-y divide-gray-50">
                     @foreach($historiqueAbonnements as $ab)
                     <tr class="hover:bg-gray-50">
-                        <td class="px-5 py-3 font-medium text-gray-800">{{ $ab->plan ?? '—' }}</td>
+                        <td class="px-5 py-3 font-medium text-gray-800">{{ $ab->plan?->nom ?? '—' }}</td>
                         <td class="px-5 py-3 text-gray-500">
                             {{ $ab->debut_le?->format('d/m/Y') ?? '—' }} → {{ $ab->expire_le?->format('d/m/Y') ?? '—' }}
                         </td>
                         <td class="px-5 py-3 text-right text-gray-800">
-                            {{ $ab->montant_paye ? number_format((float)$ab->montant_paye, 0, ',', ' ') . ' FCFA' : '—' }}
+                            {{ $ab->montant_xof ? number_format((float)$ab->montant_xof, 0, ',', ' ') . ' FCFA' : '—' }}
                         </td>
                         <td class="px-5 py-3 text-center">
                             <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium
@@ -198,4 +209,23 @@
     @endif
 
 </div>
+
+@if($planAPayer)
+@push('scripts')
+<script src="https://api-v2.feexpay.me/feexpay-javascript-sdk/index.js"></script>
+<script>
+    FeexPayButton.init("feexpay-render", {
+        id: "{{ config('services.feexpay.shop_id') }}",
+        amount: {{ (int) $planAPayer->prix_mensuel_xof }},
+        token: "{{ config('services.feexpay.token') }}",
+        mode: "{{ config('services.feexpay.mode', 'SANDBOX') }}",
+        callback_url: "{{ route('abonnement.succes') }}",
+        error_callback_url: "{{ route('abonnement.index') }}",
+        custom_id: "{{ $tenant->id }}|{{ $planAPayer->slug }}",
+        description: "Abonnement {{ $planAPayer->nom }} — eCompta360",
+    });
+    document.getElementById('feexpay-paiement')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+</script>
+@endpush
+@endif
 @endsection

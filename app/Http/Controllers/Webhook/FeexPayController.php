@@ -53,25 +53,28 @@ class FeexPayController extends Controller
             return response()->json(['ok' => true]);
         }
 
-        // Décoder les infos retournées lors de la création de la transaction
-        $callbackInfo = json_decode($callbackRaw, true);
-        $tenantId = $callbackInfo['tenant_id'] ?? null;
-        $planSlug = $callbackInfo['plan'] ?? null;
+        // custom_id envoyé au widget FeexPay au format "tenant_id|plan_slug" (voir
+        // abonnement/index.blade.php). FeexPay ne documente pas précisément si ce champ
+        // revient tel quel dans callback_info — on reste tolérant sur le format.
+        [$tenantId, $planSlug] = array_pad(explode('|', $callbackRaw, 2), 2, null);
 
         if (!$tenantId || !$planSlug) {
-            Log::error('FeexPay callback: tenant_id ou plan manquant', ['callback_info' => $callbackRaw]);
-            return response()->json(['error' => 'Données manquantes'], 400);
+            Log::warning('FeexPay webhook: tenant_id/plan absents du callback_info — activation laissée à abonnement.succes', [
+                'callback_info' => $callbackRaw,
+                'trans_id'      => $transId,
+            ]);
+            return response()->json(['ok' => true]);
         }
 
         $tenant = Tenant::find($tenantId);
         $plan   = Plan::where('slug', $planSlug)->first();
 
         if (!$tenant || !$plan) {
-            Log::error('FeexPay callback: tenant ou plan introuvable', [
+            Log::warning('FeexPay webhook: tenant ou plan introuvable pour ce custom_id', [
                 'tenant_id' => $tenantId,
                 'plan'      => $planSlug,
             ]);
-            return response()->json(['error' => 'Tenant ou plan introuvable'], 404);
+            return response()->json(['ok' => true]);
         }
 
         // Le montant réellement payé (vérifié auprès de FeexPay) doit correspondre au prix du plan —
@@ -86,35 +89,11 @@ class FeexPayController extends Controller
             return response()->json(['error' => 'Montant insuffisant pour ce plan'], 400);
         }
 
-        // Éviter les doublons (idempotence)
-        if ($transId && Abonnement::where('transaction_id', $transId)->exists()) {
-            Log::info('FeexPay: transaction déjà traitée', ['transaction_id' => $transId]);
-            return response()->json(['ok' => true]);
-        }
+        // Abonnement::activerPourPaiement() est idempotent sur transaction_id —
+        // pas de risque de doublon si abonnement.succes est déjà passé par là.
+        Abonnement::activerPourPaiement($tenant, $plan, $transId, $montant, $request->all());
 
-        // Créer l'enregistrement d'abonnement
-        Abonnement::create([
-            'tenant_id'           => $tenant->id,
-            'plan_id'             => $plan->id,
-            'statut'              => 'actif',
-            'processeur_paiement' => 'feexpay',
-            'transaction_id'      => $transId,
-            'montant_xof'         => $montant,
-            'debut_le'            => now(),
-            'expire_le'           => now()->addDays(30),
-            'metadata_paiement'   => $request->all(),
-        ]);
-
-        // Mettre à jour le tenant
-        $tenant->update([
-            'plan'                   => $plan->slug,
-            'statut'                 => 'actif',
-            'quota_factures_mensuel' => $plan->quota_factures,
-            'quota_users'            => $plan->quota_users,
-            'abonnement_expire_le'   => now()->addDays(30),
-        ]);
-
-        Log::info("FeexPay: abonnement activé — {$tenant->nom} → {$plan->nom}");
+        Log::info("FeexPay: abonnement activé (webhook) — {$tenant->nom} → {$plan->nom}");
 
         return response()->json(['ok' => true]);
     }

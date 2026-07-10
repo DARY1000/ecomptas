@@ -16,7 +16,7 @@
                 </svg>
                 Export CSV
             </a>
-            @if(auth()->user()->tenant->plan && auth()->user()->tenant->plan->export_xlsx ?? false)
+            @if(auth()->user()->tenant->planActuel()?->export_xlsx ?? false)
             <a href="{{ route('export.xlsx', request()->query()) }}"
                class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-medium">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

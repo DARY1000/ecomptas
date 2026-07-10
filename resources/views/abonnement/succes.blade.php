@@ -4,6 +4,18 @@
 @section('content')
 <div class="max-w-lg mx-auto py-12 text-center space-y-6">
 
+    @if($erreur ?? null)
+    {{-- Icône erreur --}}
+    <div class="inline-flex items-center justify-center w-20 h-20 bg-red-100 rounded-full mx-auto">
+        <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+    </div>
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Paiement non confirmé</h1>
+        <p class="text-gray-500">{{ $erreur }}</p>
+    </div>
+    @else
     {{-- Icône succès --}}
     <div class="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mx-auto">
         <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,14 +53,15 @@
                 <dd class="font-medium text-gray-800">{{ $abonnement->expire_le->format('d/m/Y') }}</dd>
             </div>
             @endif
-            @if($abonnement->montant_paye)
+            @if($abonnement->montant_xof)
             <div class="flex justify-between border-t border-gray-100 pt-2 mt-2">
                 <dt class="text-gray-500 font-medium">Montant payé</dt>
-                <dd class="font-bold text-gray-900">{{ number_format((float)$abonnement->montant_paye, 0, ',', ' ') }} FCFA</dd>
+                <dd class="font-bold text-gray-900">{{ number_format((float)$abonnement->montant_xof, 0, ',', ' ') }} FCFA</dd>
             </div>
             @endif
         </dl>
     </div>
+    @endif
     @endif
 
     {{-- CTA --}}

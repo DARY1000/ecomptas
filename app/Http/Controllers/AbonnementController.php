@@ -7,6 +7,7 @@ use App\Models\Abonnement;
 use App\Models\Plan;
 use App\Services\FeexPayService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class AbonnementController extends Controller
@@ -14,9 +15,10 @@ class AbonnementController extends Controller
     public function __construct(private FeexPayService $feexpay) {}
 
     /**
-     * Page des plans d'abonnement.
+     * Page des plans d'abonnement. Si ?payer=<slug> est présent (redirection depuis
+     * initierPaiement), la vue ouvre automatiquement le widget FeexPay pour ce plan.
      */
-    public function index()
+    public function index(Request $request)
     {
         $tenant = auth()->user()->tenant;
         $plans  = Plan::actifs();
@@ -26,11 +28,20 @@ class AbonnementController extends Controller
             ->take(10)
             ->get();
 
-        return view('abonnement.index', compact('tenant', 'plans', 'abonnementActif', 'historiqueAbonnements'));
+        $planAPayer = $request->query('payer')
+            ? $plans->firstWhere('slug', $request->query('payer'))
+            : null;
+
+        return view('abonnement.index', compact(
+            'tenant', 'plans', 'abonnementActif', 'historiqueAbonnements', 'planAPayer'
+        ));
     }
 
     /**
-     * Initie un paiement FeexPay et redirige vers la page de paiement mobile money.
+     * Marque le plan choisi comme "en cours de paiement" (session) et redirige vers
+     * la page d'abonnement, qui ouvrira automatiquement le widget de paiement FeexPay.
+     * Le paiement lui-même se fait entièrement côté client via leur modale hébergée —
+     * pas d'appel serveur-à-serveur pour "créer" une transaction (leur API ne le propose pas).
      */
     public function initierPaiement(Request $request)
     {
@@ -45,47 +56,58 @@ class AbonnementController extends Controller
             return back()->withErrors(['plan' => 'Le plan Trial est gratuit et activé automatiquement.']);
         }
 
-        $result = $this->feexpay->creerTransaction(
-            montantXof:  $plan->prix_mensuel_xof,
-            description: "ComptaSaaS — Abonnement {$plan->nom} (1 mois)",
-            tenantId:    $tenant->id,
-            planSlug:    $plan->slug,
-            redirectUrl: route('abonnement.succes'),
-            cancelUrl:   route('abonnement.index')
-        );
+        // Mémorise le plan choisi pour que abonnement.succes sache quoi activer au retour
+        // (FeexPay n'ajoute que la référence de transaction à l'URL de callback, pas nos
+        // métadonnées métier).
+        session(['feexpay_plan_en_cours' => $plan->slug]);
 
-        if (!$result['succes']) {
-            return back()->withErrors([
-                'paiement' => 'Erreur lors de la création du paiement : ' . ($result['erreur'] ?? 'Erreur inconnue'),
-            ]);
-        }
-
-        // Rediriger vers la page FeexPay (mobile money MTN/Moov)
-        return redirect($result['payment_url']);
+        return redirect()->route('abonnement.index', ['payer' => $plan->slug]);
     }
 
     /**
-     * Page de confirmation après paiement réussi.
+     * Page de retour après paiement (callback_url du widget FeexPay, avec ?ref=<reference>
+     * ajouté automatiquement par FeexPay). Revérifie le paiement serveur-à-serveur avant
+     * d'activer quoi que ce soit — jamais confiance dans le simple fait d'atterrir ici.
      */
     public function succes(Request $request)
     {
         $user   = auth()->user();
         $tenant = $user->tenant;
-        $abonnement = Abonnement::with(['plan', 'tenant'])
-            ->where('tenant_id', $tenant->id)
-            ->where('statut', 'actif')
-            ->latest()
-            ->first();
 
-        // Email de confirmation de paiement
-        if ($abonnement) {
-            try {
-                Mail::to($user->email)->send(new PaiementConfirmeMail($user, $abonnement));
-            } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::warning('Email paiement non envoyé : ' . $e->getMessage());
+        $reference = $request->query('ref');
+        $planSlug  = session('feexpay_plan_en_cours');
+        $plan      = $planSlug ? Plan::where('slug', $planSlug)->first() : null;
+
+        $abonnement = null;
+        $erreur     = null;
+
+        if (!$reference || !$plan) {
+            $erreur = "Impossible d'identifier le paiement. Si le montant a bien été débité, contactez le support.";
+        } else {
+            $transaction = $this->feexpay->verifierTransaction($reference);
+            $statut      = $transaction['status'] ?? null;
+            $montant     = (int) ($transaction['amount'] ?? 0);
+
+            if ($statut !== 'SUCCESSFUL') {
+                $erreur = "Le paiement n'a pas été confirmé (statut : {$statut}). Si le débit a eu lieu, contactez le support.";
+            } elseif ($montant < $plan->prix_mensuel_xof) {
+                Log::error('FeexPay succes: montant insuffisant', [
+                    'tenant_id' => $tenant->id, 'plan' => $plan->slug,
+                    'montant_paye' => $montant, 'prix_plan' => $plan->prix_mensuel_xof,
+                ]);
+                $erreur = 'Montant payé insuffisant pour ce plan. Contactez le support.';
+            } else {
+                $abonnement = Abonnement::activerPourPaiement($tenant, $plan, $reference, $montant, $transaction);
+                session()->forget('feexpay_plan_en_cours');
+
+                try {
+                    Mail::to($user->email)->send(new PaiementConfirmeMail($user, $abonnement));
+                } catch (\Throwable $e) {
+                    Log::warning('Email paiement non envoyé : ' . $e->getMessage());
+                }
             }
         }
 
-        return view('abonnement.succes', compact('tenant', 'abonnement'));
+        return view('abonnement.succes', compact('tenant', 'abonnement', 'erreur'));
     }
 }

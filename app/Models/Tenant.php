@@ -56,6 +56,15 @@ class Tenant extends Model
     }
 
     /**
+     * Le plan souscrit par ce cabinet (résolu par slug — 'plan' est une colonne
+     * string sur cette table, pas une clé étrangère, donc pas de vraie relation).
+     */
+    public function planActuel(): ?Plan
+    {
+        return Plan::where('slug', $this->plan)->first();
+    }
+
+    /**
      * Le cabinet peut utiliser l'application si actif ou en trial.
      */
     public function estActif(): bool
