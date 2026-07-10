@@ -44,10 +44,10 @@ class TraitementLog extends Model
     {
         return match($this->etape) {
             'upload'               => 'Upload',
-            'n8n_envoi'            => 'Envoi n8n.cloud (legacy)',
-            'traitement_ia'        => 'Traitement IA (Mistral + GPT-4o)',
-            'ocr'                  => 'OCR Mistral',
-            'classification'       => 'Classification IA',
+            'n8n_envoi'            => 'Envoi (legacy)',
+            'traitement_ia'        => 'Traitement en cours',
+            'ocr'                  => 'Lecture du document',
+            'classification'       => 'Classification',
             'extraction'           => 'Extraction données',
             'generation_ecritures' => 'Génération écritures',
             'validation'           => 'Validation comptable',

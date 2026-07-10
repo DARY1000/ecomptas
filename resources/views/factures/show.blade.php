@@ -216,7 +216,7 @@
                     </svg>
                 </div>
                 <h3 class="font-semibold text-blue-800 mb-1">Traitement en cours</h3>
-                <p class="text-blue-600 text-sm">L'IA analyse votre facture… Veuillez patienter.</p>
+                <p class="text-blue-600 text-sm">eCompta360 analyse votre facture… Veuillez patienter.</p>
             </div>
             @endif
 
@@ -259,7 +259,7 @@
                         </svg>
                         <p class="text-sm">
                             @if($facture->statut === 'traitement_en_cours')
-                                Les écritures seront générées après le traitement IA.
+                                Les écritures seront générées après le traitement.
                             @elseif($facture->statut === 'uploade')
                                 En attente de traitement.
                             @else
@@ -367,7 +367,7 @@
                 {{-- Onglet données brutes --}}
                 @if($facture->donnees_extraites)
                 <div x-show="tab === 'raw'" class="p-5">
-                    <h3 class="text-sm font-semibold text-gray-700 mb-3">Données extraites par l'IA</h3>
+                    <h3 class="text-sm font-semibold text-gray-700 mb-3">Données extraites</h3>
                     <pre class="text-xs text-gray-600 bg-gray-50 rounded-lg p-4 overflow-x-auto border border-gray-200">{{ json_encode($facture->donnees_extraites, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
                 </div>
                 @endif

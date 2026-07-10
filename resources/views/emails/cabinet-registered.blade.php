@@ -92,7 +92,7 @@
                 </div>
                 <div class="step">
                     <div class="step-num">2</div>
-                    <div class="step-text"><strong>Uploadez votre première facture</strong> — l'IA l'analyse et génère les écritures SYSCOHADA automatiquement.</div>
+                    <div class="step-text"><strong>Uploadez votre première facture</strong> — eCompta360 l'analyse et génère les écritures SYSCOHADA automatiquement.</div>
                 </div>
                 <div class="step">
                     <div class="step-num">3</div>

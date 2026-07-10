@@ -97,7 +97,7 @@
                     <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
-                    <span>OCR IA + SYSCOHADA auto</span>
+                    <span>Extraction automatique + SYSCOHADA</span>
                 </div>
                 <div class="flex items-center gap-2 {{ $plan->export_xlsx ? 'text-gray-700' : 'text-gray-300' }}">
                     <svg class="w-4 h-4 {{ $plan->export_xlsx ? 'text-green-500' : 'text-gray-200' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

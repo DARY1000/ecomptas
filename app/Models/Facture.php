@@ -103,7 +103,7 @@ class Facture extends Model
     {
         return match($this->statut) {
             'uploade'             => 'Uploadé',
-            'traitement_en_cours' => 'Traitement IA...',
+            'traitement_en_cours' => 'Traitement en cours...',
             'a_valider'           => 'À valider',
             'valide'              => 'Validé',
             'rejete'              => 'Rejeté',

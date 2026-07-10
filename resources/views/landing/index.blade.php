@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>eCompta360 — La comptabilité SYSCOHADA automatisée par l'IA</title>
+    <title>eCompta360 — La comptabilité SYSCOHADA automatisée</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
@@ -83,7 +83,7 @@
                     <span class="text-sky-300">cabinet commence ici</span>
                 </h1>
                 <p class="text-blue-100 text-lg mb-8 leading-relaxed">
-                    Uploadez vos factures, l'IA génère vos écritures <strong class="text-white">SYSCOHADA</strong> en quelques secondes.
+                    Uploadez vos factures, eCompta360 génère vos écritures <strong class="text-white">SYSCOHADA</strong> en quelques secondes.
                     Moins de saisie, plus de temps pour vos clients.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4">
@@ -152,7 +152,7 @@
             <div class="text-xs text-blue-400 mt-1">Plan comptable révisé</div>
         </div>
         <div>
-            <div class="text-2xl font-black text-blue-300">IA</div>
+            <div class="text-2xl font-black text-blue-300">100%</div>
             <div class="text-xs text-blue-400 mt-1">Traitement automatique</div>
         </div>
         <div>
@@ -404,7 +404,7 @@
         </div>
         <div class="grid md:grid-cols-3 gap-6">
             @foreach([
-                ['AM','Adjoua M.','Expert-comptable, Cotonou','bg-blue-100 text-blue-700','"eCompta360 a réduit de moitié le temps passé sur la saisie. L\'IA reconnaît parfaitement les factures en XOF et génère les bons comptes SYSCOHADA automatiquement. Je recommande à tous mes confrères."'],
+                ['AM','Adjoua M.','Expert-comptable, Cotonou','bg-blue-100 text-blue-700','"eCompta360 a réduit de moitié le temps passé sur la saisie. Il reconnaît parfaitement les factures en XOF et génère les bons comptes SYSCOHADA automatiquement. Je recommande à tous mes confrères."'],
                 ['KO','Kofi Ouedraogo','Cabinet comptable, Porto-Novo','bg-teal-100 text-teal-700','"Le gain de temps est impressionnant. Ce qui prenait 3 heures ne prend plus que 20 minutes. L\'intégration avec Mobile Money est un vrai plus — je règle mon abonnement depuis mon téléphone."'],
                 ['FS','Fatou Sow','Directrice, Abomey-Calavi','bg-purple-100 text-purple-700','"Enfin une solution de comptabilité pensée pour l\'Afrique ! Le respect du SYSCOHADA Révisé est irréprochable. Mon équipe a été opérationnelle dès le premier jour sans formation particulière."'],
             ] as $t)

@@ -161,7 +161,7 @@
             </li>
             <li class="flex items-start gap-2">
                 <span class="w-5 h-5 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">2</span>
-                <span>Notre IA (OCR + GPT) extrait automatiquement les données</span>
+                <span>eCompta360 extrait automatiquement les données</span>
             </li>
             <li class="flex items-start gap-2">
                 <span class="w-5 h-5 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">3</span>

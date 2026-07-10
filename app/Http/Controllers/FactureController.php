@@ -85,8 +85,8 @@ class FactureController extends Controller
         }
 
         $msg = count($factures) === 1
-            ? 'Facture uploadée — traitement IA en cours (mise à jour auto dans quelques minutes).'
-            : count($factures) . ' factures uploadées — traitement IA en cours.';
+            ? 'Facture uploadée — traitement en cours (mise à jour auto dans quelques minutes).'
+            : count($factures) . ' factures uploadées — traitement en cours.';
 
         return redirect()->route('factures.index')->with('succes', $msg);
     }
