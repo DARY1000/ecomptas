@@ -108,16 +108,82 @@
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 font-mono">
                 </div>
                 <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Modèle Vision Mistral (images JPG/PNG)</label>
+                    <input type="text" name="mistral_vision_model"
+                           value="{{ old('mistral_vision_model', $settings['mistral_vision_model']) }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 font-mono">
+                </div>
+                <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Modèle OpenAI</label>
                     <input type="text" name="openai_model"
                            value="{{ old('openai_model', $settings['openai_model']) }}"
+                           placeholder="gpt-4o, gpt-4o-mini, gpt-4.1..."
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 font-mono">
+                    <p class="text-xs text-gray-400 mt-0.5">N'importe quel modèle OpenAI supportant le function calling.</p>
                 </div>
             </div>
 
             <button type="submit"
                     class="bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-800 transition">
                 Sauvegarder les paramètres IA
+            </button>
+        </form>
+    </div>
+
+    {{-- ── Paiement — FeexPay ───────────────────────────────────────── --}}
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <h2 class="font-semibold text-gray-800 mb-1 flex items-center gap-2">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+            Paiement — FeexPay
+        </h2>
+        <p class="text-sm text-gray-400 mb-5">
+            Identifiants de la boutique FeexPay (dashboard : <a href="https://app-v2.feexpay.me" target="_blank" class="underline">app-v2.feexpay.me</a>).
+            Utilisés pour afficher le bouton de paiement (mobile money / carte) sur la page Abonnement des cabinets.
+        </p>
+
+        <div class="mb-4 flex flex-wrap gap-3 text-xs">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full {{ $settings['feexpay_token'] ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                <span class="w-1.5 h-1.5 rounded-full {{ $settings['feexpay_token'] ? 'bg-green-500' : 'bg-red-500' }}"></span>
+                FeexPay : {{ $settings['feexpay_token'] ? 'clé configurée' : 'clé manquante' }}
+            </span>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full {{ $settings['feexpay_mode'] === 'LIVE' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-600' }}">
+                Mode : {{ $settings['feexpay_mode'] }}
+            </span>
+        </div>
+
+        <form method="POST" action="{{ route('admin.settings.env') }}" class="space-y-4">
+            @csrf
+
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Shop ID FeexPay</label>
+                    <input type="text" name="feexpay_shop_id"
+                           value="{{ old('feexpay_shop_id', $settings['feexpay_shop_id']) }}"
+                           placeholder="Ayg9lkjkhurIvNp"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 font-mono">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Clé API FeexPay</label>
+                    <input type="password" name="feexpay_token" autocomplete="new-password"
+                           placeholder="{{ $settings['feexpay_token'] ? '•••••••••••••••••••• (configurée)' : 'fp_...' }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 font-mono">
+                    <p class="text-xs text-gray-400 mt-0.5">Laissez vide pour conserver la valeur actuelle.</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Mode</label>
+                    <select name="feexpay_mode"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+                        <option value="SANDBOX" {{ $settings['feexpay_mode'] === 'SANDBOX' ? 'selected' : '' }}>SANDBOX (tests)</option>
+                        <option value="LIVE" {{ $settings['feexpay_mode'] === 'LIVE' ? 'selected' : '' }}>LIVE (production)</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit"
+                    class="bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-800 transition">
+                Sauvegarder les paramètres FeexPay
             </button>
         </form>
     </div>

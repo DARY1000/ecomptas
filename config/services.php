@@ -18,10 +18,13 @@ return [
         'callback_url' => env('N8N_CALLBACK_URL', 'https://tondomaine.com'),
     ],
 
-    // FeexPay — Mobile money Bénin (MTN MoMo / Moov Money)
+    // FeexPay — Mobile money & carte (MTN/Moov/carte). Doc : https://docs.feexpay.me
+    // shop_id + token viennent du dashboard FeexPay (app-v2.feexpay.me).
+    // mode : SANDBOX (tests) ou LIVE (production).
     'feexpay' => [
-        'token'        => env('FEEXPAY_TOKEN'),
-        'callback_url' => env('FEEXPAY_CALLBACK_URL'),
+        'shop_id' => env('FEEXPAY_SHOP_ID'),
+        'token'   => env('FEEXPAY_TOKEN'),
+        'mode'    => env('FEEXPAY_MODE', 'SANDBOX'),
     ],
 
     // Mistral AI — OCR PDF + Vision images (TraitementIAService)

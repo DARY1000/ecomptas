@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Abonnement;
 use App\Models\Plan;
 use App\Models\Tenant;
+use App\Services\FeexPayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -13,15 +14,32 @@ use Illuminate\Support\Facades\Log;
  * Reçoit les confirmations de paiement FeexPay.
  * Active ou renouvelle l'abonnement du cabinet après paiement mobile money.
  * Route exclue du CSRF dans bootstrap/app.php.
+ *
+ * Le webhook FeexPay n'est pas signé cryptographiquement (voir doc "Sécurité" —
+ * aucune vérification de signature documentée). On ne fait donc jamais confiance
+ * au statut/montant du payload seul : on revérifie auprès de l'API FeexPay avant
+ * d'activer quoi que ce soit.
  */
 class FeexPayController extends Controller
 {
+    public function __construct(private FeexPayService $feexpay) {}
+
     public function callback(Request $request)
     {
-        $statut      = $request->input('status');
+        // Payload réel FeexPay (doc webhook) : reference, order_id, status, amount, callback_info...
         $montant     = (int) $request->input('amount', 0);
-        $transId     = $request->input('id') ?? $request->input('transaction_id');
-        $callbackRaw = $request->input('callback_info', '{}');
+        $transId     = $request->input('reference') ?? $request->input('order_id');
+        $callbackRaw = $request->input('callback_info') ?: '{}';
+
+        if (!$transId) {
+            Log::error('FeexPay webhook: reference manquante', $request->all());
+            return response()->json(['error' => 'reference manquante'], 400);
+        }
+
+        // Revérification serveur-à-serveur — ne jamais se fier uniquement au payload reçu.
+        $transaction = $this->feexpay->verifierTransaction($transId);
+        $statut      = $transaction['status'] ?? null;
+        $montant     = (int) ($transaction['amount'] ?? $montant);
 
         Log::info('FeexPay webhook reçu', [
             'status'  => $statut,
@@ -29,9 +47,9 @@ class FeexPayController extends Controller
             'trans_id' => $transId,
         ]);
 
-        // Ignorer les paiements non réussis sans erreur
+        // Ignorer les paiements non réussis (ou non confirmables) sans erreur
         if ($statut !== 'SUCCESSFUL') {
-            Log::info('FeexPay: paiement non abouti', ['status' => $statut]);
+            Log::info('FeexPay: paiement non abouti ou invérifiable', ['status' => $statut, 'trans_id' => $transId]);
             return response()->json(['ok' => true]);
         }
 
@@ -54,6 +72,18 @@ class FeexPayController extends Controller
                 'plan'      => $planSlug,
             ]);
             return response()->json(['error' => 'Tenant ou plan introuvable'], 404);
+        }
+
+        // Le montant réellement payé (vérifié auprès de FeexPay) doit correspondre au prix du plan —
+        // sinon quelqu'un pourrait payer un petit montant et le faire passer pour un plan plus cher.
+        if ($montant < $plan->prix_mensuel_xof) {
+            Log::error('FeexPay callback: montant payé insuffisant pour le plan demandé', [
+                'tenant_id'    => $tenantId,
+                'plan'         => $planSlug,
+                'montant_paye' => $montant,
+                'prix_plan'    => $plan->prix_mensuel_xof,
+            ]);
+            return response()->json(['error' => 'Montant insuffisant pour ce plan'], 400);
         }
 
         // Éviter les doublons (idempotence)
