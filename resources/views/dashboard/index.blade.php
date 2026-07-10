@@ -171,7 +171,7 @@
                             @php
                                 $colors = [
                                     'uploade' => 'bg-gray-100 text-gray-600',
-                                    'traitement_en_cours' => 'bg-blue-100 text-blue-700',
+                                    'traitement_en_cours' => 'bg-orange-100 text-orange-700',
                                     'a_valider' => 'bg-yellow-100 text-yellow-700',
                                     'valide' => 'bg-green-100 text-green-700',
                                     'rejete' => 'bg-red-100 text-red-700',

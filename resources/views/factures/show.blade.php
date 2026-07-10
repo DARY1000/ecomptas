@@ -28,7 +28,7 @@
                 $badgeClass = match($facture->statut) {
                     'valide'              => 'bg-green-100 text-green-700 border-green-200',
                     'a_valider'           => 'bg-yellow-100 text-yellow-700 border-yellow-200',
-                    'traitement_en_cours' => 'bg-blue-100 text-blue-700 border-blue-200',
+                    'traitement_en_cours' => 'bg-orange-100 text-orange-700 border-orange-200',
                     'rejete','erreur'     => 'bg-red-100 text-red-700 border-red-200',
                     default               => 'bg-gray-100 text-gray-600 border-gray-200',
                 };
@@ -208,15 +208,15 @@
 
             {{-- En cours de traitement --}}
             @if($facture->statut === 'traitement_en_cours')
-            <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center" id="processing-banner">
-                <div class="inline-flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-3">
-                    <svg class="animate-spin w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24">
+            <div class="bg-orange-50 border border-orange-200 rounded-xl p-6 text-center" id="processing-banner">
+                <div class="inline-flex items-center justify-center w-12 h-12 bg-orange-100 rounded-full mb-3">
+                    <svg class="animate-spin w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                     </svg>
                 </div>
-                <h3 class="font-semibold text-blue-800 mb-1">Traitement en cours</h3>
-                <p class="text-blue-600 text-sm">eCompta360 analyse votre facture… Veuillez patienter.</p>
+                <h3 class="font-semibold text-orange-800 mb-1">Traitement en cours</h3>
+                <p class="text-orange-600 text-sm">eCompta360 analyse votre facture… Veuillez patienter.</p>
             </div>
             @endif
 

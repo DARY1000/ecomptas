@@ -119,7 +119,7 @@ class Facture extends Model
     {
         return match($this->statut) {
             'uploade'             => 'gray',
-            'traitement_en_cours' => 'blue',
+            'traitement_en_cours' => 'orange',
             'a_valider'           => 'yellow',
             'valide'              => 'green',
             'rejete'              => 'red',
