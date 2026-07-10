@@ -12,7 +12,8 @@ class Tenant extends Model
     use HasUuids, SoftDeletes;
 
     protected $fillable = [
-        'nom', 'slug', 'ifu', 'email', 'email_contact', 'telephone',
+        'nom', 'sigle', 'slug', 'ifu', 'rccm', 'email_contact', 'telephone',
+        'site_web', 'logo_path',
         'adresse', 'ville', 'pays', 'devise',
         'plan', 'plan_slug',          // plan_slug = alias accepté, stocké dans 'plan'
         'regime_fiscal',
