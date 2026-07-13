@@ -19,71 +19,72 @@
 </head>
 <body class="bg-white text-gray-800 antialiased">
 
-{{-- ══ NAVBAR (vert foncé, dans le hero) ═════════════════════════════════ --}}
-<header class="hero-bg text-white sticky top-0 z-50" x-data="{ open: false }">
+{{-- ══ NAVBAR — blanche, séparée du hero ══════════════════════════════════ --}}
+<header class="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm" x-data="{ open: false }">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
             <a href="{{ route('landing') }}" class="flex items-center gap-2.5 flex-shrink-0">
-                <div class="w-9 h-9 bg-amber-400 rounded-xl flex items-center justify-center font-black text-green-950 text-lg shadow">e</div>
-                <span class="font-black text-xl tracking-tight">eCompta<span class="text-amber-300">360</span></span>
+                <div class="w-9 h-9 bg-emerald-700 rounded-xl flex items-center justify-center font-black text-white text-lg shadow">e</div>
+                <span class="font-black text-xl text-green-950 tracking-tight">eCompta<span class="text-emerald-600">360</span></span>
             </a>
 
-            <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-green-100">
-                <a href="#fonctions" class="hover:text-white transition">Fonctionnalités</a>
-                <a href="#suite"     class="hover:text-white transition">Nos outils</a>
-                <a href="#tarifs"    class="hover:text-white transition">Tarifs</a>
-                <a href="#faq"       class="hover:text-white transition">FAQ</a>
-                <a href="#contact"   class="hover:text-white transition">Contact</a>
+            <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-gray-500">
+                <a href="#fonctions" class="hover:text-emerald-700 transition">Fonctionnalités</a>
+                <a href="#suite"     class="hover:text-emerald-700 transition">Nos outils</a>
+                <a href="#tarifs"    class="hover:text-emerald-700 transition">Tarifs</a>
+                <a href="#faq"       class="hover:text-emerald-700 transition">FAQ</a>
+                <a href="#contact"   class="hover:text-emerald-700 transition">Contact</a>
             </nav>
 
             <div class="flex items-center gap-3">
-                <a href="{{ route('login') }}" class="hidden sm:block text-sm font-semibold text-green-100 hover:text-white transition">
+                <a href="{{ route('login') }}" class="hidden sm:block text-sm font-semibold text-emerald-700 hover:text-emerald-900 transition">
                     Connexion
                 </a>
                 <a href="{{ route('register') }}" class="bg-amber-400 text-green-950 text-sm font-bold px-5 py-2.5 rounded-xl hover:bg-amber-300 transition shadow-sm">
                     Essai gratuit
                 </a>
-                <button @click="open=!open" class="md:hidden p-2 text-green-100 hover:text-white">
+                <button @click="open=!open" class="md:hidden p-2 text-gray-500 hover:text-gray-700">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                 </button>
             </div>
         </div>
-        <div x-show="open" x-cloak class="md:hidden py-3 border-t border-white/10 space-y-1 text-sm font-medium text-green-100">
-            <a href="#fonctions" @click="open=false" class="block py-2 px-3 rounded-lg hover:bg-white/10">Fonctionnalités</a>
-            <a href="#suite"     @click="open=false" class="block py-2 px-3 rounded-lg hover:bg-white/10">Nos outils</a>
-            <a href="#tarifs"    @click="open=false" class="block py-2 px-3 rounded-lg hover:bg-white/10">Tarifs</a>
-            <a href="#faq"       @click="open=false" class="block py-2 px-3 rounded-lg hover:bg-white/10">FAQ</a>
-            <a href="#contact"   @click="open=false" class="block py-2 px-3 rounded-lg hover:bg-white/10">Contact</a>
-            <a href="{{ route('login') }}" class="block py-2 px-3 rounded-lg hover:bg-white/10">Connexion</a>
+        <div x-show="open" x-cloak class="md:hidden py-3 border-t border-gray-100 space-y-1 text-sm font-medium text-gray-600">
+            <a href="#fonctions" @click="open=false" class="block py-2 px-3 rounded-lg hover:bg-gray-50">Fonctionnalités</a>
+            <a href="#suite"     @click="open=false" class="block py-2 px-3 rounded-lg hover:bg-gray-50">Nos outils</a>
+            <a href="#tarifs"    @click="open=false" class="block py-2 px-3 rounded-lg hover:bg-gray-50">Tarifs</a>
+            <a href="#faq"       @click="open=false" class="block py-2 px-3 rounded-lg hover:bg-gray-50">FAQ</a>
+            <a href="#contact"   @click="open=false" class="block py-2 px-3 rounded-lg hover:bg-gray-50">Contact</a>
+            <a href="{{ route('login') }}" class="block py-2 px-3 rounded-lg hover:bg-gray-50">Connexion</a>
         </div>
     </div>
 </header>
 
-{{-- ══ HERO ═════════════════════════════════════════════════════════════ --}}
-<section id="accueil" class="hero-bg text-white overflow-hidden relative" x-data="{ profil: 'cabinet' }">
+{{-- ══ HERO (vert foncé) ═══════════════════════════════════════════════════ --}}
+<section id="accueil" class="hero-bg text-white overflow-hidden relative">
     <div class="absolute inset-0 opacity-10 pointer-events-none">
         <div class="absolute top-10 right-20 w-96 h-96 bg-white rounded-full blur-3xl"></div>
         <div class="absolute bottom-0 left-10 w-64 h-64 bg-teal-400 rounded-full blur-3xl"></div>
     </div>
-    <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-16">
+    <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24">
         <div class="grid lg:grid-cols-2 gap-12 items-center">
             <div>
                 <h1 class="text-4xl md:text-5xl font-black leading-tight mb-5">
-                    Logiciel de comptabilité<br>
-                    pour <span class="text-amber-300">cabinets & entreprises</span><br>
-                    SYSCOHADA
+                    Logiciels de gestion<br>
+                    pour <span class="text-amber-300">cabinets comptables</span><br>
+                    et TPE-PME
                 </h1>
-                <p class="text-green-100 text-lg mb-8 leading-relaxed max-w-lg">
-                    Plus qu'un logiciel, eCompta360 automatise la saisie comptable pour que votre cabinet
-                    passe moins de temps sur la donnée et plus de temps avec ses clients.
-                </p>
-                <a href="{{ route('register') }}"
-                   class="inline-block bg-amber-400 text-green-950 font-bold px-7 py-3.5 rounded-xl hover:bg-amber-300 transition shadow-lg text-center">
-                    Démarrer gratuitement — 15 jours
-                </a>
-                <p class="text-green-300 text-xs mt-4">Sans carte bancaire · Résiliable à tout moment</p>
+                <div class="bg-white/10 border border-white/15 rounded-2xl p-5 max-w-md backdrop-blur-sm">
+                    <p class="text-green-100 text-sm leading-relaxed mb-4">
+                        Plus qu'un logiciel, eCompta360 facilite la collaboration entre les cabinets comptables
+                        et leurs clients en automatisant la saisie SYSCOHADA au quotidien.
+                    </p>
+                    <a href="{{ route('register') }}"
+                       class="inline-block bg-amber-400 text-green-950 font-bold px-6 py-2.5 rounded-lg hover:bg-amber-300 transition text-sm">
+                        Démarrer gratuitement
+                    </a>
+                </div>
             </div>
 
             {{-- Illustration dashboard --}}
@@ -128,46 +129,45 @@
                 </div>
             </div>
         </div>
+    </div>
+</section>
 
-        {{-- Toggle profil --}}
-        <div class="mt-10 flex flex-wrap gap-3">
+{{-- ══ TOUT LE RESTE — un seul grand fond vert clair, cartes qui flottent dessus ══ --}}
+<div class="mint-bg">
+
+    {{-- Toggle profil — chevauche le bas du hero --}}
+    <div class="relative -mt-7 z-10 flex justify-center px-4" x-data="{ profil: 'cabinet' }">
+        <div class="bg-white rounded-full shadow-lg p-1.5 inline-flex gap-1 flex-wrap justify-center">
             <button @click="profil = 'cabinet'"
-                    :class="profil === 'cabinet' ? 'bg-white text-green-900' : 'bg-white/10 text-green-100 hover:bg-white/15'"
+                    :class="profil === 'cabinet' ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:text-gray-700'"
                     class="px-5 py-2.5 rounded-full text-sm font-semibold transition">
                 Je suis un cabinet comptable
             </button>
             <button @click="profil = 'entreprise'"
-                    :class="profil === 'entreprise' ? 'bg-white text-green-900' : 'bg-white/10 text-green-100 hover:bg-white/15'"
+                    :class="profil === 'entreprise' ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:text-gray-700'"
                     class="px-5 py-2.5 rounded-full text-sm font-semibold transition">
                 Je suis une entreprise TPE-PME
             </button>
         </div>
-        <p x-show="profil === 'cabinet'" x-cloak class="text-green-200 text-sm mt-3 max-w-lg">
-            Gérez tous vos clients depuis un seul espace : upload, traitement automatique, validation et export SYSCOHADA.
-        </p>
-        <p x-show="profil === 'entreprise'" x-cloak class="text-green-200 text-sm mt-3 max-w-lg">
-            Confiez vos factures à un cabinet équipé d'eCompta360 — moins d'allers-retours papier, une comptabilité à jour en continu.
-        </p>
     </div>
-</section>
 
-{{-- ══ POURQUOI CHOISIR ═══════════════════════════════════════════════════ --}}
-<section class="mint-bg py-20 px-4">
-    <div class="max-w-6xl mx-auto">
+    {{-- ── Pourquoi choisir ── --}}
+    <div class="max-w-6xl mx-auto px-4 pt-16 pb-4">
         <div class="text-center mb-12">
             <h2 class="text-3xl md:text-4xl font-black text-green-950 mb-3">Pourquoi choisir eCompta360 ?</h2>
             <p class="text-green-800/70 text-lg max-w-2xl mx-auto">
-                Une plateforme pensée pour les réalités comptables et fiscales de l'espace OHADA.
+                Découvrez eCompta360, votre allié pour propulser votre cabinet vers l'avenir. Avec nos solutions
+                adaptées aux réalités comptables et fiscales de l'espace OHADA.
             </p>
         </div>
         <div class="grid md:grid-cols-3 gap-5">
             @foreach([
-                ['M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z','Un moteur SYSCOHADA complet','Journaux, plan comptable révisé, calcul automatique de la TVA et de l\'AIB — tout est déjà paramétré pour le Bénin.'],
-                ['M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z','Conçu pour l\'Afrique','Mobile Money (MTN, Moov), montants en FCFA, fiscalité locale : pensé pour les cabinets ouest-africains, pas adapté après coup.'],
+                ['M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z','Un moteur SYSCOHADA complet','Journaux, plan comptable révisé, calcul automatique de la TVA et de l\'AIB — déjà paramétré pour le Bénin.'],
+                ['M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z','Conçu pour l\'Afrique','Mobile Money (MTN, Moov), montants en FCFA, fiscalité locale : pensé pour les cabinets ouest-africains.'],
                 ['M13 10V3L4 14h7v7l9-11h-7z','Rapide et automatisé','Uploadez une facture, elle est traitée en quelques secondes. Plus de ressaisie manuelle ligne par ligne.'],
             ] as $c)
             <div class="bg-white rounded-2xl p-6 card-shadow">
-                <div class="w-11 h-11 bg-emerald-100 rounded-xl flex items-center justify-center mb-4">
+                <div class="w-11 h-11 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
                     <svg class="w-5 h-5 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $c[0] }}"/>
                     </svg>
@@ -178,22 +178,20 @@
             @endforeach
         </div>
     </div>
-</section>
 
-{{-- ══ PILOTER VOTRE CABINET (texte + illustration) ═══════════════════════ --}}
-<section class="py-20 px-4 bg-white">
-    <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+    {{-- ── Développer et piloter (texte + illustration) ── --}}
+    <div class="max-w-6xl mx-auto px-4 py-16 grid lg:grid-cols-2 gap-12 items-center">
         <div>
-            <h2 class="text-3xl md:text-4xl font-black text-gray-900 mb-4">
+            <h2 class="text-3xl md:text-4xl font-black text-green-950 mb-4">
                 Développer et piloter votre<br>cabinet comptable
             </h2>
-            <p class="text-gray-500 text-lg leading-relaxed">
+            <p class="text-green-800/70 text-lg leading-relaxed">
                 Entre les nouvelles exigences fiscales, la digitalisation des services et le suivi quotidien
                 des dossiers clients, votre cabinet fait face à de multiples défis. eCompta360 est conçu pour
                 alléger cette charge et vous redonner du temps utile.
             </p>
         </div>
-        <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-8 border border-emerald-100 flex items-center justify-center">
+        <div class="bg-white rounded-2xl p-8 card-shadow flex items-center justify-center">
             <div class="grid grid-cols-2 gap-4 w-full max-w-xs">
                 @foreach([
                     ['M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z','Écritures validées'],
@@ -201,7 +199,7 @@
                     ['M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z','Équipe collaborative'],
                     ['M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z','Exports conformes'],
                 ] as $i)
-                <div class="bg-white rounded-xl p-4 shadow-sm text-center">
+                <div class="bg-emerald-50 rounded-xl p-4 text-center">
                     <svg class="w-6 h-6 text-emerald-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $i[0] }}"/>
                     </svg>
@@ -211,23 +209,26 @@
             </div>
         </div>
     </div>
-</section>
 
-{{-- ══ RÉPONDRE À VOS ENJEUX MÉTIER ═══════════════════════════════════════ --}}
-<section id="fonctions" class="mint-bg py-20 px-4">
-    <div class="max-w-6xl mx-auto">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl md:text-4xl font-black text-green-950 mb-3">Répondre à vos enjeux métier</h2>
+    {{-- ── Répondre à vos enjeux métier ── --}}
+    <div id="fonctions" class="max-w-6xl mx-auto px-4 py-16">
+        <div class="text-center mb-10">
+            <h2 class="text-3xl md:text-4xl font-black text-green-950">Répondre à vos enjeux métier</h2>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             @foreach([
-                ['from-emerald-700 to-emerald-900','M13 10V3L4 14h7v7l9-11h-7z','Gagner en productivité','Automatisez la saisie répétitive et concentrez-vous sur le conseil.'],
-                ['from-teal-700 to-teal-900','M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z','Fiabiliser vos écritures','Des écritures conformes au SYSCOHADA Révisé, sans erreur de codification.'],
-                ['from-green-700 to-green-900','M13 10V3L4 14h7v7l9-11h-7z','Réduire les tâches répétitives','Moins de ressaisie manuelle, plus de temps pour l\'analyse.'],
-                ['from-emerald-800 to-teal-900','M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z','Devenir le copilote de vos clients','Libérez du temps pour un accompagnement à plus forte valeur ajoutée.'],
+                ['from-emerald-700 to-emerald-950','M13 10V3L4 14h7v7l9-11h-7z','Gagner en productivité','Comment optimiser la productivité de votre cabinet comptable ?'],
+                ['from-teal-700 to-teal-950','M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z','Fiabiliser vos écritures','Comment garantir des écritures conformes au SYSCOHADA Révisé ?'],
+                ['from-green-700 to-green-950','M13 10V3L4 14h7v7l9-11h-7z','Réduire les tâches répétitives','Comment libérer du temps sur la saisie pour vos clients ?'],
+                ['from-emerald-800 to-teal-950','M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z','Devenir le copilote de vos clients','Un enjeu majeur : la digitalisation de la relation client.'],
             ] as $card)
-            <div class="rounded-2xl overflow-hidden card-shadow bg-gradient-to-br {{ $card[0] }} p-5 text-white flex flex-col min-h-[180px]">
-                <svg class="w-6 h-6 text-amber-300 mb-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="rounded-2xl overflow-hidden card-shadow bg-gradient-to-br {{ $card[0] }} p-5 text-white flex flex-col min-h-[170px] relative">
+                <div class="absolute top-4 right-4 w-7 h-7 bg-amber-400 rounded flex items-center justify-center">
+                    <svg class="w-4 h-4 text-green-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 17L17 7M17 7H8m9 0v9"/>
+                    </svg>
+                </div>
+                <svg class="w-6 h-6 text-white/70 mb-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $card[1] }}"/>
                 </svg>
                 <h3 class="font-bold mt-4 mb-1.5">{{ $card[2] }}</h3>
@@ -236,75 +237,75 @@
             @endforeach
         </div>
     </div>
-</section>
 
-{{-- ══ CONFORMITÉ (remplace le bandeau "logos clients") ═══════════════════ --}}
-<section class="py-8 px-4 bg-white border-y border-gray-100">
-    <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-sm font-semibold text-gray-400">
-        <span class="uppercase tracking-wide text-xs text-gray-400">Conforme à :</span>
-        <span>SYSCOHADA Révisé 2017</span>
-        <span>·</span>
-        <span>Zone OHADA</span>
-        <span>·</span>
-        <span>Fiscalité DGI Bénin</span>
-        <span>·</span>
-        <span>Paiement sécurisé FeexPay</span>
-    </div>
-</section>
-
-{{-- ══ STATS BAR ════════════════════════════════════════════════════════ --}}
-<section class="hero-bg py-8">
-    <div class="max-w-5xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-        <div>
-            <div class="text-2xl font-black text-white">SYSCOHADA</div>
-            <div class="text-xs text-green-300 mt-1">Plan comptable révisé</div>
-        </div>
-        <div>
-            <div class="text-2xl font-black text-white">100%</div>
-            <div class="text-xs text-green-300 mt-1">Traitement automatique</div>
-        </div>
-        <div>
-            <div class="text-2xl font-black text-white">15 jours</div>
-            <div class="text-xs text-green-300 mt-1">Essai gratuit</div>
-        </div>
-        <div>
-            <div class="text-2xl font-black text-white">Mobile Money</div>
-            <div class="text-xs text-green-300 mt-1">MTN & Moov</div>
+    {{-- ── Bandeau conformité (remplace les logos clients qu'on n'a pas) ── --}}
+    <div class="max-w-5xl mx-auto px-4 pb-16">
+        <div class="bg-white rounded-full shadow-sm px-6 py-4 flex flex-wrap items-center justify-center gap-x-8 gap-y-2">
+            <span class="font-bold text-gray-800 text-sm">Conforme à</span>
+            <span class="text-gray-400 text-sm">SYSCOHADA Révisé 2017</span>
+            <span class="text-gray-300">·</span>
+            <span class="text-gray-400 text-sm">Zone OHADA</span>
+            <span class="text-gray-300">·</span>
+            <span class="text-gray-400 text-sm">Fiscalité DGI Bénin</span>
+            <span class="text-gray-300">·</span>
+            <span class="text-gray-400 text-sm">FeexPay sécurisé</span>
         </div>
     </div>
-</section>
 
-{{-- ══ SUITE D'OUTILS (liste + CTA, comme "15 logiciels" chez Agiris) ═════ --}}
-<section id="suite" class="py-20 px-4 bg-white">
-    <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+    {{-- ── Stats bar — carte arrondie vert foncé ── --}}
+    <div class="max-w-5xl mx-auto px-4 pb-16">
+        <div class="hero-bg rounded-3xl py-10 px-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div>
+                <div class="text-2xl md:text-3xl font-black text-white">SYSCOHADA</div>
+                <div class="text-xs text-green-300 mt-1">Plan comptable révisé</div>
+            </div>
+            <div>
+                <div class="text-2xl md:text-3xl font-black text-white">100%</div>
+                <div class="text-xs text-green-300 mt-1">Traitement automatique</div>
+            </div>
+            <div>
+                <div class="text-2xl md:text-3xl font-black text-white">15 jours</div>
+                <div class="text-xs text-green-300 mt-1">Essai gratuit</div>
+            </div>
+            <div>
+                <div class="text-2xl md:text-3xl font-black text-white">Mobile Money</div>
+                <div class="text-xs text-green-300 mt-1">MTN & Moov</div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ── Suite d'outils ── --}}
+    <div id="suite" class="max-w-6xl mx-auto px-4 py-4 grid lg:grid-cols-2 gap-12 items-start">
         <div>
-            <h2 class="text-3xl md:text-4xl font-black text-gray-900 mb-4">
-                Une suite pensée pour<br>votre cabinet
+            <p class="text-green-800/70 font-semibold mb-1">Plus de</p>
+            <h2 class="text-3xl md:text-4xl font-black text-green-950 mb-4">
+                4 modules de gestion<br>pour votre cabinet
             </h2>
-            <p class="text-gray-500 text-lg leading-relaxed mb-6">
-                Tout ce dont vous avez besoin pour la tenue comptable de vos clients, dans un seul espace.
+            <p class="text-green-800/70 text-lg leading-relaxed mb-6">
+                eCompta360 se distingue par la profondeur fonctionnelle de ses solutions. Une couverture complète
+                pour fidéliser vos clients et gagner en productivité.
             </p>
             <a href="{{ route('register') }}"
                class="inline-block bg-amber-400 text-green-950 font-bold px-6 py-3 rounded-xl hover:bg-amber-300 transition">
                 Découvrir tous nos outils
             </a>
         </div>
-        <div class="space-y-3">
+        <div class="bg-white rounded-2xl card-shadow divide-y divide-gray-100 overflow-hidden">
             @foreach([
                 ['M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z','Comptabilité','Écritures SYSCOHADA automatiques, journaux, plan comptable complet.'],
                 ['M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z','Notes de frais','Catégorisez vos dépenses par type de charge, exportez pour l\'expert-comptable.'],
                 ['M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z','Déclarations','Retrouvez facilement les données pour vos déclarations fiscales TVA.'],
                 ['M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4','Immobilisations','Suivi des actifs immobilisés et de leur amortissement.'],
             ] as $tool)
-            <div class="flex items-center gap-4 bg-gray-50 hover:bg-emerald-50 rounded-xl p-4 transition group">
-                <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
+            <div class="flex items-center gap-4 p-5 hover:bg-emerald-50 transition group">
+                <div class="w-11 h-11 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
                     <svg class="w-5 h-5 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $tool[0] }}"/>
                     </svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="font-semibold text-gray-800 text-sm">{{ $tool[1] }}</p>
-                    <p class="text-gray-400 text-xs">{{ $tool[2] }}</p>
+                    <p class="font-bold text-emerald-800 text-sm">{{ $tool[1] }}</p>
+                    <p class="text-gray-400 text-xs mt-0.5">{{ $tool[2] }}</p>
                 </div>
                 <svg class="w-4 h-4 text-gray-300 group-hover:text-emerald-600 group-hover:translate-x-1 transition flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -313,18 +314,20 @@
             @endforeach
         </div>
     </div>
-</section>
 
-{{-- ══ COMMENT ÇA MARCHE ═══════════════════════════════════════════════════ --}}
-<section class="mint-bg py-20 px-4" x-data="{ step: 1 }">
-    <div class="max-w-5xl mx-auto">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl md:text-4xl font-black text-green-950 mb-3">Comment fonctionne eCompta360 ?</h2>
-            <p class="text-green-800/70 text-lg">Trois étapes, sans formation nécessaire.</p>
+    {{-- ── Comment ça marche ── --}}
+    <div class="max-w-5xl mx-auto px-4 py-16" x-data="{ step: 1 }">
+        <div class="mb-8">
+            <h2 class="text-3xl md:text-4xl font-black text-green-950 mb-2">
+                Comment fonctionne<br>eCompta360 ?
+            </h2>
+            <p class="text-green-800/70 max-w-xl">
+                Trois étapes suffisent, sans formation ni installation compliquée, pour digitaliser la saisie de votre cabinet.
+            </p>
         </div>
 
         <div class="bg-white rounded-3xl overflow-hidden card-shadow grid md:grid-cols-2">
-            <div class="step-circle flex items-center justify-center p-12">
+            <div class="step-circle flex items-center justify-center p-12 min-h-[280px]">
                 <svg class="w-24 h-24 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13l2 2 4-4"/>
@@ -333,19 +336,19 @@
             <div class="hero-bg p-8 md:p-10 text-white flex flex-col justify-center">
                 <template x-if="step === 1">
                     <div>
-                        <h3 class="text-xl font-black mb-2">1. Uploadez vos factures</h3>
+                        <h3 class="text-xl font-black mb-2">Uploadez vos factures</h3>
                         <p class="text-green-100 text-sm leading-relaxed">PDF ou image (JPG, PNG) — fournisseur, client, notes de frais, tout passe par le même point d'entrée.</p>
                     </div>
                 </template>
                 <template x-if="step === 2">
                     <div>
-                        <h3 class="text-xl font-black mb-2">2. Traitement automatique</h3>
+                        <h3 class="text-xl font-black mb-2">Traitement automatique</h3>
                         <p class="text-green-100 text-sm leading-relaxed">eCompta360 lit le document, identifie les montants, la TVA, l'AIB, et génère les écritures SYSCOHADA en quelques secondes.</p>
                     </div>
                 </template>
                 <template x-if="step === 3">
                     <div>
-                        <h3 class="text-xl font-black mb-2">3. Validez et exportez</h3>
+                        <h3 class="text-xl font-black mb-2">Validez et exportez</h3>
                         <p class="text-green-100 text-sm leading-relaxed">Vérifiez les données extraites, validez, puis exportez au format Excel, CSV ou FEC.</p>
                     </div>
                 </template>
@@ -359,40 +362,43 @@
             </div>
         </div>
     </div>
-</section>
 
-{{-- ══ NOS INTÉGRATIONS ═════════════════════════════════════════════════════ --}}
-<section class="py-20 px-4 bg-white">
-    <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+    {{-- ── Nos intégrations ── --}}
+    <div class="max-w-6xl mx-auto px-4 py-16 grid lg:grid-cols-2 gap-12 items-center">
         <div>
-            <h2 class="text-3xl md:text-4xl font-black text-gray-900 mb-4">Nos intégrations</h2>
-            <p class="text-gray-500 text-lg leading-relaxed mb-6">
-                Connectez eCompta360 aux outils que vous utilisez déjà et optimisez l'organisation de votre cabinet.
+            <h2 class="text-3xl md:text-4xl font-black text-green-950 mb-3">Nos intégrations</h2>
+            <p class="text-green-800/70 text-lg leading-relaxed mb-2">
+                Construisez votre écosystème et optimisez l'organisation de votre cabinet.
+            </p>
+            <p class="text-green-800/70 leading-relaxed mb-6">
+                eCompta360 se connecte aux outils de paiement et d'export que vous utilisez déjà, pour s'adapter
+                à vos méthodes de travail plutôt que de vous imposer les siennes.
             </p>
             <a href="#tarifs"
                class="inline-block bg-amber-400 text-green-950 font-bold px-6 py-3 rounded-xl hover:bg-amber-300 transition">
                 Voir les offres disponibles
             </a>
         </div>
-        <div class="grid grid-cols-2 gap-4">
+        <div class="bg-white rounded-2xl card-shadow p-6 space-y-3">
             @foreach([
                 ['Google Sheets','Synchronisation automatique de vos écritures.'],
                 ['FeexPay','Paiement Mobile Money (MTN, Moov) et carte.'],
-                ['Export Excel/CSV','Compatible avec vos logiciels existants.'],
+                ['Export Excel / CSV','Compatible avec vos logiciels existants.'],
                 ['Export FEC','Format standardisé pour la transmission fiscale.'],
             ] as $intg)
-            <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-5">
-                <p class="font-bold text-gray-800 text-sm mb-1">{{ $intg[0] }}</p>
-                <p class="text-gray-500 text-xs leading-relaxed">{{ $intg[1] }}</p>
+            <div class="flex items-center gap-3 bg-emerald-50 rounded-xl p-4">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <div>
+                    <p class="font-bold text-gray-800 text-sm">{{ $intg[0] }}</p>
+                    <p class="text-gray-500 text-xs">{{ $intg[1] }}</p>
+                </div>
             </div>
             @endforeach
         </div>
     </div>
-</section>
 
-{{-- ══ TARIFS ═══════════════════════════════════════════════════════════ --}}
-<section id="tarifs" class="mint-bg py-20 px-4">
-    <div class="max-w-5xl mx-auto">
+    {{-- ── Tarifs ── --}}
+    <div id="tarifs" class="max-w-5xl mx-auto px-4 py-16">
         <div class="text-center mb-12">
             <h2 class="text-3xl md:text-4xl font-black text-green-950 mb-3">Des offres adaptées à votre activité</h2>
             <p class="text-green-800/70 text-lg">Commencez gratuitement. Évoluez à votre rythme.</p>
@@ -450,14 +456,12 @@
             Paiement sécurisé · MTN Mobile Money · Moov Money · Pas de carte internationale requise
         </p>
     </div>
-</section>
 
-{{-- ══ TÉMOIGNAGES ══════════════════════════════════════════════════════ --}}
-<section class="py-20 px-4 bg-white">
-    <div class="max-w-5xl mx-auto">
+    {{-- ── Témoignages ── --}}
+    <div class="max-w-5xl mx-auto px-4 py-16">
         <div class="text-center mb-12">
-            <h2 class="text-3xl font-black text-gray-900 mb-2">Ce que nos clients pensent de nous</h2>
-            <p class="text-gray-400">Des cabinets qui ont transformé leur quotidien avec eCompta360.</p>
+            <h2 class="text-3xl font-black text-green-950 mb-2">Ce que nos clients pensent de nous</h2>
+            <p class="text-green-800/60">Des cabinets qui ont transformé leur quotidien avec eCompta360.</p>
         </div>
         <div class="grid md:grid-cols-3 gap-6">
             @foreach([
@@ -465,7 +469,7 @@
                 ['KO','Kofi Ouedraogo','Cabinet comptable, Porto-Novo','bg-teal-100 text-teal-700','"Le gain de temps est impressionnant. Ce qui prenait 3 heures ne prend plus que 20 minutes. L\'intégration avec Mobile Money est un vrai plus — je règle mon abonnement depuis mon téléphone."'],
                 ['FS','Fatou Sow','Directrice, Abomey-Calavi','bg-amber-100 text-amber-700','"Enfin une solution de comptabilité pensée pour l\'Afrique ! Le respect du SYSCOHADA Révisé est irréprochable. Mon équipe a été opérationnelle dès le premier jour sans formation particulière."'],
             ] as $t)
-            <div class="bg-gray-50 border border-gray-100 rounded-2xl p-6 card-shadow">
+            <div class="bg-white border border-gray-100 rounded-2xl p-6 card-shadow">
                 <div class="flex gap-0.5 mb-4">
                     @for($i=0;$i<5;$i++)
                     <svg class="w-4 h-4 text-amber-400 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09L5.5 11.5 1 7.91l6.061-.882L10 2l2.939 5.028L19 7.91l-4.5 3.59 1.378 6.59z"/></svg>
@@ -483,11 +487,9 @@
             @endforeach
         </div>
     </div>
-</section>
 
-{{-- ══ FAQ ════════════════════════════════════════════════════════════ --}}
-<section id="faq" class="mint-bg py-20 px-4" x-data="{ open: null }">
-    <div class="max-w-3xl mx-auto">
+    {{-- ── FAQ ── --}}
+    <div id="faq" class="max-w-3xl mx-auto px-4 py-16" x-data="{ open: null }">
         <h2 class="text-3xl font-black text-center text-green-950 mb-10">Questions fréquentes</h2>
         @php $faqs = [
             ["Qu'est-ce que le SYSCOHADA Révisé ?","Le SYSCOHADA Révisé est le référentiel comptable des 17 pays membres de l'OHADA. eCompta360 génère des écritures automatiquement conformes à ce standard, pour les régimes B (réel normal) et D (simplifié)."],
@@ -514,28 +516,29 @@
             @endforeach
         </div>
     </div>
-</section>
 
-{{-- ══ CTA FINAL (bandeau sombre, façon "Intéressé ? Des questions ?") ════ --}}
-<section id="contact" class="bg-gray-950 py-16 px-4 text-center text-white">
-    <div class="max-w-2xl mx-auto">
-        <h2 class="text-3xl font-black mb-3">Intéressé ? Des questions ?</h2>
-        <p class="text-gray-400 mb-8 text-lg">Notre équipe vous répond dans les 24 heures ouvrées.</p>
-        <a href="{{ route('register') }}"
-           class="inline-block bg-amber-400 text-green-950 font-bold px-10 py-4 rounded-xl hover:bg-amber-300 transition shadow-xl text-lg">
-            Créer mon espace gratuitement →
-        </a>
-        <div class="flex flex-wrap justify-center gap-6 mt-8 text-sm text-gray-400">
-            <a href="mailto:contact@ecompta360.com" class="hover:text-white transition">contact@ecompta360.com</a>
-            <span>+229 00 00 00 00</span>
+    {{-- ── CTA final — boîte sombre bordée, façon "Intéressé ? Des questions ?" ── --}}
+    <div class="max-w-5xl mx-auto px-4 pt-4 pb-16">
+        <div id="contact" class="bg-gradient-to-br from-gray-950 to-green-950 border border-amber-400/20 rounded-3xl py-14 px-6 text-center text-white">
+            <h2 class="text-3xl font-black mb-3">Intéressé ? Des questions ?</h2>
+            <p class="text-gray-400 mb-8 text-lg">Notre équipe vous répond dans les 24 heures ouvrées.</p>
+            <a href="{{ route('register') }}"
+               class="inline-block bg-amber-400 text-green-950 font-bold px-10 py-4 rounded-xl hover:bg-amber-300 transition shadow-xl text-lg">
+                Créer mon espace gratuitement →
+            </a>
+            <div class="flex flex-wrap justify-center gap-6 mt-8 text-sm text-gray-400">
+                <a href="mailto:contact@ecompta360.com" class="hover:text-white transition">contact@ecompta360.com</a>
+                <span>+229 00 00 00 00</span>
+            </div>
         </div>
     </div>
-</section>
 
-{{-- ══ FOOTER ══════════════════════════════════════════════════════════ --}}
-<footer class="mint-bg text-green-900 py-12 px-4">
-    <div class="max-w-6xl mx-auto">
-        <div class="grid md:grid-cols-4 gap-8 mb-10">
+</div>
+
+{{-- ══ FOOTER — carte arrondie claire sur fond vert foncé ═════════════════ --}}
+<footer class="hero-bg py-10 px-4">
+    <div class="max-w-6xl mx-auto mint-bg rounded-3xl p-8 md:p-10">
+        <div class="grid md:grid-cols-4 gap-8 mb-8">
             <div class="md:col-span-2">
                 <div class="flex items-center gap-2.5 mb-3">
                     <div class="w-8 h-8 bg-emerald-700 rounded-lg flex items-center justify-center font-black text-white text-sm">e</div>
