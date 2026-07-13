@@ -51,7 +51,7 @@
             @if($facture->statut === 'a_valider' && auth()->user()->peutValider())
                 <form method="POST" action="{{ route('factures.valider', $facture) }}" class="inline"
                       onsubmit="return confirm('Valider cette facture et comptabiliser les écritures ?')">
-                    @csrf @method('PATCH')
+                    @csrf
                     <button type="submit"
                             class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-medium">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,7 +62,7 @@
                 </form>
                 <form method="POST" action="{{ route('factures.rejeter', $facture) }}" class="inline"
                       onsubmit="return confirm('Rejeter cette facture ?')">
-                    @csrf @method('PATCH')
+                    @csrf
                     <button type="submit"
                             class="inline-flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition text-sm font-medium">
                         Rejeter
