@@ -37,6 +37,33 @@ class ExportController extends Controller
     }
 
     /**
+     * Export FEC (Fichier des Écritures Comptables) — format standardisé pour
+     * transmission fiscale, avec sous-comptes tiers et numérotation séquentielle.
+     */
+    public function fec(Request $request)
+    {
+        $tenant = auth()->user()->tenant;
+
+        $plan = Plan::where('slug', $tenant->plan)->first();
+        abort_unless($plan?->export_xlsx, 403, 'L\'export n\'est pas disponible dans votre plan actuel.');
+
+        $fec = $this->exportService->exportFec(
+            tenantId:   $tenant->id,
+            dateDebut:  $request->date_debut,
+            dateFin:    $request->date_fin,
+            journal:    $request->journal
+        );
+
+        $identifiant = $tenant->ifu ?: $tenant->slug;
+        $filename = "{$identifiant}_FEC_" . now()->format('Ymd') . '.txt';
+
+        return response($fec, 200, [
+            'Content-Type'        => 'text/plain; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
+    }
+
+    /**
      * Export XLSX des écritures via maatwebsite/excel.
      */
     public function xlsx(Request $request)

@@ -84,6 +84,90 @@ class ExportService
     }
 
     /**
+     * Export au format FEC (Fichier des Écritures Comptables) — colonnes standardisées
+     * attendues par l'administration fiscale (JournalCode, EcritureNum, CompAuxNum,
+     * ModeRglt, CodeMECeF...). Fichier texte à séparateur tabulation (convention FEC).
+     *
+     * Limite connue : le règlement est généré dans la même écriture que la facture
+     * (pas de suivi séparé des impayés), donc DateRglt/ModeRglt reflètent la ligne
+     * de règlement de la facture elle-même, pas un encaissement ultérieur réel.
+     */
+    public function exportFec(
+        string  $tenantId,
+        ?string $dateDebut = null,
+        ?string $dateFin   = null,
+        ?string $journal   = null
+    ): string {
+        $ecritures = $this->requeteEcritures($tenantId, $dateDebut, $dateFin, $journal)
+            ->load('facture');
+
+        $entetes = [
+            'JournalCode', 'JournalLib', 'EcritureNum', 'EcritureDate',
+            'CompteNum', 'CompteLib', 'CompAuxNum', 'CompAuxLib',
+            'PieceRef', 'PieceDate', 'EcritureLib', 'Debit', 'Credit',
+            'EcritureLettre', 'DateLettre', 'ValidDate', 'Montantdevise', 'Idevise',
+            'DateRglt', 'ModeRglt', 'NatOp', 'IdFournisseur', 'RefMarche', 'CodeMECeF',
+        ];
+
+        $lignes   = [implode("\t", $entetes)];
+        $compteur = []; // numéro d'écriture séquentiel par journal
+        $numeros  = []; // [journal => [facture_id => EcritureNum]] — une écriture = une facture
+
+        foreach ($ecritures as $e) {
+            $j = $e->journal;
+            if (!isset($numeros[$j][$e->facture_id])) {
+                $compteur[$j] = ($compteur[$j] ?? 0) + 1;
+                $numeros[$j][$e->facture_id] = $j . str_pad((string) $compteur[$j], 6, '0', STR_PAD_LEFT);
+            }
+
+            $facture = $e->facture;
+
+            $lignes[] = implode("\t", [
+                $j,
+                $this->libelleJournal($j),
+                $numeros[$j][$e->facture_id],
+                $e->date_ecriture?->format('Ymd') ?? '',
+                $e->numero_compte,
+                $e->libelle_compte ?? '',
+                $facture?->ifu_tiers ?? '',
+                $facture?->fournisseur_client ?? '',
+                $e->numero_piece ?? '',
+                $facture?->date_facture?->format('Ymd') ?? '',
+                $e->libelle_ecriture,
+                $e->debit > 0 ? number_format((float) $e->debit, 2, '.', '') : '0.00',
+                $e->credit > 0 ? number_format((float) $e->credit, 2, '.', '') : '0.00',
+                '', // EcritureLettre — lettrage non géré
+                '', // DateLettre
+                $e->created_at?->format('Ymd') ?? '',
+                '', // Montantdevise — laissé vide (devise unique XOF)
+                $e->devise,
+                $e->est_ecriture_reglement ? $e->date_ecriture?->format('Ymd') : '',
+                $e->est_ecriture_reglement ? ($facture?->mode_paiement ?? '') : '',
+                $facture?->type_document ?? '',
+                '', // IdFournisseur — non distinct de CompAuxNum dans notre modèle actuel
+                '', // RefMarche — non applicable
+                $facture?->code_mecef ?? '',
+            ]);
+        }
+
+        return implode("\n", $lignes);
+    }
+
+    private function libelleJournal(string $code): string
+    {
+        return match ($code) {
+            'HA' => 'Journal des Achats',
+            'VE' => 'Journal des Ventes',
+            'BQ' => 'Journal de Banque',
+            'CA' => 'Journal de Caisse',
+            'OD' => 'Journal des Opérations Diverses',
+            'AN' => 'Journal des À-Nouveaux',
+            'SA' => 'Journal de Situation',
+            default => $code,
+        };
+    }
+
+    /**
      * Calcul des totaux par journal pour le résumé d'export.
      */
     public function calculerTotaux(string $tenantId, ?string $dateDebut, ?string $dateFin): array

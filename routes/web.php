@@ -82,6 +82,7 @@ Route::middleware(['auth', 'check.subscription'])->group(function () {
     // ── Exports (plan Starter+) ───────────────────────────────────
     Route::get('/export/xlsx', [ExportController::class, 'xlsx'])->name('export.xlsx');
     Route::get('/export/csv', [ExportController::class, 'csv'])->name('export.csv');
+    Route::get('/export/fec', [ExportController::class, 'fec'])->name('export.fec');
 
     // ── Abonnement ────────────────────────────────────────────────
     Route::prefix('abonnement')->name('abonnement.')->group(function () {
