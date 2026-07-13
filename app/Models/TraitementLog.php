@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TraitementLog extends Model
 {
+    // Laravel devine "traitement_logs" (singulier) à partir du nom de classe —
+    // la vraie table s'appelle "traitements_logs" (voir la migration de création).
+    protected $table = 'traitements_logs';
+
     // Pas de updated_at sur cette table (append-only)
     public $timestamps = false;
     const CREATED_AT = 'created_at';
