@@ -9,10 +9,10 @@
     <style>
         [x-cloak] { display: none !important; }
         html { scroll-behavior: smooth; }
-        .hero-bg { background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 60%, #0ea5e9 100%); }
-        .feature-icon { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
-        .card-shadow { box-shadow: 0 4px 24px rgba(30,58,138,.08); }
-        .popular-card { background: linear-gradient(160deg, #1e3a8a 0%, #1d4ed8 100%); }
+        .hero-bg { background: linear-gradient(135deg, #052e1f 0%, #065f46 55%, #0d9488 100%); }
+        .feature-icon { background: linear-gradient(135deg, #d1fae5, #a7f3d0); }
+        .card-shadow { box-shadow: 0 4px 24px rgba(6,95,70,.08); }
+        .popular-card { background: linear-gradient(160deg, #065f46 0%, #0d9488 100%); }
         @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
         .float { animation: float 4s ease-in-out infinite; }
     </style>
@@ -25,25 +25,25 @@
         <div class="flex items-center justify-between h-16">
             {{-- Logo --}}
             <a href="{{ route('landing') }}" class="flex items-center gap-2.5 flex-shrink-0">
-                <div class="w-9 h-9 bg-blue-700 rounded-xl flex items-center justify-center font-black text-white text-lg shadow">e</div>
-                <span class="font-black text-xl text-blue-900 tracking-tight">eCompta<span class="text-blue-500">360</span></span>
+                <div class="w-9 h-9 bg-green-700 rounded-xl flex items-center justify-center font-black text-white text-lg shadow">e</div>
+                <span class="font-black text-xl text-green-900 tracking-tight">eCompta<span class="text-green-500">360</span></span>
             </a>
 
             {{-- Nav desktop --}}
             <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-gray-500">
-                <a href="#accueil"   class="hover:text-blue-700 transition">Accueil</a>
-                <a href="#fonctions" class="hover:text-blue-700 transition">Fonctionnalités</a>
-                <a href="#tarifs"    class="hover:text-blue-700 transition">Tarifs</a>
-                <a href="#faq"       class="hover:text-blue-700 transition">FAQ</a>
-                <a href="#contact"   class="hover:text-blue-700 transition">Contact</a>
+                <a href="#accueil"   class="hover:text-green-700 transition">Accueil</a>
+                <a href="#fonctions" class="hover:text-green-700 transition">Fonctionnalités</a>
+                <a href="#tarifs"    class="hover:text-green-700 transition">Tarifs</a>
+                <a href="#faq"       class="hover:text-green-700 transition">FAQ</a>
+                <a href="#contact"   class="hover:text-green-700 transition">Contact</a>
             </nav>
 
             {{-- CTAs --}}
             <div class="flex items-center gap-3">
-                <a href="{{ route('login') }}" class="hidden sm:block text-sm font-semibold text-blue-700 hover:text-blue-900 transition">
+                <a href="{{ route('login') }}" class="hidden sm:block text-sm font-semibold text-green-700 hover:text-green-900 transition">
                     Connexion
                 </a>
-                <a href="{{ route('register') }}" class="bg-blue-700 text-white text-sm font-bold px-5 py-2.5 rounded-xl hover:bg-blue-800 transition shadow-sm">
+                <a href="{{ route('register') }}" class="bg-amber-400 text-green-950 text-sm font-bold px-5 py-2.5 rounded-xl hover:bg-amber-300 transition shadow-sm">
                     Essai gratuit
                 </a>
                 <button @click="open=!open" class="md:hidden p-2 text-gray-500 hover:text-gray-700">
@@ -69,7 +69,7 @@
 <section id="accueil" class="hero-bg text-white overflow-hidden relative">
     <div class="absolute inset-0 opacity-10">
         <div class="absolute top-10 right-20 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-        <div class="absolute bottom-0 left-10 w-64 h-64 bg-sky-300 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 left-10 w-64 h-64 bg-green-300 rounded-full blur-3xl"></div>
     </div>
     <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24">
         <div class="grid lg:grid-cols-2 gap-12 items-center">
@@ -80,15 +80,15 @@
                 </div>
                 <h1 class="text-4xl md:text-5xl font-black leading-tight mb-5">
                     La gestion sereine de votre<br>
-                    <span class="text-sky-300">cabinet commence ici</span>
+                    <span class="text-amber-300">cabinet commence ici</span>
                 </h1>
-                <p class="text-blue-100 text-lg mb-8 leading-relaxed">
+                <p class="text-green-100 text-lg mb-8 leading-relaxed">
                     Uploadez vos factures, eCompta360 génère vos écritures <strong class="text-white">SYSCOHADA</strong> en quelques secondes.
                     Moins de saisie, plus de temps pour vos clients.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4">
                     <a href="{{ route('register') }}"
-                       class="bg-white text-blue-900 font-bold px-7 py-3.5 rounded-xl hover:bg-blue-50 transition shadow-lg text-center">
+                       class="bg-amber-400 text-green-950 font-bold px-7 py-3.5 rounded-xl hover:bg-amber-300 transition shadow-lg text-center">
                         Démarrer gratuitement — 15 jours
                     </a>
                     <a href="#fonctions"
@@ -96,7 +96,7 @@
                         Découvrir →
                     </a>
                 </div>
-                <p class="text-blue-300 text-xs mt-4">Sans carte bancaire · Résiliable à tout moment</p>
+                <p class="text-green-300 text-xs mt-4">Sans carte bancaire · Résiliable à tout moment</p>
             </div>
 
             {{-- Illustration dashboard --}}
@@ -108,9 +108,9 @@
                             <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">Actif</span>
                         </div>
                         <div class="grid grid-cols-3 gap-3 mb-4">
-                            <div class="bg-blue-50 rounded-lg p-3 text-center">
-                                <div class="text-2xl font-black text-blue-700">48</div>
-                                <div class="text-xs text-blue-500 mt-0.5">Factures</div>
+                            <div class="bg-green-50 rounded-lg p-3 text-center">
+                                <div class="text-2xl font-black text-green-700">48</div>
+                                <div class="text-xs text-green-500 mt-0.5">Factures</div>
                             </div>
                             <div class="bg-green-50 rounded-lg p-3 text-center">
                                 <div class="text-2xl font-black text-green-700">45</div>
@@ -145,23 +145,23 @@
 </section>
 
 {{-- ══ STATS BAR ════════════════════════════════════════════════════════ --}}
-<section class="bg-blue-950 py-8">
+<section class="bg-green-950 py-8">
     <div class="max-w-5xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
         <div>
-            <div class="text-2xl font-black text-blue-300">SYSCOHADA</div>
-            <div class="text-xs text-blue-400 mt-1">Plan comptable révisé</div>
+            <div class="text-2xl font-black text-green-300">SYSCOHADA</div>
+            <div class="text-xs text-green-400 mt-1">Plan comptable révisé</div>
         </div>
         <div>
-            <div class="text-2xl font-black text-blue-300">100%</div>
-            <div class="text-xs text-blue-400 mt-1">Traitement automatique</div>
+            <div class="text-2xl font-black text-green-300">100%</div>
+            <div class="text-xs text-green-400 mt-1">Traitement automatique</div>
         </div>
         <div>
-            <div class="text-2xl font-black text-blue-300">15 jours</div>
-            <div class="text-xs text-blue-400 mt-1">Essai gratuit</div>
+            <div class="text-2xl font-black text-green-300">15 jours</div>
+            <div class="text-xs text-green-400 mt-1">Essai gratuit</div>
         </div>
         <div>
-            <div class="text-2xl font-black text-blue-300">Mobile Money</div>
-            <div class="text-xs text-blue-400 mt-1">MTN & Moov</div>
+            <div class="text-2xl font-black text-green-300">Mobile Money</div>
+            <div class="text-xs text-green-400 mt-1">MTN & Moov</div>
         </div>
     </div>
 </section>
@@ -172,7 +172,7 @@
         <div class="text-center mb-14">
             <h2 class="text-3xl md:text-4xl font-black text-gray-900 mb-3">
                 Simplifiez vos tâches administratives<br>
-                <span class="text-blue-700">pour vous concentrer sur l'essentiel</span>
+                <span class="text-green-700">pour vous concentrer sur l'essentiel</span>
             </h2>
             <p class="text-gray-500 text-lg max-w-2xl mx-auto">
                 eCompta360 prend en charge les tâches répétitives de votre comptabilité. Vous gardez le contrôle.
@@ -184,7 +184,7 @@
             {{-- Feature 1 --}}
             <div class="grid lg:grid-cols-2 gap-10 items-center">
                 <div>
-                    <div class="inline-flex items-center gap-2 bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full mb-4">
+                    <div class="inline-flex items-center gap-2 bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full mb-4">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         Extraction automatique
                     </div>
@@ -195,13 +195,13 @@
                     <ul class="space-y-2.5">
                         @foreach(['Reconnaissance automatique du fournisseur','Extraction des montants HT, TVA, TTC','Détection du type de charge SYSCOHADA','Vérification de cohérence des données'] as $item)
                         <li class="flex items-start gap-2 text-sm text-gray-600">
-                            <svg class="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                             {{ $item }}
                         </li>
                         @endforeach
                     </ul>
                 </div>
-                <div class="bg-blue-50 rounded-2xl p-6 border border-blue-100">
+                <div class="bg-green-50 rounded-2xl p-6 border border-green-100">
                     <div class="bg-white rounded-xl p-5 shadow-sm">
                         <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
                             <div class="w-9 h-9 bg-red-100 rounded-lg flex items-center justify-center text-red-600 font-bold text-xs">PDF</div>
@@ -210,14 +210,14 @@
                                 <div class="text-xs text-gray-400">En cours de traitement…</div>
                             </div>
                             <div class="ml-auto">
-                                <div class="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                                <div class="w-6 h-6 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
                             </div>
                         </div>
                         <div class="space-y-2 text-xs">
                             <div class="flex justify-between py-1.5 border-b border-gray-50"><span class="text-gray-400">Fournisseur</span><span class="font-semibold text-gray-700">SONAC Bénin</span></div>
                             <div class="flex justify-between py-1.5 border-b border-gray-50"><span class="text-gray-400">Date</span><span class="font-semibold text-gray-700">15/05/2025</span></div>
                             <div class="flex justify-between py-1.5 border-b border-gray-50"><span class="text-gray-400">Montant HT</span><span class="font-semibold text-gray-700">45 000 XOF</span></div>
-                            <div class="flex justify-between py-1.5"><span class="text-gray-400">Compte SYSCOHADA</span><span class="font-semibold text-blue-700">6011 — Achats de marchandises</span></div>
+                            <div class="flex justify-between py-1.5"><span class="text-gray-400">Compte SYSCOHADA</span><span class="font-semibold text-green-700">6011 — Achats de marchandises</span></div>
                         </div>
                     </div>
                 </div>
@@ -256,9 +256,9 @@
                                 <tr><th class="px-3 py-2 text-left">Journal</th><th class="px-3 py-2 text-left">N° Compte</th><th class="px-3 py-2 text-right">Débit</th><th class="px-3 py-2 text-right">Crédit</th></tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50 font-mono">
-                                <tr class="hover:bg-gray-50"><td class="px-3 py-2 font-bold text-blue-700">ACH</td><td class="px-3 py-2 text-gray-700">6011</td><td class="px-3 py-2 text-right text-gray-800 font-semibold">45 000</td><td class="px-3 py-2 text-right text-gray-300">—</td></tr>
-                                <tr class="hover:bg-gray-50"><td class="px-3 py-2 font-bold text-blue-700">ACH</td><td class="px-3 py-2 text-gray-700">4454</td><td class="px-3 py-2 text-right text-gray-800 font-semibold">8 100</td><td class="px-3 py-2 text-right text-gray-300">—</td></tr>
-                                <tr class="hover:bg-gray-50"><td class="px-3 py-2 font-bold text-blue-700">ACH</td><td class="px-3 py-2 text-gray-700">4011</td><td class="px-3 py-2 text-right text-gray-300">—</td><td class="px-3 py-2 text-right text-green-700 font-semibold">53 100</td></tr>
+                                <tr class="hover:bg-gray-50"><td class="px-3 py-2 font-bold text-green-700">ACH</td><td class="px-3 py-2 text-gray-700">6011</td><td class="px-3 py-2 text-right text-gray-800 font-semibold">45 000</td><td class="px-3 py-2 text-right text-gray-300">—</td></tr>
+                                <tr class="hover:bg-gray-50"><td class="px-3 py-2 font-bold text-green-700">ACH</td><td class="px-3 py-2 text-gray-700">4454</td><td class="px-3 py-2 text-right text-gray-800 font-semibold">8 100</td><td class="px-3 py-2 text-right text-gray-300">—</td></tr>
+                                <tr class="hover:bg-gray-50"><td class="px-3 py-2 font-bold text-green-700">ACH</td><td class="px-3 py-2 text-gray-700">4011</td><td class="px-3 py-2 text-right text-gray-300">—</td><td class="px-3 py-2 text-right text-green-700 font-semibold">53 100</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -287,7 +287,7 @@
                 </div>
                 <div class="bg-purple-50 rounded-2xl p-6 border border-purple-100">
                     <div class="space-y-3">
-                        @foreach([['AD','Adjoua Mensah','Administrateur','bg-blue-100 text-blue-700','Complet'],['KO','Kofi Ouedraogo','Comptable','bg-green-100 text-green-700','Upload + Écritures'],['FS','Fatou Sow','Auditeur','bg-gray-100 text-gray-600','Lecture seule']] as $user)
+                        @foreach([['AD','Adjoua Mensah','Administrateur','bg-green-100 text-green-700','Complet'],['KO','Kofi Ouedraogo','Comptable','bg-green-100 text-green-700','Upload + Écritures'],['FS','Fatou Sow','Auditeur','bg-gray-100 text-gray-600','Lecture seule']] as $user)
                         <div class="bg-white rounded-xl p-4 flex items-center gap-3 shadow-sm">
                             <div class="w-9 h-9 {{ $user[3] }} rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">{{ $user[0] }}</div>
                             <div class="flex-1 min-w-0">
@@ -314,7 +314,7 @@
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             @foreach([
-                ['bg-blue-50 border-blue-100','text-blue-700','bg-blue-100','Comptabilité','Écritures SYSCOHADA automatiques, journaux ACH/VTE/OD, plan comptable complet.','M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z'],
+                ['bg-emerald-50 border-emerald-100','text-emerald-700','bg-emerald-100','Comptabilité','Écritures SYSCOHADA automatiques, journaux ACH/VTE/OD, plan comptable complet.','M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z'],
                 ['bg-green-50 border-green-100','text-green-700','bg-green-100','Notes de frais','Catégorisez vos dépenses par type de charge. Exportez pour votre expert-comptable.','M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z'],
                 ['bg-yellow-50 border-yellow-100','text-yellow-700','bg-yellow-100','Déclarations','Retrouvez facilement les données pour vos déclarations fiscales TVA et IS.','M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
                 ['bg-teal-50 border-teal-100','text-teal-700','bg-teal-100','Immobilisations','Suivi de vos actifs immobilisés et de leur amortissement dans le respect du SYSCOHADA.','M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
@@ -344,24 +344,24 @@
         <div class="grid md:grid-cols-4 gap-5">
             @foreach($plans as $plan)
             @php $pop = $plan->slug === 'pro'; @endphp
-            <div class="relative rounded-2xl overflow-hidden card-shadow {{ $pop ? 'popular-card scale-105 ring-2 ring-blue-400 ring-offset-2' : 'bg-white border border-gray-200' }}">
+            <div class="relative rounded-2xl overflow-hidden card-shadow {{ $pop ? 'popular-card scale-105 ring-2 ring-green-400 ring-offset-2' : 'bg-white border border-gray-200' }}">
                 @if($pop)
-                <div class="text-center py-1.5 text-xs font-bold text-blue-200 uppercase tracking-widest border-b border-white/10">
+                <div class="text-center py-1.5 text-xs font-bold text-green-200 uppercase tracking-widest border-b border-white/10">
                     ⭐ Le plus choisi
                 </div>
                 @endif
                 <div class="p-6">
                     <div class="font-black text-xl mb-1 {{ $pop ? 'text-white' : 'text-gray-900' }}">{{ $plan->nom }}</div>
                     <div class="mt-3 mb-5">
-                        <span class="text-3xl font-black {{ $pop ? 'text-blue-200' : 'text-blue-700' }}">
+                        <span class="text-3xl font-black {{ $pop ? 'text-green-200' : 'text-green-700' }}">
                             @if($plan->prix_mensuel_xof === 0) Gratuit
                             @else {{ number_format($plan->prix_mensuel_xof, 0, ',', ' ') }}
                             @endif
                         </span>
                         @if($plan->prix_mensuel_xof > 0)
-                        <span class="text-sm {{ $pop ? 'text-blue-300' : 'text-gray-400' }}"> FCFA/mois</span>
+                        <span class="text-sm {{ $pop ? 'text-green-300' : 'text-gray-400' }}"> FCFA/mois</span>
                         @else
-                        <span class="text-sm {{ $pop ? 'text-blue-300' : 'text-gray-400' }}"> · 15 jours</span>
+                        <span class="text-sm {{ $pop ? 'text-green-300' : 'text-gray-400' }}"> · 15 jours</span>
                         @endif
                     </div>
                     <ul class="space-y-2 mb-6 text-sm">
@@ -373,16 +373,16 @@
                             ['api_access', 'Accès API', $plan->api_access],
                         ] as $feat)
                         <li class="flex items-center gap-2 {{ !$feat[2] ? 'opacity-40' : '' }}">
-                            <span class="{{ $feat[2] ? ($pop?'text-blue-300':'text-blue-600') : 'text-gray-300' }}">
+                            <span class="{{ $feat[2] ? ($pop?'text-green-300':'text-green-600') : 'text-gray-300' }}">
                                 {{ $feat[2] ? '✓' : '✗' }}
                             </span>
-                            <span class="{{ $pop ? 'text-blue-100' : 'text-gray-600' }}">{{ $feat[1] }}</span>
+                            <span class="{{ $pop ? 'text-green-100' : 'text-gray-600' }}">{{ $feat[1] }}</span>
                         </li>
                         @endforeach
                     </ul>
                     <a href="{{ route('register', ['plan' => $plan->slug]) }}"
                        class="block text-center font-bold py-3 rounded-xl transition text-sm
-                              {{ $pop ? 'bg-white text-blue-900 hover:bg-blue-50' : 'bg-blue-700 text-white hover:bg-blue-800' }}">
+                              {{ $pop ? 'bg-amber-400 text-green-950 hover:bg-amber-300' : 'bg-green-700 text-white hover:bg-green-800' }}">
                         {{ $plan->prix_mensuel_xof === 0 ? 'Commencer gratuitement' : 'Choisir cette offre' }}
                     </a>
                 </div>
@@ -404,7 +404,7 @@
         </div>
         <div class="grid md:grid-cols-3 gap-6">
             @foreach([
-                ['AM','Adjoua M.','Expert-comptable, Cotonou','bg-blue-100 text-blue-700','"eCompta360 a réduit de moitié le temps passé sur la saisie. Il reconnaît parfaitement les factures en XOF et génère les bons comptes SYSCOHADA automatiquement. Je recommande à tous mes confrères."'],
+                ['AM','Adjoua M.','Expert-comptable, Cotonou','bg-green-100 text-green-700','"eCompta360 a réduit de moitié le temps passé sur la saisie. Il reconnaît parfaitement les factures en XOF et génère les bons comptes SYSCOHADA automatiquement. Je recommande à tous mes confrères."'],
                 ['KO','Kofi Ouedraogo','Cabinet comptable, Porto-Novo','bg-teal-100 text-teal-700','"Le gain de temps est impressionnant. Ce qui prenait 3 heures ne prend plus que 20 minutes. L\'intégration avec Mobile Money est un vrai plus — je règle mon abonnement depuis mon téléphone."'],
                 ['FS','Fatou Sow','Directrice, Abomey-Calavi','bg-purple-100 text-purple-700','"Enfin une solution de comptabilité pensée pour l\'Afrique ! Le respect du SYSCOHADA Révisé est irréprochable. Mon équipe a été opérationnelle dès le premier jour sans formation particulière."'],
             ] as $t)
@@ -463,9 +463,9 @@
 <section class="hero-bg py-16 px-4 text-center text-white">
     <div class="max-w-2xl mx-auto">
         <h2 class="text-3xl font-black mb-3">Prêt à moderniser votre cabinet ?</h2>
-        <p class="text-blue-200 mb-8 text-lg">Rejoignez les cabinets qui font confiance à eCompta360.<br>15 jours d'essai gratuit, sans engagement, sans carte bancaire.</p>
+        <p class="text-green-200 mb-8 text-lg">Rejoignez les cabinets qui font confiance à eCompta360.<br>15 jours d'essai gratuit, sans engagement, sans carte bancaire.</p>
         <a href="{{ route('register') }}"
-           class="inline-block bg-white text-blue-900 font-bold px-10 py-4 rounded-xl hover:bg-blue-50 transition shadow-xl text-lg">
+           class="inline-block bg-amber-400 text-green-950 font-bold px-10 py-4 rounded-xl hover:bg-amber-300 transition shadow-xl text-lg">
             Créer mon espace gratuitement →
         </a>
     </div>
@@ -477,13 +477,13 @@
         <h2 class="text-2xl font-black text-gray-900 mb-2">Nous contacter</h2>
         <p class="text-gray-500 mb-8">Notre équipe répond dans les 24 heures ouvrées.</p>
         <div class="grid sm:grid-cols-2 gap-4 max-w-xl mx-auto text-left">
-            <div class="bg-blue-50 rounded-xl p-5 border border-blue-100 flex items-start gap-4">
-                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg class="w-5 h-5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            <div class="bg-green-50 rounded-xl p-5 border border-green-100 flex items-start gap-4">
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                 </div>
                 <div>
                     <p class="font-semibold text-gray-700 text-sm mb-0.5">Email</p>
-                    <a href="mailto:contact@ecompta360.com" class="text-blue-700 text-sm hover:underline">contact@ecompta360.com</a>
+                    <a href="mailto:contact@ecompta360.com" class="text-green-700 text-sm hover:underline">contact@ecompta360.com</a>
                 </div>
             </div>
             <div class="bg-green-50 rounded-xl p-5 border border-green-100 flex items-start gap-4">
@@ -505,7 +505,7 @@
         <div class="grid md:grid-cols-4 gap-8 mb-10">
             <div class="md:col-span-2">
                 <div class="flex items-center gap-2.5 mb-3">
-                    <div class="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center font-black text-white text-sm">e</div>
+                    <div class="w-8 h-8 bg-green-700 rounded-lg flex items-center justify-center font-black text-white text-sm">e</div>
                     <span class="font-black text-white text-lg">eCompta360</span>
                 </div>
                 <p class="text-sm text-gray-400 leading-relaxed max-w-xs">
