@@ -140,9 +140,11 @@
             </div>
         </div>
     </div>
+</section>
 
-    {{-- Gérez votre comptabilité en toute sérénité --}}
-    <div class="max-w-5xl mx-auto mt-14">
+{{-- ══ GÉREZ VOTRE COMPTABILITÉ EN TOUTE SÉRÉNITÉ ══════════════════════════ --}}
+<section class="py-20 px-4 bg-gray-50">
+    <div class="max-w-5xl mx-auto">
         <h2 class="text-2xl md:text-3xl font-black text-gray-900 text-center mb-8">
             Gérez votre comptabilité<br class="sm:hidden">en toute sérénité
         </h2>
@@ -153,7 +155,7 @@
                 ['🏛️', 'Fiscalité Intégrée', 'TVA et déclarations simplifiées.'],
                 ['🔒', 'Sécurité des Données', 'Confidentialité et chiffrement avancé de vos données.'],
             ] as $card)
-            <div class="border border-gray-200 rounded-xl p-5 text-center">
+            <div class="bg-white border border-gray-200 rounded-xl p-5 text-center">
                 @if($card[0])
                 <div class="text-2xl mb-2">{{ $card[0] }}</div>
                 @else
