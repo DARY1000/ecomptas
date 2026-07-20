@@ -10,6 +10,8 @@
         [x-cloak] { display: none !important; }
         html { scroll-behavior: smooth; }
         .dark-cta { background: linear-gradient(135deg, #052e1f 0%, #0a3d2e 100%); }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .marquee-track { animation: marquee 18s linear infinite; }
     </style>
 </head>
 <body class="bg-white text-gray-900 antialiased">
@@ -82,10 +84,33 @@
             </a>
         </div>
 
-        <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mt-14 mb-4">Connecté aux solutions de paiement locales</p>
-        <div class="flex flex-wrap items-center justify-center gap-2">
-            @foreach(['MTN Mobile Money','Moov Money','Visa','Mastercard'] as $pm)
-            <span class="text-xs font-medium text-gray-500 border border-gray-200 rounded-full px-3 py-1.5">{{ $pm }}</span>
+    </div>
+
+    {{-- Gérez votre comptabilité en toute sérénité --}}
+    <div class="max-w-5xl mx-auto mt-16">
+        <h2 class="text-2xl md:text-3xl font-black text-gray-900 text-center mb-8">
+            Gérez votre comptabilité<br class="sm:hidden">en toute sérénité
+        </h2>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            @foreach([
+                ['', 'Conforme OHADA', 'Respect des normes comptables en vigueur.'],
+                ['🧾', 'Écritures Automatisées', 'Saisie comptable intelligente et rapide.'],
+                ['🏛️', 'Fiscalité Intégrée', 'TVA et déclarations simplifiées.'],
+                ['🔒', 'Sécurité des Données', 'Confidentialité et chiffrement avancé de vos données.'],
+            ] as $card)
+            <div class="border border-gray-200 rounded-xl p-5 text-center">
+                @if($card[0])
+                <div class="text-2xl mb-2">{{ $card[0] }}</div>
+                @else
+                <div class="w-8 h-8 mx-auto mb-2 rounded-full bg-emerald-100 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                @endif
+                <h3 class="font-bold text-gray-900 text-sm mb-1">{{ $card[1] }}</h3>
+                <p class="text-gray-500 text-xs leading-relaxed">{{ $card[2] }}</p>
+            </div>
             @endforeach
         </div>
     </div>
@@ -262,25 +287,25 @@
     </div>
 </section>
 
-{{-- ══ CONFORMITÉ ═══════════════════════════════════════════════════════ --}}
-<section class="py-20 px-4 bg-white">
-    <div class="max-w-4xl mx-auto text-center">
-        <span class="text-xs font-semibold text-emerald-700 uppercase tracking-wide">100% conforme</span>
-        <h2 class="text-3xl md:text-4xl font-black text-gray-900 mt-2 mb-10">
-            Gérez votre comptabilité<br>en toute sérénité
-        </h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            @foreach([
-                ['SYSCOHADA Révisé','Norme comptable 2017'],
-                ['Zone OHADA','17 pays couverts'],
-                ['DGI Bénin','Fiscalité locale intégrée'],
-                ['FeexPay','Paiement sécurisé'],
-            ] as $badge)
-            <div class="border border-gray-200 rounded-xl p-5">
-                <p class="font-bold text-gray-900 text-sm">{{ $badge[0] }}</p>
-                <p class="text-gray-400 text-xs mt-1">{{ $badge[1] }}</p>
-            </div>
-            @endforeach
+{{-- ══ ILS FONT CONFIANCE ═══════════════════════════════════════════════ --}}
+<section class="py-20 bg-white overflow-hidden">
+    <div class="max-w-4xl mx-auto text-center px-4 mb-10">
+        <h2 class="text-3xl md:text-4xl font-black text-gray-900">Ils font confiance à eCompta360</h2>
+        <p class="text-gray-500 mt-2">Des cabinets qui pilotent déjà leur comptabilité avec eCompta360.</p>
+    </div>
+    <div class="relative">
+        <div class="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-white to-transparent z-10"></div>
+        <div class="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-white to-transparent z-10"></div>
+        <div class="flex w-max marquee-track">
+            @for($r = 0; $r < 2; $r++)
+                @foreach(['AFM', 'Cabinet ICODE'] as $client)
+                    @for($n = 0; $n < 4; $n++)
+                    <div class="flex items-center justify-center mx-6 px-8 py-4 border border-gray-200 rounded-xl">
+                        <span class="font-bold text-gray-400 text-lg whitespace-nowrap">{{ $client }}</span>
+                    </div>
+                    @endfor
+                @endforeach
+            @endfor
         </div>
     </div>
 </section>
