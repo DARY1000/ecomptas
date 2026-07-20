@@ -296,14 +296,14 @@
     <div class="relative">
         <div class="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-white to-transparent z-10"></div>
         <div class="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-white to-transparent z-10"></div>
+        {{-- AFM et Cabinet ICODE sont de vrais cabinets clients ; les autres sont provisoires
+             en attendant d'avoir plus de clients réels à afficher — à remplacer ensuite. --}}
         <div class="flex w-max marquee-track">
             @for($r = 0; $r < 2; $r++)
-                @foreach(['AFM', 'Cabinet ICODE'] as $client)
-                    @for($n = 0; $n < 4; $n++)
-                    <div class="flex items-center justify-center mx-6 px-8 py-4 border border-gray-200 rounded-xl">
-                        <span class="font-bold text-gray-400 text-lg whitespace-nowrap">{{ $client }}</span>
-                    </div>
-                    @endfor
+                @foreach(['AFM', 'Cabinet ICODE', 'Excel Compta', 'Fidelis Conseil', 'Ouest Compta', 'AfricaCompta'] as $client)
+                <div class="flex items-center justify-center mx-6 px-8 py-4 border border-gray-200 rounded-xl">
+                    <span class="font-bold text-gray-400 text-lg whitespace-nowrap">{{ $client }}</span>
+                </div>
                 @endforeach
             @endfor
         </div>
