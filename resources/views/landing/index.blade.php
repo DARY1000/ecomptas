@@ -86,35 +86,6 @@
 
     </div>
 
-    {{-- Gérez votre comptabilité en toute sérénité --}}
-    <div class="max-w-5xl mx-auto mt-16">
-        <h2 class="text-2xl md:text-3xl font-black text-gray-900 text-center mb-8">
-            Gérez votre comptabilité<br class="sm:hidden">en toute sérénité
-        </h2>
-        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            @foreach([
-                ['', 'Conforme OHADA', 'Respect des normes comptables en vigueur.'],
-                ['🧾', 'Écritures Automatisées', 'Saisie comptable intelligente et rapide.'],
-                ['🏛️', 'Fiscalité Intégrée', 'TVA et déclarations simplifiées.'],
-                ['🔒', 'Sécurité des Données', 'Confidentialité et chiffrement avancé de vos données.'],
-            ] as $card)
-            <div class="border border-gray-200 rounded-xl p-5 text-center">
-                @if($card[0])
-                <div class="text-2xl mb-2">{{ $card[0] }}</div>
-                @else
-                <div class="w-8 h-8 mx-auto mb-2 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
-                @endif
-                <h3 class="font-bold text-gray-900 text-sm mb-1">{{ $card[1] }}</h3>
-                <p class="text-gray-500 text-xs leading-relaxed">{{ $card[2] }}</p>
-            </div>
-            @endforeach
-        </div>
-    </div>
-
     {{-- Mockup produit --}}
     <div class="max-w-5xl mx-auto mt-14">
         <div class="bg-white border border-gray-200 rounded-2xl shadow-2xl shadow-gray-200/60 overflow-hidden">
@@ -167,6 +138,35 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    {{-- Gérez votre comptabilité en toute sérénité --}}
+    <div class="max-w-5xl mx-auto mt-14">
+        <h2 class="text-2xl md:text-3xl font-black text-gray-900 text-center mb-8">
+            Gérez votre comptabilité<br class="sm:hidden">en toute sérénité
+        </h2>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            @foreach([
+                ['', 'Conforme OHADA', 'Respect des normes comptables en vigueur.'],
+                ['🧾', 'Écritures Automatisées', 'Saisie comptable intelligente et rapide.'],
+                ['🏛️', 'Fiscalité Intégrée', 'TVA et déclarations simplifiées.'],
+                ['🔒', 'Sécurité des Données', 'Confidentialité et chiffrement avancé de vos données.'],
+            ] as $card)
+            <div class="border border-gray-200 rounded-xl p-5 text-center">
+                @if($card[0])
+                <div class="text-2xl mb-2">{{ $card[0] }}</div>
+                @else
+                <div class="w-8 h-8 mx-auto mb-2 rounded-full bg-emerald-100 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                @endif
+                <h3 class="font-bold text-gray-900 text-sm mb-1">{{ $card[1] }}</h3>
+                <p class="text-gray-500 text-xs leading-relaxed">{{ $card[2] }}</p>
+            </div>
+            @endforeach
         </div>
     </div>
 </section>
