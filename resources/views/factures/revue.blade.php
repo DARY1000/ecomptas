@@ -21,7 +21,7 @@
     </div>
 
     <form method="POST" action="{{ route('factures.valider', $facture) }}">
-        @csrf @method('PATCH')
+        @csrf
 
         @if($errors->any())
         <div class="bg-red-50 border border-red-300 rounded-xl px-4 py-3">

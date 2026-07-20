@@ -31,7 +31,7 @@
             </span>
             @if($tenant->statut === 'suspendu')
             <form method="POST" action="{{ route('admin.tenants.activer', $tenant) }}" class="inline">
-                @csrf @method('PATCH')
+                @csrf
                 <button type="submit" class="inline-flex items-center gap-1.5 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-medium">
                     Activer
                 </button>
@@ -39,7 +39,7 @@
             @else
             <form method="POST" action="{{ route('admin.tenants.suspendre', $tenant) }}" class="inline"
                   onsubmit="return confirm('Suspendre ce cabinet ? Les utilisateurs ne pourront plus se connecter.')">
-                @csrf @method('PATCH')
+                @csrf
                 <button type="submit" class="inline-flex items-center gap-1.5 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition text-sm font-medium">
                     Suspendre
                 </button>
