@@ -185,7 +185,7 @@
             @foreach([
                 ['bg-blue-100 text-blue-600','M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z','Comptabilité SYSCOHADA','Journaux, plan comptable révisé et écritures générées automatiquement à chaque facture.'],
                 ['bg-orange-100 text-orange-600','M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z','Traitement automatique','Uploadez une facture PDF ou image, elle est lue et comptabilisée en quelques secondes.'],
-                ['bg-purple-100 text-purple-600','M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z','Trésorerie & Mobile Money','Suivez vos règlements MTN MoMo, Moov Money et carte via FeexPay.'],
+                ['bg-purple-100 text-purple-600','M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z','Trésorerie & Mobile Money','Suivez vos règlements Mobile Money et carte bancaire.'],
                 ['bg-teal-100 text-teal-600','M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z','Export multi-format','Excel, CSV et FEC (fichier des écritures comptables) pour votre expert-comptable.'],
                 ['bg-pink-100 text-pink-600','M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z','Multi-utilisateurs & rôles','Administrateur, comptable, auditeur — chacun avec les droits qui lui conviennent.'],
                 ['bg-amber-100 text-amber-600','M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z','Notes de frais','Catégorisez les dépenses par type de charge et exportez-les facilement.'],
@@ -391,7 +391,7 @@
             @endforeach
         </div>
         <p class="text-center text-gray-400 text-sm mt-8">
-            Paiement sécurisé · MTN Mobile Money · Moov Money · Pas de carte internationale requise
+            Paiement sécurisé · Mobile Money et carte bancaire
         </p>
     </div>
 </section>
@@ -438,7 +438,7 @@
             ["Mes données sont-elles sécurisées ?","Oui. Chaque cabinet dispose d'un espace de données entièrement isolé. Les fichiers sont stockés sur un serveur sécurisé, avec chiffrement HTTPS. Aucune donnée n'est partagée entre cabinets."],
             ["Comment fonctionne le traitement automatique ?","Vous importez une facture PDF. Notre moteur extrait automatiquement le fournisseur, la date, les montants, la TVA. Il génère les écritures SYSCOHADA correspondantes. Il suffit de valider."],
             ["Puis-je changer d'offre en cours de mois ?","Oui. Vous pouvez évoluer vers une offre supérieure à tout moment depuis votre espace. Le changement est immédiat."],
-            ["Comment se passe le paiement ?","Nous acceptons MTN Mobile Money et Moov Money via FeexPay. Aucune carte bancaire internationale requise. Le paiement est 100% local."],
+            ["Comment se passe le paiement ?","Nous acceptons le paiement par Mobile Money et par carte bancaire. Le paiement est 100% sécurisé."],
             ["Que se passe-t-il à la fin de l'essai gratuit ?","Votre compte est suspendu jusqu'à souscription d'une offre payante. Vos données restent intactes et accessibles à la réactivation."],
             ["Y a-t-il une formation pour démarrer ?","Non. L'interface est intuitive et conçue pour être utilisée sans formation. Un email de bienvenue avec les étapes clés vous est envoyé à l'inscription."],
         ]; @endphp
