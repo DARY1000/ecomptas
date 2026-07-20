@@ -30,20 +30,20 @@
                 <label class="block text-xs font-medium text-gray-600 mb-1">Nom complet <span class="text-red-500">*</span></label>
                 <input type="text" name="name" value="{{ old('name') }}" required
                        placeholder="Prénom Nom"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
             </div>
 
             <div>
                 <label class="block text-xs font-medium text-gray-600 mb-1">Adresse email <span class="text-red-500">*</span></label>
                 <input type="email" name="email" value="{{ old('email') }}" required
                        placeholder="utilisateur@cabinet.bj"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
             </div>
 
             <div>
                 <label class="block text-xs font-medium text-gray-600 mb-1">Rôle <span class="text-red-500">*</span></label>
                 <select name="role" required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                     <option value="">— Sélectionner un rôle —</option>
                     <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Admin — Accès complet au cabinet</option>
                     <option value="comptable" {{ old('role') === 'comptable' ? 'selected' : '' }}>Comptable — Upload + validation factures</option>
@@ -54,21 +54,21 @@
             <div>
                 <label class="block text-xs font-medium text-gray-600 mb-1">Mot de passe temporaire <span class="text-red-500">*</span></label>
                 <input type="text" name="password" value="{{ old('password', Str::random(10)) }}" required
-                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500">
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 <p class="text-xs text-gray-400 mt-1">L'utilisateur devra changer son mot de passe à la première connexion.</p>
             </div>
 
             {{-- Résumé des rôles --}}
             <div class="bg-gray-50 rounded-lg p-4 text-xs text-gray-500 space-y-1.5 mt-2">
                 <p class="font-semibold text-gray-700 mb-2">Permissions par rôle :</p>
-                <p><strong class="text-blue-700">Admin</strong> : Gestion complète (factures, écritures, utilisateurs, paramètres)</p>
+                <p><strong class="text-emerald-700">Admin</strong> : Gestion complète (factures, écritures, utilisateurs, paramètres)</p>
                 <p><strong class="text-purple-700">Comptable</strong> : Upload, traitement et validation de factures</p>
                 <p><strong class="text-green-700">Auditeur</strong> : Consultation uniquement (lecture seule)</p>
             </div>
 
             <div class="flex gap-3 pt-2">
                 <button type="submit"
-                        class="flex-1 bg-blue-900 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-800 transition text-sm">
+                        class="flex-1 bg-emerald-900 text-white py-2.5 rounded-lg font-semibold hover:bg-emerald-900 transition text-sm">
                     Créer l'utilisateur
                 </button>
                 <a href="{{ route('users.index') }}"

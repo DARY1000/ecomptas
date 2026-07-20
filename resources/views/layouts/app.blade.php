@@ -14,19 +14,19 @@
 <body class="bg-gray-50 text-gray-800" x-cloak>
 <div class="flex h-screen overflow-hidden">
 
-    {{-- ══ SIDEBAR CABINET ══════════════════════════════════════════════ --}}
-    <aside class="fixed inset-y-0 left-0 z-50 w-64 bg-blue-900 text-white flex flex-col transition-transform duration-300 ease-in-out"
+    {{-- ══ SIDEBAR CABINET — fond blanc ═══════════════════════════════════ --}}
+    <aside class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-100 flex flex-col transition-transform duration-300 ease-in-out"
            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
 
         {{-- Logo --}}
-        <div class="flex items-center gap-3 px-5 py-4 border-b border-white/10">
-            <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center font-black text-white text-sm flex-shrink-0">e</div>
+        <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
+            <div class="w-8 h-8 bg-emerald-800 rounded-lg flex items-center justify-center font-black text-white text-sm flex-shrink-0">e</div>
             <div class="min-w-0">
-                <div class="font-bold text-white text-sm leading-tight">eCompta360</div>
+                <div class="font-bold text-gray-900 text-sm leading-tight">eCompta360</div>
                 @if(auth()->user()?->tenant)
-                    <div class="text-blue-300 text-xs truncate">{{ auth()->user()->tenant->nom }}</div>
+                    <div class="text-gray-400 text-xs truncate">{{ auth()->user()->tenant->nom }}</div>
                 @else
-                    <div class="text-blue-300 text-xs">Cabinet</div>
+                    <div class="text-gray-400 text-xs">Cabinet</div>
                 @endif
             </div>
         </div>
@@ -36,7 +36,7 @@
 
             <a href="{{ route('dashboard') }}"
                class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
-                      {{ request()->routeIs('dashboard') ? 'bg-white/20 text-white' : 'text-blue-200 hover:bg-white/10 hover:text-white' }}">
+                      {{ request()->routeIs('dashboard') ? 'bg-emerald-50 text-emerald-800' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
@@ -46,7 +46,7 @@
 
             <a href="{{ route('factures.index') }}"
                class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
-                      {{ request()->routeIs('factures.index') ? 'bg-white/20 text-white' : 'text-blue-200 hover:bg-white/10 hover:text-white' }}">
+                      {{ request()->routeIs('factures.index') ? 'bg-emerald-50 text-emerald-800' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -57,7 +57,7 @@
             @if(!auth()->user()->estAuditeur())
             <a href="{{ route('factures.upload') }}"
                class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
-                      {{ request()->routeIs('factures.upload') ? 'bg-white/20 text-white' : 'text-blue-200 hover:bg-white/10 hover:text-white' }}">
+                      {{ request()->routeIs('factures.upload') ? 'bg-emerald-50 text-emerald-800' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
@@ -68,7 +68,7 @@
 
             <a href="{{ route('ecritures.index') }}"
                class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
-                      {{ request()->routeIs('ecritures.*') ? 'bg-white/20 text-white' : 'text-blue-200 hover:bg-white/10 hover:text-white' }}">
+                      {{ request()->routeIs('ecritures.*') ? 'bg-emerald-50 text-emerald-800' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -82,7 +82,7 @@
             @endphp
             @if($hasExport)
             <a href="{{ route('export.xlsx') }}"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-blue-200 hover:bg-white/10 hover:text-white">
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-gray-600 hover:bg-gray-100 hover:text-gray-900">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -94,12 +94,12 @@
             {{-- Section Cabinet (admin uniquement) --}}
             @if(auth()->user()->isAdmin())
             <div class="pt-4 pb-1 px-3">
-                <p class="text-blue-400 text-xs uppercase tracking-widest font-semibold">Cabinet</p>
+                <p class="text-gray-400 text-xs uppercase tracking-widest font-semibold">Cabinet</p>
             </div>
 
             <a href="{{ route('users.index') }}"
                class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
-                      {{ request()->routeIs('users.*') ? 'bg-white/20 text-white' : 'text-blue-200 hover:bg-white/10 hover:text-white' }}">
+                      {{ request()->routeIs('users.*') ? 'bg-emerald-50 text-emerald-800' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
@@ -109,7 +109,7 @@
 
             <a href="{{ route('settings.index') }}"
                class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
-                      {{ request()->routeIs('settings.*') ? 'bg-white/20 text-white' : 'text-blue-200 hover:bg-white/10 hover:text-white' }}">
+                      {{ request()->routeIs('settings.*') ? 'bg-emerald-50 text-emerald-800' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
@@ -121,12 +121,12 @@
 
             {{-- Section Compte --}}
             <div class="pt-4 pb-1 px-3">
-                <p class="text-blue-400 text-xs uppercase tracking-widest font-semibold">Compte</p>
+                <p class="text-gray-400 text-xs uppercase tracking-widest font-semibold">Compte</p>
             </div>
 
             <a href="{{ route('abonnement.index') }}"
                class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
-                      {{ request()->routeIs('abonnement.*') ? 'bg-white/20 text-white' : 'text-blue-200 hover:bg-white/10 hover:text-white' }}">
+                      {{ request()->routeIs('abonnement.*') ? 'bg-emerald-50 text-emerald-800' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
@@ -144,40 +144,40 @@
                 $max  = $tenantForQuota->quota_factures_mensuel;
                 $pct  = $max > 0 ? min(100, round($used / $max * 100)) : 0;
             @endphp
-            <div class="px-4 py-3 border-t border-white/10">
-                <div class="flex justify-between text-xs text-blue-300 mb-1.5">
+            <div class="px-4 py-3 border-t border-gray-100">
+                <div class="flex justify-between text-xs text-gray-500 mb-1.5">
                     <span>Quota ce mois</span>
-                    <span class="{{ $pct >= 80 ? 'text-yellow-300 font-bold' : '' }}">{{ $used }}/{{ $max }}</span>
+                    <span class="{{ $pct >= 80 ? 'text-amber-600 font-bold' : '' }}">{{ $used }}/{{ $max }}</span>
                 </div>
-                <div class="w-full bg-blue-800 rounded-full h-1.5">
-                    <div class="h-1.5 rounded-full transition-all {{ $pct >= 80 ? 'bg-yellow-400' : 'bg-blue-400' }}"
+                <div class="w-full bg-gray-100 rounded-full h-1.5">
+                    <div class="h-1.5 rounded-full transition-all {{ $pct >= 80 ? 'bg-amber-500' : 'bg-emerald-600' }}"
                          style="width: {{ $pct }}%"></div>
                 </div>
             </div>
         @endif
 
         {{-- User + Logout --}}
-        <div class="border-t border-white/10 px-2 py-3" x-data="{ open: false }">
+        <div class="border-t border-gray-100 px-2 py-3" x-data="{ open: false }">
             <button @click="open = !open"
-                    class="w-full flex items-center gap-3 hover:bg-white/10 rounded-lg px-3 py-2 transition">
-                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+                    class="w-full flex items-center gap-3 hover:bg-gray-100 rounded-lg px-3 py-2 transition">
+                <div class="w-8 h-8 bg-emerald-800 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
                     {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
                 </div>
                 <div class="flex-1 text-left min-w-0">
-                    <div class="text-white text-sm font-medium truncate">{{ auth()->user()->name }}</div>
-                    <div class="text-blue-300 text-xs">{{ auth()->user()->role_label ?? ucfirst(auth()->user()->role) }}</div>
+                    <div class="text-gray-900 text-sm font-medium truncate">{{ auth()->user()->name }}</div>
+                    <div class="text-gray-400 text-xs">{{ auth()->user()->role_label ?? ucfirst(auth()->user()->role) }}</div>
                 </div>
-                <svg class="w-4 h-4 text-blue-400 flex-shrink-0 transition-transform" :class="{ 'rotate-180': open }"
+                <svg class="w-4 h-4 text-gray-400 flex-shrink-0 transition-transform" :class="{ 'rotate-180': open }"
                      fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
             </button>
             <div x-show="open" @click.outside="open = false" x-cloak
-                 class="mt-1 bg-blue-800 rounded-lg overflow-hidden">
+                 class="mt-1 bg-gray-50 border border-gray-100 rounded-lg overflow-hidden">
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit"
-                            class="w-full text-left px-4 py-2.5 text-sm text-red-300 hover:bg-blue-700 transition flex items-center gap-2">
+                            class="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
@@ -211,7 +211,7 @@
 
             @if(session('succes'))
                 <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
-                     class="hidden sm:flex items-center gap-2 bg-green-50 text-green-700 text-xs px-3 py-1.5 rounded-lg border border-green-200">
+                     class="hidden sm:flex items-center gap-2 bg-emerald-50 text-emerald-700 text-xs px-3 py-1.5 rounded-lg border border-emerald-200">
                     ✅ {{ session('succes') }}
                 </div>
             @endif
@@ -221,7 +221,7 @@
             @if($tenantBadge)
                 <span class="hidden md:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold
                     {{ $tenantBadge->plan === 'trial' ? 'bg-gray-100 text-gray-600' :
-                       ($tenantBadge->plan === 'starter' ? 'bg-blue-100 text-blue-700' :
+                       ($tenantBadge->plan === 'starter' ? 'bg-emerald-100 text-emerald-700' :
                        ($tenantBadge->plan === 'pro' ? 'bg-purple-100 text-purple-700' : 'bg-teal-100 text-teal-700')) }}">
                     {{ ucfirst($tenantBadge->plan) }}
                 </span>

@@ -10,7 +10,7 @@
         @php
         $roleConfig = [
             'super_admin' => ['label'=>'Super Admins', 'bg'=>'bg-red-50',    'text'=>'text-red-700'],
-            'admin'       => ['label'=>'Admins',       'bg'=>'bg-blue-50',   'text'=>'text-blue-700'],
+            'admin'       => ['label'=>'Admins',       'bg'=>'bg-emerald-50',   'text'=>'text-emerald-700'],
             'comptable'   => ['label'=>'Comptables',   'bg'=>'bg-green-50',  'text'=>'text-green-700'],
             'auditeur'    => ['label'=>'Auditeurs',    'bg'=>'bg-purple-50', 'text'=>'text-purple-700'],
         ];
@@ -27,7 +27,7 @@
     <form method="GET" class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <input type="text" name="q" value="{{ request('q') }}" placeholder="Rechercher nom ou email…"
-                   class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+                   class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500">
             <select name="role" class="px-3 py-2 border border-gray-200 rounded-lg text-sm">
                 <option value="">Tous les rôles</option>
                 <option value="admin"       {{ request('role')==='admin'       ? 'selected':'' }}>Admin</option>
@@ -65,7 +65,7 @@
                     @php
                     $roleColors = [
                         'super_admin' => 'bg-red-100 text-red-700',
-                        'admin'       => 'bg-blue-100 text-blue-700',
+                        'admin'       => 'bg-emerald-100 text-emerald-700',
                         'comptable'   => 'bg-green-100 text-green-700',
                         'auditeur'    => 'bg-purple-100 text-purple-700',
                     ];
@@ -85,7 +85,7 @@
                         <td class="px-5 py-3">
                             @if($u->tenant)
                                 <a href="{{ route('admin.tenants.show', $u->tenant_id) }}"
-                                   class="text-blue-700 hover:underline font-medium">{{ $u->tenant->nom }}</a>
+                                   class="text-emerald-700 hover:underline font-medium">{{ $u->tenant->nom }}</a>
                             @else
                                 <span class="text-gray-400 text-xs italic">—</span>
                             @endif

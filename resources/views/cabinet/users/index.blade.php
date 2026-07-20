@@ -9,7 +9,7 @@
     <div class="flex flex-wrap items-center justify-between gap-3">
         <h1 class="text-2xl font-bold text-gray-900">Utilisateurs</h1>
         <a href="{{ route('users.create') }}"
-           class="inline-flex items-center gap-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition font-medium text-sm shadow">
+           class="inline-flex items-center gap-2 bg-emerald-900 text-white px-4 py-2 rounded-lg hover:bg-emerald-900 transition font-medium text-sm shadow">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
@@ -50,8 +50,8 @@
                 <tr class="hover:bg-gray-50 transition">
                     <td class="px-5 py-3">
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                <span class="text-blue-700 font-semibold text-xs">
+                            <div class="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <span class="text-emerald-700 font-semibold text-xs">
                                     {{ strtoupper(substr($u->name, 0, 2)) }}
                                 </span>
                             </div>
@@ -64,7 +64,7 @@
                     <td class="px-5 py-3">
                         @php
                             $roleColors = [
-                                'admin' => 'bg-blue-100 text-blue-700',
+                                'admin' => 'bg-emerald-100 text-emerald-700',
                                 'comptable' => 'bg-purple-100 text-purple-700',
                                 'auditeur' => 'bg-green-100 text-green-700',
                             ];
@@ -91,7 +91,7 @@
                         @if($u->id !== auth()->id())
                         <div class="flex items-center justify-center gap-2">
                             <a href="{{ route('users.edit', $u) }}"
-                               class="text-gray-400 hover:text-blue-600 transition" title="Modifier">
+                               class="text-gray-400 hover:text-emerald-700 transition" title="Modifier">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                 </svg>

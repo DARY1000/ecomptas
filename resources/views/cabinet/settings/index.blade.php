@@ -45,7 +45,7 @@
                 <div class="flex-1">
                     <label class="block text-xs font-medium text-gray-600 mb-1">Logo de l'entreprise</label>
                     <input type="file" name="logo" accept="image/png,image/jpg,image/jpeg,image/svg+xml"
-                           class="block w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+                           class="block w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
                     <p class="text-xs text-gray-400 mt-1">PNG, JPG ou SVG · Max 512 Ko. Apparaît sur les factures et exports.</p>
                 </div>
             </div>
@@ -54,13 +54,13 @@
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Raison sociale <span class="text-red-500">*</span></label>
                     <input type="text" name="nom" value="{{ old('nom', $tenant->nom) }}" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Sigle</label>
                     <input type="text" name="sigle" value="{{ old('sigle', $tenant->sigle) }}"
                            placeholder="Ex : ECT"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
             </div>
 
@@ -68,12 +68,12 @@
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Email de l'entreprise</label>
                     <input type="email" name="email_contact" value="{{ old('email_contact', $tenant->email_contact) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Téléphone</label>
                     <input type="text" name="telephone" value="{{ old('telephone', $tenant->telephone) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
             </div>
 
@@ -81,7 +81,7 @@
                 <label class="block text-xs font-medium text-gray-600 mb-1">Site web</label>
                 <input type="url" name="site_web" value="{{ old('site_web', $tenant->site_web) }}"
                        placeholder="https://..."
-                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
             </div>
 
             <div class="grid grid-cols-2 gap-3">
@@ -89,12 +89,12 @@
                     <label class="block text-xs font-medium text-gray-600 mb-1">Adresse</label>
                     <input type="text" name="adresse" value="{{ old('adresse', $tenant->adresse) }}"
                            placeholder="Cotonou, Bénin"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Ville</label>
                     <input type="text" name="ville" value="{{ old('ville', $tenant->ville) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
             </div>
 
@@ -102,12 +102,12 @@
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">N° IFU</label>
                     <input type="text" name="ifu" value="{{ old('ifu', $tenant->ifu) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">RCCM</label>
                     <input type="text" name="rccm" value="{{ old('rccm', $tenant->rccm) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
             </div>
         </div>
@@ -118,7 +118,7 @@
             <div>
                 <label class="block text-xs font-medium text-gray-600 mb-1">Régime</label>
                 <select name="regime_fiscal"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                     <option value="B" {{ old('regime_fiscal', $tenant->regime_fiscal) === 'B' ? 'selected' : '' }}>Régime B — Assujetti TVA 18%</option>
                     <option value="D" {{ old('regime_fiscal', $tenant->regime_fiscal) === 'D' ? 'selected' : '' }}>Régime D — Exonéré TVA</option>
                 </select>
@@ -157,7 +157,7 @@
                 <input type="text" name="google_spreadsheet_id"
                        value="{{ old('google_spreadsheet_id', $gsConfig['spreadsheet_id'] ?? '') }}"
                        placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500">
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 <p class="text-xs text-gray-400 mt-1">
                     Trouvez l'ID dans l'URL de votre Google Sheet : docs.google.com/spreadsheets/d/<strong>ID</strong>/edit
                 </p>
@@ -186,7 +186,7 @@
                     </p>
                 </div>
             </div>
-            <a href="{{ route('abonnement.index') }}" class="inline-block mt-3 text-sm text-blue-600 hover:underline">
+            <a href="{{ route('abonnement.index') }}" class="inline-block mt-3 text-sm text-emerald-700 hover:underline">
                 Gérer l'abonnement →
             </a>
         </div>
@@ -194,7 +194,7 @@
         {{-- Bouton enregistrer --}}
         <div class="flex justify-end">
             <button type="submit"
-                    class="px-6 py-2.5 bg-blue-900 text-white rounded-lg font-semibold hover:bg-blue-800 transition text-sm flex items-center gap-2">
+                    class="px-6 py-2.5 bg-emerald-900 text-white rounded-lg font-semibold hover:bg-emerald-900 transition text-sm flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                 </svg>

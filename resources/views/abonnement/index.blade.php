@@ -53,17 +53,17 @@
             $isCurrent = $tenant->plan === $plan->slug;
             $isFree    = $plan->prix_mensuel_xof === 0;
         @endphp
-        <div class="bg-white rounded-xl border {{ $isCurrent ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200' }} shadow-sm flex flex-col overflow-hidden relative">
+        <div class="bg-white rounded-xl border {{ $isCurrent ? 'border-emerald-500 ring-2 ring-emerald-200' : 'border-gray-200' }} shadow-sm flex flex-col overflow-hidden relative">
 
             {{-- Badge plan actuel --}}
             @if($isCurrent)
             <div class="absolute top-3 right-3">
-                <span class="bg-blue-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">Actuel</span>
+                <span class="bg-emerald-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">Actuel</span>
             </div>
             @endif
 
             {{-- En-tête plan --}}
-            <div class="{{ $plan->slug === 'cabinet_plus' ? 'bg-blue-900 text-white' : 'bg-gray-50' }} px-5 py-4 border-b {{ $plan->slug === 'cabinet_plus' ? 'border-blue-800' : 'border-gray-100' }}">
+            <div class="{{ $plan->slug === 'cabinet_plus' ? 'bg-emerald-900 text-white' : 'bg-gray-50' }} px-5 py-4 border-b {{ $plan->slug === 'cabinet_plus' ? 'border-emerald-800' : 'border-gray-100' }}">
                 <h3 class="font-bold text-lg {{ $plan->slug === 'cabinet_plus' ? 'text-white' : 'text-gray-900' }}">
                     {{ $plan->nom }}
                 </h3>
@@ -74,7 +74,7 @@
                     <span class="text-2xl font-black {{ $plan->slug === 'cabinet_plus' ? 'text-white' : 'text-gray-900' }}">
                         {{ number_format($plan->prix_mensuel_xof, 0, ',', ' ') }}
                     </span>
-                    <span class="text-sm {{ $plan->slug === 'cabinet_plus' ? 'text-blue-200' : 'text-gray-500' }}">FCFA/mois</span>
+                    <span class="text-sm {{ $plan->slug === 'cabinet_plus' ? 'text-emerald-200' : 'text-gray-500' }}">FCFA/mois</span>
                     @endif
                 </div>
             </div>
@@ -133,7 +133,7 @@
                     @csrf
                     <input type="hidden" name="plan_slug" value="{{ $plan->slug }}">
                     <button type="submit"
-                            class="w-full py-2.5 {{ $plan->slug === 'cabinet_plus' ? 'bg-blue-900 hover:bg-blue-800' : 'bg-blue-600 hover:bg-blue-700' }} text-white rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2">
+                            class="w-full py-2.5 {{ $plan->slug === 'cabinet_plus' ? 'bg-emerald-900 hover:bg-emerald-900' : 'bg-emerald-700 hover:bg-emerald-800' }} text-white rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                         </svg>
@@ -147,19 +147,19 @@
     </div>
 
     {{-- Info paiement --}}
-    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
-        <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
+        <svg class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
-        <div class="text-sm text-blue-800">
+        <div class="text-sm text-emerald-800">
             <p class="font-semibold mb-1">Paiement sécurisé</p>
-            <p class="text-blue-700">Accepte MTN MoMo, Moov Money et cartes bancaires. Votre abonnement est activé instantanément après confirmation du paiement.</p>
+            <p class="text-emerald-700">Accepte MTN MoMo, Moov Money et cartes bancaires. Votre abonnement est activé instantanément après confirmation du paiement.</p>
         </div>
     </div>
 
     {{-- Widget de paiement FeexPay --}}
     @if($planAPayer)
-    <div id="feexpay-paiement" class="bg-white rounded-xl border-2 border-blue-500 shadow-sm p-5 text-center space-y-3">
+    <div id="feexpay-paiement" class="bg-white rounded-xl border-2 border-emerald-500 shadow-sm p-5 text-center space-y-3">
         <p class="font-semibold text-gray-800">
             Finaliser le paiement — Plan {{ $planAPayer->nom }}
             ({{ number_format($planAPayer->prix_mensuel_xof, 0, ',', ' ') }} FCFA/mois)

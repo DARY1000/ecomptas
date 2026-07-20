@@ -21,15 +21,15 @@
         $restantes = $tenant->quotaDisponible();
         $pct = $tenant->quotaPourcentage();
     @endphp
-    <div class="bg-blue-50 border border-blue-200 rounded-xl px-5 py-4 flex items-center justify-between">
+    <div class="bg-emerald-50 border border-emerald-200 rounded-xl px-5 py-4 flex items-center justify-between">
         <div>
-            <p class="text-sm font-medium text-blue-800">Quota mensuel</p>
-            <p class="text-xs text-blue-600 mt-0.5">
+            <p class="text-sm font-medium text-emerald-800">Quota mensuel</p>
+            <p class="text-xs text-emerald-700 mt-0.5">
                 {{ $tenant->facturesCeMois() }} / {{ $tenant->quota_factures_mensuel }} factures utilisées ce mois
             </p>
         </div>
         <div class="text-right">
-            <span class="text-lg font-bold {{ $restantes <= 5 ? 'text-yellow-600' : 'text-blue-700' }}">
+            <span class="text-lg font-bold {{ $restantes <= 5 ? 'text-yellow-600' : 'text-emerald-700' }}">
                 {{ $restantes }} restante{{ $restantes > 1 ? 's' : '' }}
             </span>
         </div>
@@ -50,7 +50,7 @@
                 </label>
 
                 <div class="relative border-2 border-dashed border-gray-300 rounded-xl p-8 text-center transition-colors"
-                     :class="{'border-blue-400 bg-blue-50': dragover, 'border-gray-300': !dragover}"
+                     :class="{'border-emerald-400 bg-emerald-50': dragover, 'border-gray-300': !dragover}"
                      @dragover.prevent="dragover = true"
                      @dragleave.prevent="dragover = false"
                      @drop.prevent="handleDrop($event)">
@@ -122,7 +122,7 @@
             <div class="flex gap-3">
                 <button type="submit"
                         :disabled="files.length === 0 || uploading"
-                        class="flex-1 bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                        class="flex-1 bg-emerald-900 text-white py-3 rounded-lg font-semibold hover:bg-emerald-900 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                     <svg x-show="uploading" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
@@ -138,7 +138,7 @@
             {{-- Barre de progression --}}
             <div x-show="uploading" class="mt-4">
                 <div class="w-full bg-gray-100 rounded-full h-2">
-                    <div class="h-2 bg-blue-600 rounded-full transition-all duration-300"
+                    <div class="h-2 bg-emerald-700 rounded-full transition-all duration-300"
                          :style="'width:' + progress + '%'"></div>
                 </div>
                 <p class="text-xs text-gray-400 text-center mt-1" x-text="progress + '% envoyé'"></p>
@@ -149,26 +149,26 @@
     {{-- Infos et conseils --}}
     <div class="bg-gray-50 rounded-xl border border-gray-200 p-5">
         <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             Comment ça marche ?
         </h3>
         <ol class="space-y-2 text-sm text-gray-600">
             <li class="flex items-start gap-2">
-                <span class="w-5 h-5 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">1</span>
+                <span class="w-5 h-5 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">1</span>
                 <span>Uploadez vos factures PDF (achat, vente ou charge)</span>
             </li>
             <li class="flex items-start gap-2">
-                <span class="w-5 h-5 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">2</span>
+                <span class="w-5 h-5 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">2</span>
                 <span>eCompta360 extrait automatiquement les données</span>
             </li>
             <li class="flex items-start gap-2">
-                <span class="w-5 h-5 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">3</span>
+                <span class="w-5 h-5 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">3</span>
                 <span>Les écritures SYSCOHADA sont générées et soumises à validation</span>
             </li>
             <li class="flex items-start gap-2">
-                <span class="w-5 h-5 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">4</span>
+                <span class="w-5 h-5 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">4</span>
                 <span>Vous validez ou corrigez les écritures avant comptabilisation</span>
             </li>
         </ol>

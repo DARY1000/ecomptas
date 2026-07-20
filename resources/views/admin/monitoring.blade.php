@@ -9,7 +9,7 @@
     <form method="GET" class="flex items-center gap-3">
         <label class="text-sm font-medium text-gray-600">Mois :</label>
         <input type="month" name="mois" value="{{ $mois }}"
-               class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+               class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500">
         <button type="submit" class="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium">Voir</button>
         <span class="text-sm text-gray-400">{{ $totalCeMois }} factures traitées</span>
     </form>
@@ -19,7 +19,7 @@
         @php
         $statutLabels = [
             'uploade'             => ['label'=>'Uploadées',    'bg'=>'bg-gray-50',   'text'=>'text-gray-700',   'dot'=>'bg-gray-400'],
-            'traitement_en_cours' => ['label'=>'En cours',     'bg'=>'bg-blue-50',   'text'=>'text-blue-700',   'dot'=>'bg-blue-500'],
+            'traitement_en_cours' => ['label'=>'En cours',     'bg'=>'bg-emerald-50',   'text'=>'text-emerald-700',   'dot'=>'bg-emerald-500'],
             'a_valider'           => ['label'=>'À valider',    'bg'=>'bg-yellow-50', 'text'=>'text-yellow-700', 'dot'=>'bg-yellow-500'],
             'valide'              => ['label'=>'Validées',     'bg'=>'bg-green-50',  'text'=>'text-green-700',  'dot'=>'bg-green-500'],
             'rejete'              => ['label'=>'Rejetées',     'bg'=>'bg-orange-50', 'text'=>'text-orange-700', 'dot'=>'bg-orange-500'],
@@ -47,14 +47,14 @@
             <div class="divide-y divide-gray-50">
                 @forelse($topCabinets as $row)
                 <div class="px-5 py-3 flex items-center gap-3">
-                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-xs font-black text-blue-700">
+                    <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center text-xs font-black text-emerald-700">
                         {{ $loop->iteration }}
                     </div>
                     <div class="flex-1">
                         <p class="text-sm font-medium text-gray-800">{{ $row->tenant?->nom ?? '—' }}</p>
                         <div class="w-full bg-gray-100 rounded-full h-1.5 mt-1">
                             @php $pct = $topCabinets->first()->total > 0 ? round($row->total / $topCabinets->first()->total * 100) : 0; @endphp
-                            <div class="h-1.5 rounded-full bg-blue-500" style="width:{{ $pct }}%"></div>
+                            <div class="h-1.5 rounded-full bg-emerald-500" style="width:{{ $pct }}%"></div>
                         </div>
                     </div>
                     <span class="text-sm font-bold text-gray-700">{{ $row->total }}</span>

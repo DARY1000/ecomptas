@@ -20,7 +20,7 @@
             @include('admin.plans._form')
             <div class="pt-2">
                 <button type="submit"
-                        class="bg-blue-700 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-800 transition">
+                        class="bg-emerald-800 text-white px-6 py-3 rounded-lg font-bold hover:bg-emerald-900 transition">
                     Créer le plan
                 </button>
             </div>

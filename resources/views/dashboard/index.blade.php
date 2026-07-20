@@ -12,7 +12,7 @@
         </p>
         @if(!auth()->user()->estAuditeur())
         <a href="{{ route('factures.upload') }}"
-           class="inline-flex items-center gap-2 bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition font-medium text-sm shadow">
+           class="inline-flex items-center gap-2 bg-emerald-800 text-white px-4 py-2 rounded-lg hover:bg-emerald-900 transition font-medium text-sm shadow">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
@@ -28,8 +28,8 @@
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">Ce mois</span>
-                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
                 </div>
@@ -39,7 +39,7 @@
             {{-- Barre de progression quota --}}
             @php $pct = ($tenant?->quota_factures_mensuel > 0) ? min(100, round($facturesCeMois / $tenant->quota_factures_mensuel * 100)) : 0; @endphp
             <div class="mt-3 w-full bg-gray-100 rounded-full h-1.5">
-                <div class="h-1.5 rounded-full {{ $pct >= 80 ? 'bg-yellow-500' : 'bg-blue-500' }}"
+                <div class="h-1.5 rounded-full {{ $pct >= 80 ? 'bg-amber-500' : 'bg-emerald-600' }}"
                      style="width: {{ $pct }}%"></div>
             </div>
         </div>
@@ -76,7 +76,7 @@
                 </div>
             </div>
             <div class="text-3xl font-bold text-purple-600">{{ $facturesEnCours }}</div>
-            <div class="text-xs text-gray-400 mt-1">Pipeline n8n.cloud</div>
+            <div class="text-xs text-gray-400 mt-1">Traitement en cours</div>
         </div>
 
         {{-- Erreurs --}}
@@ -119,13 +119,13 @@
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <h2 class="font-semibold text-gray-800">Dernières factures</h2>
-            <a href="{{ route('factures.index') }}" class="text-sm text-blue-600 hover:underline">Voir tout →</a>
+            <a href="{{ route('factures.index') }}" class="text-sm text-emerald-700 hover:underline">Voir tout →</a>
         </div>
         @if($dernieresFactures->isEmpty())
             <div class="px-6 py-12 text-center text-gray-400">
                 <p class="text-lg mb-2">Aucune facture pour le moment</p>
                 @if(!auth()->user()->estAuditeur())
-                <a href="{{ route('factures.upload') }}" class="text-blue-600 hover:underline text-sm">
+                <a href="{{ route('factures.upload') }}" class="text-emerald-700 hover:underline text-sm">
                     Uploader votre première facture →
                 </a>
                 @endif
@@ -146,7 +146,7 @@
                     @foreach($dernieresFactures as $f)
                     <tr class="hover:bg-gray-50 transition">
                         <td class="px-6 py-3">
-                            <a href="{{ route('factures.show', $f) }}" class="text-blue-600 hover:underline font-medium">
+                            <a href="{{ route('factures.show', $f) }}" class="text-emerald-700 hover:underline font-medium">
                                 {{ $f->numero_facture ?? $f->pdf_nom_original }}
                             </a>
                             <div class="text-xs text-gray-400">{{ $f->fournisseur_client }}</div>
@@ -154,7 +154,7 @@
                         <td class="px-6 py-3">
                             @if($f->type_document)
                                 <span class="px-2 py-0.5 rounded text-xs font-medium
-                                    {{ $f->type_document === 'VENTE' ? 'bg-green-100 text-green-700' : ($f->type_document === 'ACHAT' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600') }}">
+                                    {{ $f->type_document === 'VENTE' ? 'bg-green-100 text-green-700' : ($f->type_document === 'ACHAT' ? 'bg-sky-100 text-sky-700' : 'bg-gray-100 text-gray-600') }}">
                                     {{ $f->type_document }}
                                 </span>
                             @else

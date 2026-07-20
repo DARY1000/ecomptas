@@ -21,7 +21,7 @@
             @php
                 $statutColors = [
                     'actif' => 'bg-green-100 text-green-700 border-green-200',
-                    'trial' => 'bg-blue-100 text-blue-700 border-blue-200',
+                    'trial' => 'bg-amber-100 text-amber-700 border-amber-200',
                     'suspendu' => 'bg-red-100 text-red-700 border-red-200',
                     'expire' => 'bg-gray-100 text-gray-600 border-gray-200',
                 ];
@@ -190,7 +190,7 @@
                                         $colors = [
                                             'valide' => 'bg-green-100 text-green-700',
                                             'a_valider' => 'bg-yellow-100 text-yellow-700',
-                                            'traitement_en_cours' => 'bg-blue-100 text-blue-700',
+                                            'traitement_en_cours' => 'bg-orange-100 text-orange-700',
                                             'rejete' => 'bg-red-100 text-red-700',
                                             'erreur' => 'bg-red-100 text-red-700',
                                             'uploade' => 'bg-gray-100 text-gray-600',

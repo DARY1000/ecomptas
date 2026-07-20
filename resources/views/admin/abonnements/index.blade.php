@@ -19,7 +19,7 @@
         </div>
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
             <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Abonnements actifs</p>
-            <p class="text-2xl font-black text-blue-700">{{ $totalAbonnements }}</p>
+            <p class="text-2xl font-black text-emerald-700">{{ $totalAbonnements }}</p>
             <p class="text-xs text-gray-400 mt-1">cabinets payants</p>
         </div>
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
@@ -36,7 +36,7 @@
             @forelse($revenuParPlan as $item)
             <div class="bg-gray-50 rounded-lg p-4 text-center">
                 <p class="text-sm font-bold text-gray-700">{{ $item['nom'] }}</p>
-                <p class="text-xl font-black text-blue-700 mt-1">{{ number_format($item['total'], 0, ',', ' ') }}</p>
+                <p class="text-xl font-black text-emerald-700 mt-1">{{ number_format($item['total'], 0, ',', ' ') }}</p>
                 <p class="text-xs text-gray-400 mt-0.5">{{ $item['count'] }} cabinet(s) · FCFA</p>
             </div>
             @empty
@@ -95,12 +95,12 @@
                     <tr class="hover:bg-gray-50 transition">
                         <td class="px-5 py-3">
                             <a href="{{ route('admin.tenants.show', $ab->tenant_id) }}"
-                               class="font-medium text-blue-700 hover:underline">
+                               class="font-medium text-emerald-700 hover:underline">
                                 {{ $ab->tenant?->nom ?? '—' }}
                             </a>
                         </td>
                         <td class="px-5 py-3">
-                            <span class="px-2 py-0.5 rounded text-xs font-semibold bg-blue-100 text-blue-700">
+                            <span class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-100 text-emerald-700">
                                 {{ $ab->plan?->nom ?? '—' }}
                             </span>
                         </td>

@@ -41,9 +41,9 @@
         <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
             <input type="text" name="q" value="{{ request('q') }}"
                    placeholder="Compte, libellé…"
-                   class="col-span-2 md:col-span-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                   class="col-span-2 md:col-span-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
 
-            <select name="type" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select name="type" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 <option value="">Tous les types</option>
                 <option value="ACHAT" {{ request('type') === 'ACHAT' ? 'selected' : '' }}>Achat</option>
                 <option value="VENTE" {{ request('type') === 'VENTE' ? 'selected' : '' }}>Vente</option>
@@ -51,16 +51,16 @@
             </select>
 
             <input type="date" name="date_debut" value="{{ request('date_debut') }}"
-                   class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                    title="Date début">
 
             <input type="date" name="date_fin" value="{{ request('date_fin') }}"
-                   class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                    title="Date fin">
 
             <div class="flex gap-2">
                 <button type="submit"
-                        class="flex-1 bg-blue-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-800 transition">
+                        class="flex-1 bg-emerald-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-900 transition">
                     Filtrer
                 </button>
                 @if(request()->hasAny(['q', 'type', 'date_debut', 'date_fin']))
@@ -140,7 +140,7 @@
                         <td class="px-5 py-3">
                             @if($e->facture)
                             <a href="{{ route('factures.show', $e->facture) }}"
-                               class="text-blue-600 hover:underline text-xs">
+                               class="text-emerald-700 hover:underline text-xs">
                                 {{ $e->facture->numero_facture ?? Str::limit($e->facture->pdf_nom_original, 20) }}
                             </a>
                             @else
@@ -150,7 +150,7 @@
                         <td class="px-5 py-3">
                             @if($e->facture?->type_document)
                             <span class="px-2 py-0.5 rounded text-xs font-medium
-                                {{ $e->facture->type_document === 'VENTE' ? 'bg-green-100 text-green-700' : ($e->facture->type_document === 'ACHAT' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700') }}">
+                                {{ $e->facture->type_document === 'VENTE' ? 'bg-green-100 text-green-700' : ($e->facture->type_document === 'ACHAT' ? 'bg-sky-100 text-sky-700' : 'bg-purple-100 text-purple-700') }}">
                                 {{ $e->facture->type_document }}
                             </span>
                             @else

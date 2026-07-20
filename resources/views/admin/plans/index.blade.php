@@ -10,7 +10,7 @@
             <p class="text-gray-500 text-sm mt-1">{{ $plans->count() }} plans configurés</p>
         </div>
         <a href="{{ route('admin.plans.create') }}"
-           class="bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-blue-800 transition shadow">
+           class="bg-emerald-800 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-emerald-900 transition shadow">
             + Nouveau plan
         </a>
     </div>
@@ -27,7 +27,7 @@
                         {{ $plan->actif ? 'Actif' : 'Inactif' }}
                     </span>
                 </div>
-                <div class="text-2xl font-black text-blue-700 mb-1">{{ $plan->prix_formatté }}</div>
+                <div class="text-2xl font-black text-emerald-700 mb-1">{{ $plan->prix_formatté }}</div>
                 <div class="text-xs text-gray-400 mb-4">slug: {{ $plan->slug }}</div>
 
                 <ul class="space-y-1.5 text-sm text-gray-600 mb-5">
@@ -46,7 +46,7 @@
 
                 <div class="flex gap-2">
                     <a href="{{ route('admin.plans.edit', $plan) }}"
-                       class="flex-1 text-center bg-blue-50 text-blue-700 font-semibold py-2 rounded-lg text-sm hover:bg-blue-100 transition">
+                       class="flex-1 text-center bg-emerald-50 text-emerald-700 font-semibold py-2 rounded-lg text-sm hover:bg-emerald-100 transition">
                         Modifier
                     </a>
                     @if($plan->slug !== 'trial')

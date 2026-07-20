@@ -8,7 +8,7 @@
     <div class="flex flex-wrap items-center justify-between gap-3">
         <h1 class="text-2xl font-bold text-gray-900">Cabinets clients</h1>
         <a href="{{ route('admin.tenants.create') }}"
-           class="inline-flex items-center gap-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition font-medium text-sm shadow">
+           class="inline-flex items-center gap-2 bg-emerald-900 text-white px-4 py-2 rounded-lg hover:bg-emerald-900 transition font-medium text-sm shadow">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
@@ -22,15 +22,15 @@
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
             <input type="text" name="q" value="{{ request('q') }}"
                    placeholder="Nom, email, RCCM…"
-                   class="col-span-2 md:col-span-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <select name="statut" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                   class="col-span-2 md:col-span-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <select name="statut" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 <option value="">Tous les statuts</option>
                 <option value="trial" {{ request('statut') === 'trial' ? 'selected' : '' }}>Trial</option>
                 <option value="actif" {{ request('statut') === 'actif' ? 'selected' : '' }}>Actif</option>
                 <option value="suspendu" {{ request('statut') === 'suspendu' ? 'selected' : '' }}>Suspendu</option>
                 <option value="expire" {{ request('statut') === 'expire' ? 'selected' : '' }}>Expiré</option>
             </select>
-            <select name="plan" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select name="plan" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 <option value="">Tous les plans</option>
                 <option value="trial" {{ request('plan') === 'trial' ? 'selected' : '' }}>Trial</option>
                 <option value="starter" {{ request('plan') === 'starter' ? 'selected' : '' }}>Starter</option>
@@ -39,7 +39,7 @@
             </select>
             <div class="flex gap-2">
                 <button type="submit"
-                        class="flex-1 bg-blue-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-800 transition">
+                        class="flex-1 bg-emerald-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-900 transition">
                     Filtrer
                 </button>
                 @if(request()->hasAny(['q', 'statut', 'plan']))
@@ -79,7 +79,7 @@
                     <tr class="hover:bg-gray-50 transition">
                         <td class="px-5 py-3">
                             <a href="{{ route('admin.tenants.show', $t) }}"
-                               class="font-medium text-blue-700 hover:underline block">
+                               class="font-medium text-emerald-700 hover:underline block">
                                 {{ $t->nom }}
                             </a>
                             <span class="text-xs text-gray-400">{{ $t->email }}</span>
@@ -88,9 +88,9 @@
                             @php
                                 $planColors = [
                                     'trial' => 'bg-gray-100 text-gray-600',
-                                    'starter' => 'bg-blue-100 text-blue-700',
+                                    'starter' => 'bg-emerald-100 text-emerald-700',
                                     'pro' => 'bg-purple-100 text-purple-700',
-                                    'cabinet_plus' => 'bg-blue-900 text-white',
+                                    'cabinet_plus' => 'bg-emerald-900 text-white',
                                 ];
                             @endphp
                             <span class="px-2 py-0.5 rounded text-xs font-medium {{ $planColors[$t->plan] ?? 'bg-gray-100 text-gray-600' }}">
@@ -107,7 +107,7 @@
                             @php
                                 $statutColors = [
                                     'actif' => 'bg-green-100 text-green-700',
-                                    'trial' => 'bg-blue-100 text-blue-700',
+                                    'trial' => 'bg-amber-100 text-amber-700',
                                     'suspendu' => 'bg-red-100 text-red-700',
                                     'expire' => 'bg-gray-100 text-gray-600',
                                 ];
@@ -119,7 +119,7 @@
                         <td class="px-5 py-3 text-center">
                             <div class="flex items-center justify-center gap-2">
                                 <a href="{{ route('admin.tenants.show', $t) }}"
-                                   class="text-gray-400 hover:text-blue-600 transition" title="Voir">
+                                   class="text-gray-400 hover:text-emerald-700 transition" title="Voir">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>

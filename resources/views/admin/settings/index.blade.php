@@ -20,7 +20,7 @@
                     <img src="{{ asset('storage/'.$settings['logo_path']).'?v='.time() }}"
                          alt="Logo" class="w-full h-full object-contain p-1">
                 @else
-                    <div class="w-10 h-10 bg-blue-700 rounded-lg flex items-center justify-center font-black text-white text-xl">e</div>
+                    <div class="w-10 h-10 bg-emerald-800 rounded-lg flex items-center justify-center font-black text-white text-xl">e</div>
                 @endif
             </div>
             <div class="text-sm text-gray-500">
@@ -35,9 +35,9 @@
               class="flex items-center gap-3">
             @csrf
             <input type="file" name="logo" accept="image/png,image/jpg,image/jpeg,image/svg+xml"
-                   class="flex-1 block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer border border-gray-200 rounded-lg px-2 py-1.5">
+                   class="flex-1 block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer border border-gray-200 rounded-lg px-2 py-1.5">
             <button type="submit"
-                    class="bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-800 transition whitespace-nowrap">
+                    class="bg-emerald-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-900 transition whitespace-nowrap">
                 Mettre à jour
             </button>
         </form>
@@ -57,15 +57,15 @@
             classification et extraction GPT-4o. Configurez ici les clés API utilisées par le pipeline.
         </p>
 
-        <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-5 text-sm text-blue-800">
+        <div class="bg-emerald-50 border border-emerald-100 rounded-lg p-4 mb-5 text-sm text-emerald-800">
             <p class="font-semibold mb-1">Comment ça fonctionne :</p>
-            <ol class="list-decimal list-inside space-y-1 text-blue-700">
+            <ol class="list-decimal list-inside space-y-1 text-emerald-700">
                 <li>Le cabinet uploade une facture (PDF ou image)</li>
                 <li>Un job en file d'attente appelle l'OCR Mistral (PDF) ou Vision Pixtral (image)</li>
                 <li>Le texte extrait est envoyé à GPT-4o (function calling) pour classification et extraction des montants/TVA/AIB/RIRF</li>
                 <li>Laravel génère les écritures SYSCOHADA et notifie le cabinet</li>
             </ol>
-            <p class="mt-2 text-xs text-blue-600">
+            <p class="mt-2 text-xs text-emerald-700">
                 Clés à récupérer sur
                 <a href="https://console.mistral.ai" target="_blank" class="underline">console.mistral.ai</a>
                 et <a href="https://platform.openai.com/api-keys" target="_blank" class="underline">platform.openai.com</a>.
@@ -91,40 +91,40 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Clé API Mistral</label>
                     <input type="password" name="mistral_api_key" autocomplete="new-password"
                            placeholder="{{ $settings['mistral_api_key'] ? '•••••••••••••••••••• (configurée)' : 'Coller la clé Mistral' }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 font-mono">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 font-mono">
                     <p class="text-xs text-gray-400 mt-0.5">Laissez vide pour conserver la valeur actuelle.</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Clé API OpenAI</label>
                     <input type="password" name="openai_api_key" autocomplete="new-password"
                            placeholder="{{ $settings['openai_api_key'] ? '•••••••••••••••••••• (configurée)' : 'Coller la clé OpenAI (sk-...)' }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 font-mono">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 font-mono">
                     <p class="text-xs text-gray-400 mt-0.5">Laissez vide pour conserver la valeur actuelle.</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Modèle OCR Mistral</label>
                     <input type="text" name="mistral_ocr_model"
                            value="{{ old('mistral_ocr_model', $settings['mistral_ocr_model']) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 font-mono">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 font-mono">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Modèle Vision Mistral (images JPG/PNG)</label>
                     <input type="text" name="mistral_vision_model"
                            value="{{ old('mistral_vision_model', $settings['mistral_vision_model']) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 font-mono">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 font-mono">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Modèle OpenAI</label>
                     <input type="text" name="openai_model"
                            value="{{ old('openai_model', $settings['openai_model']) }}"
                            placeholder="gpt-4o, gpt-4o-mini, gpt-4.1..."
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 font-mono">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 font-mono">
                     <p class="text-xs text-gray-400 mt-0.5">N'importe quel modèle OpenAI supportant le function calling.</p>
                 </div>
             </div>
 
             <button type="submit"
-                    class="bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-800 transition">
+                    class="bg-emerald-800 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-emerald-900 transition">
                 Sauvegarder les paramètres IA
             </button>
         </form>
@@ -162,19 +162,19 @@
                     <input type="text" name="feexpay_shop_id"
                            value="{{ old('feexpay_shop_id', $settings['feexpay_shop_id']) }}"
                            placeholder="Ayg9lkjkhurIvNp"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 font-mono">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 font-mono">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Clé API FeexPay</label>
                     <input type="password" name="feexpay_token" autocomplete="new-password"
                            placeholder="{{ $settings['feexpay_token'] ? '•••••••••••••••••••• (configurée)' : 'fp_...' }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 font-mono">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 font-mono">
                     <p class="text-xs text-gray-400 mt-0.5">Laissez vide pour conserver la valeur actuelle.</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Mode</label>
                     <select name="feexpay_mode"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500">
                         <option value="SANDBOX" {{ $settings['feexpay_mode'] === 'SANDBOX' ? 'selected' : '' }}>SANDBOX (tests)</option>
                         <option value="LIVE" {{ $settings['feexpay_mode'] === 'LIVE' ? 'selected' : '' }}>LIVE (production)</option>
                     </select>
@@ -182,7 +182,7 @@
             </div>
 
             <button type="submit"
-                    class="bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-800 transition">
+                    class="bg-emerald-800 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-emerald-900 transition">
                 Sauvegarder les paramètres FeexPay
             </button>
         </form>
@@ -206,18 +206,18 @@
                     <input type="email" name="mail_from"
                            value="{{ old('mail_from', $settings['mail_from']) }}"
                            placeholder="noreply@ecompta360.com"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nom expéditeur</label>
                     <input type="text" name="mail_from_name"
                            value="{{ old('mail_from_name', env('MAIL_FROM_NAME', 'eCompta360')) }}"
                            placeholder="eCompta360"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500">
                 </div>
             </div>
             <button type="submit"
-                    class="bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-800 transition">
+                    class="bg-emerald-800 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-emerald-900 transition">
                 Sauvegarder les paramètres email
             </button>
         </form>

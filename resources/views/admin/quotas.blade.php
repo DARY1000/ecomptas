@@ -29,10 +29,10 @@
                     <tr class="hover:bg-gray-50 transition">
                         <td class="px-5 py-3">
                             <a href="{{ route('admin.tenants.show', $t) }}"
-                               class="font-medium text-blue-700 hover:underline">{{ $t->nom }}</a>
+                               class="font-medium text-emerald-700 hover:underline">{{ $t->nom }}</a>
                         </td>
                         <td class="px-5 py-3">
-                            <span class="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700 font-semibold">
+                            <span class="text-xs px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 font-semibold">
                                 {{ ucfirst($t->plan ?? 'trial') }}
                             </span>
                         </td>

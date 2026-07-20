@@ -11,8 +11,8 @@
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Cabinets actifs</span>
-                <div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-9 h-9 bg-emerald-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/>
                     </svg>
                 </div>
@@ -70,7 +70,7 @@
                 @foreach($repartitionPlans as $slug => $count)
                 @php
                     $pct  = $totalTenants > 0 ? round($count/$totalTenants*100) : 0;
-                    $bars = ['trial'=>'bg-gray-400','starter'=>'bg-blue-400','pro'=>'bg-blue-600','cabinet'=>'bg-teal-500'];
+                    $bars = ['trial'=>'bg-gray-400','starter'=>'bg-emerald-400','pro'=>'bg-emerald-700','cabinet'=>'bg-teal-500'];
                 @endphp
                 <div>
                     <div class="flex justify-between text-sm mb-1">
@@ -84,14 +84,14 @@
                 @endforeach
             </div>
             <div class="mt-5 pt-4 border-t border-gray-100">
-                <a href="{{ route('admin.plans.index') }}" class="text-sm text-blue-600 hover:underline font-medium">Gérer les plans →</a>
+                <a href="{{ route('admin.plans.index') }}" class="text-sm text-emerald-700 hover:underline font-medium">Gérer les plans →</a>
             </div>
         </div>
 
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
             <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-center">
                 <h2 class="font-semibold text-gray-800">Paiements récents</h2>
-                <a href="{{ route('admin.abonnements.index') }}" class="text-xs text-blue-600 hover:underline">Voir tout →</a>
+                <a href="{{ route('admin.abonnements.index') }}" class="text-xs text-emerald-700 hover:underline">Voir tout →</a>
             </div>
             <div class="divide-y divide-gray-50">
                 @forelse($derniersAbonnements as $ab)
@@ -111,7 +111,7 @@
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
             <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-center">
                 <h2 class="font-semibold text-gray-800">Nouveaux cabinets</h2>
-                <a href="{{ route('admin.tenants.index') }}" class="text-xs text-blue-600 hover:underline">Voir tout →</a>
+                <a href="{{ route('admin.tenants.index') }}" class="text-xs text-emerald-700 hover:underline">Voir tout →</a>
             </div>
             <div class="divide-y divide-gray-50">
                 @forelse($derniersTenants as $t)
@@ -121,7 +121,7 @@
                         <p class="text-xs text-gray-400">{{ $t->created_at->diffForHumans() }}</p>
                     </div>
                     <span class="text-xs px-2 py-0.5 rounded-full font-medium
-                        {{ $t->statut==='actif'?'bg-green-100 text-green-700':($t->statut==='trial'?'bg-blue-100 text-blue-700':($t->statut==='suspendu'?'bg-red-100 text-red-700':'bg-gray-100 text-gray-500')) }}">
+                        {{ $t->statut==='actif'?'bg-green-100 text-green-700':($t->statut==='trial'?'bg-amber-100 text-amber-700':($t->statut==='suspendu'?'bg-red-100 text-red-700':'bg-gray-100 text-gray-500')) }}">
                         {{ ucfirst($t->statut) }}
                     </span>
                 </div>
@@ -138,7 +138,7 @@
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="font-semibold text-gray-800">Monitoring IA — ce mois</h2>
-                <a href="{{ route('admin.monitoring') }}" class="text-xs text-blue-600 hover:underline">Détails →</a>
+                <a href="{{ route('admin.monitoring') }}" class="text-xs text-emerald-700 hover:underline">Détails →</a>
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div class="bg-green-50 rounded-xl p-4 text-center">
@@ -149,9 +149,9 @@
                     <div class="text-3xl font-black text-yellow-700">{{ $facturesEnCours }}</div>
                     <div class="text-xs text-yellow-600 mt-1 font-medium">En traitement</div>
                 </div>
-                <div class="bg-blue-50 rounded-xl p-4 text-center">
-                    <div class="text-3xl font-black text-blue-700">{{ $facturesAValider }}</div>
-                    <div class="text-xs text-blue-600 mt-1 font-medium">À valider</div>
+                <div class="bg-sky-50 rounded-xl p-4 text-center">
+                    <div class="text-3xl font-black text-sky-700">{{ $facturesAValider }}</div>
+                    <div class="text-xs text-sky-600 mt-1 font-medium">À valider</div>
                 </div>
                 <div class="bg-red-50 rounded-xl p-4 text-center">
                     <div class="text-3xl font-black text-red-700">{{ $facturesErreur }}</div>
@@ -177,7 +177,7 @@
                         </div>
                         <div class="text-right">
                             <p class="text-xs font-bold text-orange-600">{{ $t->abonnement_expire_le->diffForHumans() }}</p>
-                            <a href="{{ route('admin.tenants.show', $t) }}" class="text-xs text-blue-500 hover:underline">Voir →</a>
+                            <a href="{{ route('admin.tenants.show', $t) }}" class="text-xs text-emerald-700 hover:underline">Voir →</a>
                         </div>
                     </div>
                     @endforeach
