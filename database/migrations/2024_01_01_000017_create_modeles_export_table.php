@@ -9,7 +9,7 @@ return new class extends Migration {
     {
         Schema::create('modeles_export', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
+            $table->string('tenant_id', 36);
             $table->string('nom_original');
             $table->string('chemin_fichier');
             $table->string('extension', 10);
@@ -18,6 +18,7 @@ return new class extends Migration {
             $table->timestamp('analyse_le')->nullable();
             $table->timestamps();
 
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->unique('tenant_id');
         });
     }
