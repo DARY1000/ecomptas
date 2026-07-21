@@ -4,8 +4,10 @@ namespace App\Mail;
 
 use App\Models\Abonnement;
 use App\Models\User;
+use App\Services\RecuService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -31,5 +33,15 @@ class PaiementConfirmeMail extends Mailable
         return new Content(
             view: 'emails.paiement-confirme',
         );
+    }
+
+    public function attachments(): array
+    {
+        $pdf = app(RecuService::class)->generer($this->abonnement);
+
+        return [
+            Attachment::fromData(fn () => $pdf, 'recu-' . $this->abonnement->transaction_id . '.pdf')
+                ->withMime('application/pdf'),
+        ];
     }
 }

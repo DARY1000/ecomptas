@@ -89,6 +89,7 @@ Route::middleware(['auth', 'check.subscription'])->group(function () {
         Route::get('/', [AbonnementController::class, 'index'])->name('index');
         Route::post('/payer', [AbonnementController::class, 'initierPaiement'])->name('payer');
         Route::get('/succes', [AbonnementController::class, 'succes'])->name('succes');
+        Route::get('/{abonnement}/recu', [AbonnementController::class, 'recu'])->name('recu');
     });
 
     // ── Administration du cabinet (admin uniquement) ──────────────

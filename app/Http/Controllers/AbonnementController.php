@@ -6,6 +6,7 @@ use App\Mail\PaiementConfirmeMail;
 use App\Models\Abonnement;
 use App\Models\Plan;
 use App\Services\FeexPayService;
+use App\Services\RecuService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -109,5 +110,20 @@ class AbonnementController extends Controller
         }
 
         return view('abonnement.succes', compact('tenant', 'abonnement', 'erreur'));
+    }
+
+    /**
+     * Télécharge le reçu PDF d'un paiement passé.
+     */
+    public function recu(Abonnement $abonnement, RecuService $recuService)
+    {
+        abort_unless($abonnement->tenant_id === auth()->user()->tenant_id, 403);
+
+        $pdf = $recuService->generer($abonnement);
+
+        return response($pdf, 200, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="recu-' . $abonnement->transaction_id . '.pdf"',
+        ]);
     }
 }

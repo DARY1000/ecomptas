@@ -180,6 +180,7 @@
                         <th class="px-5 py-3 text-left">Période</th>
                         <th class="px-5 py-3 text-right">Montant</th>
                         <th class="px-5 py-3 text-center">Statut</th>
+                        <th class="px-5 py-3 text-right">Reçu</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
@@ -197,6 +198,13 @@
                                 {{ $ab->statut === 'actif' ? 'bg-green-100 text-green-700' : ($ab->statut === 'expire' ? 'bg-gray-100 text-gray-500' : 'bg-yellow-100 text-yellow-700') }}">
                                 {{ ucfirst($ab->statut) }}
                             </span>
+                        </td>
+                        <td class="px-5 py-3 text-right">
+                            @if($ab->transaction_id)
+                            <a href="{{ route('abonnement.recu', $ab) }}" class="text-emerald-700 font-medium hover:underline">Télécharger</a>
+                            @else
+                            <span class="text-gray-300">—</span>
+                            @endif
                         </td>
                     </tr>
                     @endforeach
