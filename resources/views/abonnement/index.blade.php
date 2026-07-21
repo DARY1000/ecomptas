@@ -35,14 +35,13 @@
         </div>
     </div>
     @else
-    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-5 flex items-center gap-3">
-        <svg class="w-6 h-6 text-yellow-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2.5 flex items-center gap-2.5">
+        <svg class="w-4 h-4 text-yellow-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
-        <div>
-            <p class="font-semibold text-yellow-800">Aucun abonnement actif</p>
-            <p class="text-sm text-yellow-700">Choisissez un plan ci-dessous pour continuer à utiliser eCOMPTA.</p>
-        </div>
+        <p class="text-sm text-yellow-800">
+            <span class="font-semibold">Aucun abonnement actif</span> — choisissez un plan ci-dessous pour continuer à utiliser eCOMPTA.
+        </p>
     </div>
     @endif
 
@@ -146,26 +145,25 @@
         @endforeach
     </div>
 
-    {{-- Info paiement --}}
-    <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
-        <svg class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        <div class="text-sm text-emerald-800">
-            <p class="font-semibold mb-1">Paiement sécurisé</p>
-            <p class="text-emerald-700">Accepte MTN MoMo, Moov Money et cartes bancaires. Votre abonnement est activé instantanément après confirmation du paiement.</p>
-        </div>
-    </div>
-
     {{-- Widget de paiement FeexPay --}}
     @if($planAPayer)
-    <div id="feexpay-paiement" class="bg-white rounded-xl border-2 border-emerald-500 shadow-sm p-5 text-center space-y-3">
-        <p class="font-semibold text-gray-800">
-            Finaliser le paiement — Plan {{ $planAPayer->nom }}
-            ({{ number_format($planAPayer->prix_mensuel_xof, 0, ',', ' ') }} FCFA/mois)
-        </p>
-        <div id="feexpay-render" class="flex justify-center"></div>
+    <div id="feexpay-paiement" class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="p-5 text-center">
+            <p class="font-semibold text-gray-800 text-sm">
+                Finaliser le paiement — Plan {{ $planAPayer->nom }}
+                ({{ number_format($planAPayer->prix_mensuel_xof, 0, ',', ' ') }} FCFA/mois)
+            </p>
+            <div id="feexpay-render" class="flex justify-center mt-3"></div>
+        </div>
+        <div class="bg-emerald-50 px-5 py-3 text-center">
+            <p class="text-xs font-semibold text-emerald-800">Paiement sécurisé</p>
+            <p class="text-xs text-emerald-700 mt-0.5">Accepte MTN MoMo, Moov Money et cartes bancaires. Votre abonnement est activé instantanément après confirmation du paiement.</p>
+        </div>
     </div>
+    @else
+    <p class="text-center text-xs text-emerald-700">
+        Paiement sécurisé — MTN MoMo, Moov Money et cartes bancaires.
+    </p>
     @endif
 
     {{-- Historique abonnements --}}
