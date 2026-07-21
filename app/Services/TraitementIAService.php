@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Facture;
+use App\Models\ModeleExport;
 use App\Models\TraitementLog;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -73,7 +74,7 @@ class TraitementIAService
         );
 
         // 3. Classification + Extraction (GPT-4o function calling)
-        $extraction = $this->classifierEtExtraire($texteOcr, $facture->id);
+        $extraction = $this->classifierEtExtraire($texteOcr, $facture->id, $facture->tenant_id);
 
         $extraits = $extraction['donnees_extraites'] ?? [];
 
@@ -272,13 +273,13 @@ class TraitementIAService
      * Envoie le texte OCR à GPT-4o via function calling.
      * Retourne un tableau structuré avec type_document, données extraites.
      */
-    private function classifierEtExtraire(string $texteOcr, string $factureId): array
+    private function classifierEtExtraire(string $texteOcr, string $factureId, ?string $tenantId = null): array
     {
         if (empty($this->openaiKey)) {
             throw new \RuntimeException('OPENAI_API_KEY non configurée');
         }
 
-        $systemPrompt = $this->construireSystemPrompt();
+        $systemPrompt = $this->construireSystemPrompt($tenantId);
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $this->openaiKey,
@@ -454,9 +455,9 @@ class TraitementIAService
     /**
      * System prompt riche pour guider GPT-4o sur les spécificités SYSCOHADA Bénin.
      */
-    private function construireSystemPrompt(): string
+    private function construireSystemPrompt(?string $tenantId = null): string
     {
-        return <<<PROMPT
+        $prompt = <<<PROMPT
 Tu es un expert-comptable SYSCOHADA Révisé spécialisé en fiscalité béninoise.
 Tu analyses des documents comptables (factures, notes de frais, relevés) et les classifies selon le Plan Comptable SYSCOHADA Révisé 2017.
 
@@ -496,6 +497,19 @@ DATE : format YYYY-MM-DD obligatoire. Si la date n'est pas clairement lisible, m
 
 Appelle la fonction classifier_et_extraire avec toutes les informations disponibles.
 PROMPT;
+
+        // Conventions propres au cabinet, déduites d'un modèle d'export qu'il a fourni
+        // (voir ModeleExportService) — prioritaires sur les exemples génériques ci-dessus
+        // quand elles précisent la classification ou la numérotation des comptes.
+        $notesStyle = $tenantId
+            ? ModeleExport::where('tenant_id', $tenantId)->value('notes_style')
+            : null;
+
+        if ($notesStyle) {
+            $prompt .= "\n\nCONVENTIONS PROPRES À CE CABINET (à respecter en priorité) :\n{$notesStyle}";
+        }
+
+        return $prompt;
     }
 
     // ─────────────────────────────────────────────────────────────────────

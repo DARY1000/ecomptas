@@ -32,6 +32,15 @@
                 Export FEC
             </a>
             @endif
+            @if((auth()->user()->tenant->planActuel()?->modeles_export ?? false) && auth()->user()->tenant->modeleExport?->analyse_le)
+            <a href="{{ route('modele-export.exporter', request()->query()) }}"
+               class="inline-flex items-center gap-2 bg-emerald-700 text-white px-4 py-2 rounded-lg hover:bg-emerald-800 transition text-sm font-medium">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M7 10l5 5 5-5M12 15V3"/>
+                </svg>
+                Exporter selon mon modèle
+            </a>
+            @endif
         </div>
     </div>
 

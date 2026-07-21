@@ -127,7 +127,7 @@ class ExportService
                 $this->libelleJournal($j),
                 $numeros[$j][$e->facture_id],
                 $e->date_ecriture?->format('Ymd') ?? '',
-                $e->numero_compte,
+                $this->compteNumFec($e->numero_compte),
                 $e->libelle_compte ?? '',
                 $facture?->ifu_tiers ?? '',
                 $facture?->fournisseur_client ?? '',
@@ -151,6 +151,19 @@ class ExportService
         }
 
         return implode("\n", $lignes);
+    }
+
+    /**
+     * Précision à 5 chiffres attendue dans un FEC (ex. 6011 → 60110) sans toucher au
+     * plan comptable interne (resté à 4 chiffres) : ajoute un 0 de sous-compte
+     * générique aux comptes généraux à 4 chiffres. Purement cosmétique côté export —
+     * ne reproduit pas une éventuelle numérotation analytique propre à un cabinet.
+     */
+    private function compteNumFec(string $numero): string
+    {
+        $n = trim($numero);
+
+        return strlen($n) === 4 && ctype_digit($n) ? $n . '0' : $n;
     }
 
     private function libelleJournal(string $code): string
@@ -183,7 +196,7 @@ class ExportService
         ];
     }
 
-    private function requeteEcritures(
+    public function requeteEcritures(
         string  $tenantId,
         ?string $dateDebut = null,
         ?string $dateFin   = null,

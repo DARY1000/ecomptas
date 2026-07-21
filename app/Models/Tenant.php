@@ -43,6 +43,11 @@ class Tenant extends Model
         return $this->hasMany(Abonnement::class, 'tenant_id', 'id');
     }
 
+    public function modeleExport(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(ModeleExport::class, 'tenant_id', 'id');
+    }
+
     /**
      * Retourne l'abonnement actif en cours s'il existe.
      */

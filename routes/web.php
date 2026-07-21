@@ -10,6 +10,7 @@ use App\Http\Controllers\AbonnementController;
 use App\Http\Controllers\Cabinet\DashboardController;
 use App\Http\Controllers\Cabinet\UserController;
 use App\Http\Controllers\Cabinet\SettingsController;
+use App\Http\Controllers\Cabinet\ModeleExportController;
 use App\Http\Controllers\Admin\TenantController;
 use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\AbonnementAdminController;
@@ -96,6 +97,10 @@ Route::middleware(['auth', 'check.subscription'])->group(function () {
     Route::middleware('role:admin,super_admin')->group(function () {
         Route::get('/parametres', [SettingsController::class, 'index'])->name('settings.index');
         Route::put('/parametres', [SettingsController::class, 'update'])->name('settings.update');
+
+        Route::post('/parametres/modele-export', [ModeleExportController::class, 'upload'])->name('modele-export.upload');
+        Route::delete('/parametres/modele-export', [ModeleExportController::class, 'destroy'])->name('modele-export.destroy');
+        Route::get('/parametres/modele-export/exporter', [ModeleExportController::class, 'exporter'])->name('modele-export.exporter');
 
         Route::get('/utilisateurs', [UserController::class, 'index'])->name('users.index');
         Route::get('/utilisateurs/creer', [UserController::class, 'create'])->name('users.create');

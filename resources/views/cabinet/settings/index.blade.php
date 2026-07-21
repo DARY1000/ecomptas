@@ -203,5 +203,72 @@
         </div>
     </form>
 
+    {{-- Modèle d'export personnalisé --}}
+    @php $modele = $tenant->modeleExport; @endphp
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
+        <div class="flex items-center justify-between">
+            <h2 class="font-semibold text-gray-800 text-sm uppercase tracking-wide">Modèle d'export personnalisé</h2>
+            @if($modele && $modele->analyse_le)
+            <span class="inline-flex items-center gap-1 text-xs text-green-600 font-medium">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                Analysé
+            </span>
+            @elseif($modele)
+            <span class="text-xs text-amber-600 font-medium">Analyse en attente</span>
+            @else
+            <span class="text-xs text-gray-400">Non configuré</span>
+            @endif
+        </div>
+
+        @if(!($tenant->planActuel()?->modeles_export ?? false))
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-3 text-sm text-yellow-700 flex items-center gap-2">
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            L'upload d'un modèle d'export personnalisé est disponible à partir du plan Pro.
+            <a href="{{ route('abonnement.index') }}" class="underline font-medium">Voir les plans →</a>
+        </div>
+        @else
+        <p class="text-sm text-gray-500">
+            Uploadez un fichier d'écritures (Excel ou CSV) dans la mise en forme que vous utilisez habituellement.
+            Une IA en analyse la structure une fois pour toutes, puis vous pourrez exporter vos écritures
+            directement dans ce même format depuis la page <a href="{{ route('ecritures.index') }}" class="text-emerald-700 underline">Écritures</a>.
+        </p>
+
+        @if($modele)
+        <div class="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3">
+            <div>
+                <p class="text-sm font-medium text-gray-800">{{ $modele->nom_original }}</p>
+                <p class="text-xs text-gray-400 mt-0.5">
+                    Importé le {{ $modele->created_at->format('d/m/Y à H:i') }}
+                    @if($modele->structure['colonnes'] ?? null)
+                        · {{ count($modele->structure['colonnes']) }} colonnes détectées
+                    @endif
+                </p>
+            </div>
+            <form method="POST" action="{{ route('modele-export.destroy') }}" onsubmit="return confirm('Supprimer ce modèle ?');">
+                @csrf @method('DELETE')
+                <button type="submit" class="text-xs text-red-600 hover:underline font-medium">Supprimer</button>
+            </form>
+        </div>
+        @if($modele->notes_style)
+        <p class="text-xs text-gray-400 italic">{{ $modele->notes_style }}</p>
+        @endif
+        @endif
+
+        <form method="POST" action="{{ route('modele-export.upload') }}" enctype="multipart/form-data" class="flex items-center gap-3">
+            @csrf
+            <input type="file" name="modele" accept=".xlsx,.xls,.csv" required
+                   class="block flex-1 text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
+            <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded-lg text-xs font-semibold whitespace-nowrap">
+                {{ $modele ? 'Remplacer' : 'Importer' }}
+            </button>
+        </form>
+        <p class="text-xs text-gray-400">Formats acceptés : XLSX, XLS, CSV · Max 5 Mo.</p>
+        @endif
+    </div>
+
 </div>
 @endsection
