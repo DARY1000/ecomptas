@@ -257,7 +257,7 @@
         @else
         <p class="text-sm text-gray-500">
             Uploadez un fichier d'écritures (Excel ou CSV) dans la mise en forme que vous utilisez habituellement.
-            Une IA en analyse la structure une fois pour toutes, puis vous pourrez exporter vos écritures
+            eCOMPTA360 en analyse la structure une fois pour toutes, puis vous pourrez exporter vos écritures
             directement dans ce même format depuis la page <a href="{{ route('ecritures.index') }}" class="text-emerald-700 underline">Écritures</a>.
         </p>
 
