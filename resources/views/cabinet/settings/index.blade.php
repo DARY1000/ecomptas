@@ -205,21 +205,45 @@
 
     {{-- Modèle d'export personnalisé --}}
     @php $modele = $tenant->modeleExport; @endphp
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4"
+         x-data="{
+            existe: {{ $modele ? 'true' : 'false' }},
+            analyseLe: @js($modele?->analyse_le?->toIso8601String()),
+            colonnes: {{ (int) count($modele->structure['colonnes'] ?? []) }},
+            notesStyle: @js($modele?->notes_style),
+            poll() {
+                if (!this.existe || this.analyseLe) return;
+                fetch('{{ route('modele-export.statut') }}', { headers: { 'Accept': 'application/json' } })
+                    .then(r => r.json())
+                    .then(d => {
+                        if (!d.existe) { this.existe = false; return; }
+                        this.colonnes = d.colonnes;
+                        this.notesStyle = d.notes_style;
+                        if (d.analyse_le) {
+                            this.analyseLe = d.analyse_le;
+                        } else {
+                            setTimeout(() => this.poll(), 4000);
+                        }
+                    });
+            }
+         }"
+         x-init="poll()">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-gray-800 text-sm uppercase tracking-wide">Modèle d'export personnalisé</h2>
-            @if($modele && $modele->analyse_le)
-            <span class="inline-flex items-center gap-1 text-xs text-green-600 font-medium">
+            <span x-show="existe && analyseLe" x-cloak class="inline-flex items-center gap-1 text-xs text-green-600 font-medium">
                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
                 </svg>
                 Analysé
             </span>
-            @elseif($modele)
-            <span class="text-xs text-amber-600 font-medium">Analyse en attente</span>
-            @else
-            <span class="text-xs text-gray-400">Non configuré</span>
-            @endif
+            <span x-show="existe && !analyseLe" x-cloak class="inline-flex items-center gap-1.5 text-xs text-amber-600 font-medium">
+                <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                Analyse en cours...
+            </span>
+            <span x-show="!existe" x-cloak class="text-xs text-gray-400">Non configuré</span>
         </div>
 
         @if(!($tenant->planActuel()?->modeles_export ?? false))
@@ -243,9 +267,7 @@
                 <p class="text-sm font-medium text-gray-800">{{ $modele->nom_original }}</p>
                 <p class="text-xs text-gray-400 mt-0.5">
                     Importé le {{ $modele->created_at->format('d/m/Y à H:i') }}
-                    @if($modele->structure['colonnes'] ?? null)
-                        · {{ count($modele->structure['colonnes']) }} colonnes détectées
-                    @endif
+                    <span x-show="colonnes > 0" x-cloak>· <span x-text="colonnes"></span> colonnes détectées</span>
                 </p>
             </div>
             <form method="POST" action="{{ route('modele-export.destroy') }}" onsubmit="return confirm('Supprimer ce modèle ?');">
@@ -253,9 +275,7 @@
                 <button type="submit" class="text-xs text-red-600 hover:underline font-medium">Supprimer</button>
             </form>
         </div>
-        @if($modele->notes_style)
-        <p class="text-xs text-gray-400 italic">{{ $modele->notes_style }}</p>
-        @endif
+        <p class="text-xs text-gray-400 italic" x-show="notesStyle" x-cloak x-text="notesStyle"></p>
         @endif
 
         <form method="POST" action="{{ route('modele-export.upload') }}" enctype="multipart/form-data" class="flex items-center gap-3">

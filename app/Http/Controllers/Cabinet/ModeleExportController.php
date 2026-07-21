@@ -34,6 +34,27 @@ class ModeleExportController extends Controller
         return back()->with('success', "Modèle importé — l'analyse est en cours et sera visible dans quelques instants.");
     }
 
+    /**
+     * Statut d'analyse du modèle, interrogé en polling par la page Paramètres
+     * pour remplacer le spinner par le badge "Analysé" sans que l'utilisateur
+     * ait à rafraîchir la page lui-même.
+     */
+    public function statut(Request $request)
+    {
+        $modele = auth()->user()->tenant->modeleExport;
+
+        if (!$modele) {
+            return response()->json(['existe' => false]);
+        }
+
+        return response()->json([
+            'existe'      => true,
+            'analyse_le'  => $modele->analyse_le?->toIso8601String(),
+            'colonnes'    => count($modele->structure['colonnes'] ?? []),
+            'notes_style' => $modele->notes_style,
+        ]);
+    }
+
     public function destroy(Request $request)
     {
         $tenant = auth()->user()->tenant;

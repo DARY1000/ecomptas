@@ -101,6 +101,7 @@ Route::middleware(['auth', 'check.subscription'])->group(function () {
         Route::post('/parametres/modele-export', [ModeleExportController::class, 'upload'])->name('modele-export.upload');
         Route::delete('/parametres/modele-export', [ModeleExportController::class, 'destroy'])->name('modele-export.destroy');
         Route::get('/parametres/modele-export/exporter', [ModeleExportController::class, 'exporter'])->name('modele-export.exporter');
+        Route::get('/parametres/modele-export/statut', [ModeleExportController::class, 'statut'])->name('modele-export.statut');
 
         Route::get('/utilisateurs', [UserController::class, 'index'])->name('users.index');
         Route::get('/utilisateurs/creer', [UserController::class, 'create'])->name('users.create');
